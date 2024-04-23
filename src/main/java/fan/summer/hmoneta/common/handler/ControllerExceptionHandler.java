@@ -8,6 +8,7 @@ import fan.summer.hmoneta.common.enums.DataBaseErrorEnum;
 import fan.summer.hmoneta.common.enums.ServiceErrorEnum;
 import fan.summer.hmoneta.common.exception.BusinessException;
 import fan.summer.hmoneta.common.exception.DataBaseException;
+import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.validation.BindException;
@@ -24,11 +25,6 @@ public class ControllerExceptionHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ControllerExceptionHandler.class);
 
-    /**
-     * 所有异常统一处理
-     * @param e
-     * @return
-     */
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
     public ApiRestResponse<ServiceErrorEnum> exceptionHandler(Exception e)  {
