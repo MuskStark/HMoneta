@@ -1,6 +1,7 @@
 package fan.summer.hmoneta.common.exception;
 
-import fan.summer.homelab.common.enums.BusinessExceptionEnum;
+
+import fan.summer.hmoneta.common.enums.BusinessExceptionEnum;
 
 /**
  * @author Phoebej

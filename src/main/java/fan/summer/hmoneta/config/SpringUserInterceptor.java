@@ -1,7 +1,8 @@
 package fan.summer.hmoneta.config;
 
-import fan.summer.homelab.common.interceptor.LogInterceptor;
-import fan.summer.homelab.common.interceptor.UserInterceptor;
+
+import fan.summer.hmoneta.common.interceptor.LogInterceptor;
+import fan.summer.hmoneta.common.interceptor.UserInterceptor;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
