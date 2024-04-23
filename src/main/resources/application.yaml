@@ -9,16 +9,14 @@ spring:
     hikari:
       username: homelab
       password: HomeLab215178^&%@
-    jpa:
-      hibernate:
-        ddl-auto: update
-      show-sql: true
-      open-in-view: false
-    task:
-      scheduling:
-        pool:
-          size: 1
-        thread-name-prefix: HomeLabScheduleTask
+  jpa:
+    hibernate:
+      ddl-auto: update
+  task:
+    scheduling:
+      pool:
+        size: 1
+
 logging:
   level:
     sql: info
