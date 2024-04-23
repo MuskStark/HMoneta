@@ -1,6 +1,6 @@
 package fan.summer.hmoneta.common.context;
 
-import fan.summer.homelab.apiEntity.resp.user.UserResp;
+import fan.summer.hmoneta.webEntity.resp.user.UserResp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
