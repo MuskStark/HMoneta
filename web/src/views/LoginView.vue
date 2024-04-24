@@ -129,7 +129,7 @@ const login = async () => {
     </template>
   </a-card>
   </a-layout-content>
-  <a-layout-footer class="footer">HomeLab ©2024 Created by PhoebeJ</a-layout-footer>
+  <a-layout-footer class="footer">HMoneta ©2024 Created by PhoebeJ</a-layout-footer>
   </a-layout>
 </template>
 
