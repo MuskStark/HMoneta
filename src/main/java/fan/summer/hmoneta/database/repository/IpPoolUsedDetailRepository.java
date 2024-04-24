@@ -28,15 +28,6 @@ public interface IpPoolUsedDetailRepository extends JpaRepository<IpPoolUsedDeta
             delete from IpPoolUsedDetail p where p.poolId= ?1 and p.issuedIp= ?2""")
     void deleteByAddrAndPoolId(String addr, Long poolId);
 
-    default boolean deleteIpUsedDetail(Long poolId,String serverIpAddr) {
-        try{
-            deleteByAddrAndPoolId(serverIpAddr, poolId);
-            return true;
-        }catch (Exception e){
-            return false;
-        }
-    }
-
     //Other
     @Query(value = """ 
     select count(*) from IpPoolUsedDetail p where p.isUsed=true and p.poolId=?1
