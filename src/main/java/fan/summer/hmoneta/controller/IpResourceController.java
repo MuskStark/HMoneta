@@ -44,7 +44,6 @@ public class IpResourceController {
     @GetMapping("/info")
     public ApiRestResponse<List<IpPoolInfoResp>> queryAllInfo(){
         List<IpPool> allIpPool = ipResourceManagerService.findAllIpPool();
-        List<IpPoolInfoResp> result = BeanUtil.copyToList(allIpPool, IpPoolInfoResp.class);
         return ApiRestResponse.success(BeanUtil.copyToList(allIpPool, IpPoolInfoResp.class));
     }
 
