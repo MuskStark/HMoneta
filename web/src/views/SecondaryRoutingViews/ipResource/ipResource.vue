@@ -14,7 +14,8 @@ const insert = () => {
 const title = ref('添加地址池')
 const open = ref(false)
 const ipPoolInfo = ref({
-  addrGroup: '',
+  poolId: '',
+  poolName: '',
   networkAddress: '',
   mask: '',
   startAddr: '',
@@ -29,7 +30,7 @@ const selectValue = ref([
 ])
 // 方法
 const handleOk = () => {
-  axios.post("/ip_pool/modify", ipPoolInfo.value).then((res) => {
+  axios.post("/pool/modify", ipPoolInfo.value).then((res) => {
     if (res.data.status) {
       // success
       Object.keys(ipPoolInfo.value).forEach(key => {
@@ -48,8 +49,8 @@ const ipPoolTable = ref([])
 const columns = [
   {
     title: 'Ip池名称',
-    dataIndex: 'addrGroup',
-    key: 'addrGroup',
+    dataIndex: 'poolName',
+    key: 'poolName',
   },
   {
     title: '网络地址',
@@ -94,7 +95,7 @@ const columns = [
 ]
 // 方法
 const onDelete = (addrGroup) => {
-  axios.get("/ip_pool/delete/" + addrGroup).then((res) => {
+  axios.get("/pool/delete/" + addrGroup).then((res) => {
     if (res.data.status) {
       message.success('{}删除成功', addrGroup)
       queryInfo();
@@ -108,7 +109,7 @@ const onDelete = (addrGroup) => {
 let interval;
 // 方法
 const queryInfo = () => {
-  axios.get("/ip_pool/all").then((res) => {
+  axios.get("/pool/info").then((res) => {
     if (res.data.status) {
       ipPoolTable.value = res.data.data;
     } else {
@@ -137,9 +138,9 @@ onUnmounted(()=>{
     >
       <a-form-item
           label="地址池名称"
-          name="addrGroup"
+          name="poolName"
       >
-        <a-input v-model:value="ipPoolInfo.addrGroup"/>
+        <a-input v-model:value="ipPoolInfo.poolName"/>
       </a-form-item>
       <a-form-item
           label="网络地址"
