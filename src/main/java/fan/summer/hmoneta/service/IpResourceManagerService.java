@@ -85,6 +85,15 @@ public class IpResourceManagerService {
     public List<String> findAllPoolName() {
         return ipPoolRepository.findAllPoolName();
     }
+
+    /**
+     * 修改IP池信息。根据请求的不同，该方法要么创建一个新的IP池，要么更新一个已存在的IP池。
+     *
+     * @param req 包含IP池修改请求信息的对象。如果请求创建新的IP池，需提供IP池名称和相关配置；
+     *            如果请求更新IP池，需提供要更新的IP池ID和更新后的配置信息。
+     * @throws BusinessException 如果尝试创建一个已存在的IP池，或者更新一个不存在的IP池，
+     *                             或者在更新时改变了IP地址范围导致与已有IP池的范围重叠，会抛出此异常。
+     */
     @Transactional
     public void modifyIpPool(IpPoolModifyReq req) {
         IpPool ipPool = null;
