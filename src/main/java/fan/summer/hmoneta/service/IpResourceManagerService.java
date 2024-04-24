@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * 管理HMoneta系统中IP资源
@@ -95,6 +96,22 @@ public class IpResourceManagerService {
             ipPool = BeanUtil.copyProperties(req, IpPool.class);
             ipPool.setPoolId(SnowFlakeUtil.getSnowFlakeNextId());
             generateIpPoolResource(ipPool);
+            // 检查同网络地址的IpPool起始地址是否重复
+            List<IpPool> allByNetworkAddress = ipPoolRepository.findAllByNetworkAddress(req.getNetworkAddress());
+            if(!allByNetworkAddress.isEmpty()){
+                TreeSet<Integer> allStartIpAddr = new TreeSet<>();
+                TreeSet<Integer> allEndIpAddr = new TreeSet<>();
+                for (IpPool pool : allByNetworkAddress) {
+                    allStartIpAddr.add(IpUtil.ipToInt(pool.getStartAddr()));
+                    allEndIpAddr.add(IpUtil.ipToInt(pool.getEndAddr()));
+                }
+                IpUtil.ipToInt(ipPool.getStartAddr());
+                IpUtil.ipToInt(ipPool.getEndAddr());
+                boolean check = (IpUtil.ipToInt(ipPool.getStartAddr()) > allEndIpAddr.last() || IpUtil.ipToInt(ipPool.getEndAddr()) < allStartIpAddr.first());
+                if(!check){
+                    throw new BusinessException(BusinessExceptionEnum.IP_POOL_IP_ADDR_REPEAT_ERROR);
+                }
+            }
         }else {
             ipPool = ipPoolRepository.findByPoolId(req.getPoolId());
             if(ObjectUtil.isEmpty(ipPool)){
