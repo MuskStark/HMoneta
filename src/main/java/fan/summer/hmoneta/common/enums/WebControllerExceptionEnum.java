@@ -2,6 +2,7 @@ package fan.summer.hmoneta.common.enums;
 
 public enum WebControllerExceptionEnum {
     WEB_IP_POOL_REQ_EMPTY(1001,"IP池请求不能为空"),
+    WEB_IP_POOL_REQ_ID_EMPTY(1002,"IP池请求ID不能为空"),
     ;
     private int code;
     private String message;
