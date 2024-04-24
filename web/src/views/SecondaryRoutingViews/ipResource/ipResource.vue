@@ -94,6 +94,16 @@ const columns = [
   },
 ]
 // 方法
+const onEdit = (record) => {
+  title.value = '修改地址池'
+  Object.keys(ipPoolInfo.value).forEach(key => {
+    ipPoolInfo.value[key] = record[key]
+  })
+  ipPoolInfo.value.create = false;
+  console.log(ipPoolInfo.value)
+  open.value = true;
+
+}
 const onDelete = (addrGroup) => {
   axios.get("/pool/delete/" + addrGroup).then((res) => {
     if (res.data.status) {
@@ -173,7 +183,7 @@ onUnmounted(()=>{
     <template #bodyCell="{ column, record }">
       <template v-if="column.dataIndex === 'operation'">
         <a-flex gap="middle">
-          <a-button type="primary" @click="editInfo(record)" > Edit</a-button>
+          <a-button type="primary" @click="onEdit(record)" > Edit</a-button>
           <a-popconfirm
               v-if="ipPoolTable.length"
               title="Sure to delete?"
