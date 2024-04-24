@@ -91,11 +91,13 @@ public class IpResourceManagerService {
      *
      * @param req 包含IP池修改请求信息的对象。如果请求创建新的IP池，需提供IP池名称和相关配置；
      *            如果请求更新IP池，需提供要更新的IP池ID和更新后的配置信息。
+     * @return 如果是更新IP池且涉及到服务器IP地址的修改，返回true；否则，返回false。
      * @throws BusinessException 如果尝试创建一个已存在的IP池，或者更新一个不存在的IP池，
      *                             或者在更新时改变了IP地址范围导致与已有IP池的范围重叠，会抛出此异常。
      */
     @Transactional
-    public void modifyIpPool(IpPoolModifyReq req) {
+    public boolean modifyIpPool(IpPoolModifyReq req) {
+        boolean needModifyServer = false;
         IpPool ipPool = null;
         if(req.isCreate()){
             if(!ObjectUtil.isEmpty(findIpPoolByPoolName(req.getPoolName()))){
@@ -121,16 +123,29 @@ public class IpResourceManagerService {
                     throw new BusinessException(BusinessExceptionEnum.IP_POOL_IP_ADDR_REPEAT_ERROR);
                 }
             }
+            ipPoolRepository.save(ipPool);
+            return false;
         }else {
             ipPool = ipPoolRepository.findByPoolId(req.getPoolId());
             if(ObjectUtil.isEmpty(ipPool)){
                 throw new BusinessException(BusinessExceptionEnum.IP_POOL_NOT_EXISTS_ERROR);
             }
+            // 检查是否有修改IP起始位置
+            if(!ipPool.getNetworkAddress().equals(req.getNetworkAddress()) || !ipPool.getStartAddr().equals(req.getStartAddr()) || !ipPool.getEndAddr().equals(req.getEndAddr()) || !ipPool.getMask().equals(req.getMask())){
+                needModifyServer = true;
+            }
             BeanUtil.copyProperties(req,ipPool);
             generateIpPoolResource(ipPool);
+            ipPoolRepository.save(ipPool);
+            // 同步清除IpUsedDetail信息
+            if(needModifyServer){
+                List<IpPoolUsedDetail> usedDetails = ipPoolUsedDetailRepository.findByPoolId(ipPool.getPoolId());
+                if (!usedDetails.isEmpty()) {
+                    ipPoolUsedDetailRepository.deleteAllByPoolId(ipPool.getPoolId());
+                }
+            }
+            return needModifyServer;
         }
-        ipPoolRepository.save(ipPool);
-        // TODO:如果是更新，并且发生ip地址变更，则删除IpPoolUsedDetail对应的全部信息
     }
 
     /**
