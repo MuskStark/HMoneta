@@ -7,6 +7,7 @@ import fan.summer.hmoneta.common.exception.WebControllerException;
 import fan.summer.hmoneta.database.entity.ipPool.IpPool;
 import fan.summer.hmoneta.service.IpResourceManagerService;
 import fan.summer.hmoneta.service.ServerInfoManagerService;
+import fan.summer.hmoneta.util.IpUtil;
 import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
 import fan.summer.hmoneta.webEntity.req.ipPool.IpPoolModifyReq;
 import fan.summer.hmoneta.webEntity.resp.ipPool.IpPoolInfoResp;
@@ -61,6 +62,34 @@ public class IpResourceController {
         if(ObjUtil.isEmpty(req)){
             throw new WebControllerException(WebControllerExceptionEnum.WEB_IP_POOL_REQ_EMPTY);
         }
+        // 判断Ip地址合法性
+        boolean baseNetInfoValid = IpUtil.isValidNetworkAddress(req.getNetworkAddress()) & IpUtil.isValidMask(req.getMask());
+        if(baseNetInfoValid){
+            if(!ObjUtil.isEmpty(req.getStartAddr())){
+                if(!IpUtil.isValidIpAddress(req.getStartAddr())){
+                    throw new WebControllerException(WebControllerExceptionEnum.WEB_IP_FORMAT_ERROR);
+                }else{
+                    if(!IpUtil.isInSameSubnet(req.getStartAddr(),req.getNetworkAddress(),req.getMask())){
+                        throw new WebControllerException(WebControllerExceptionEnum.WEB_IP_NOT_IN_SAME_NETWORK);
+                    }
+                }
+
+            }
+            if(!ObjUtil.isEmpty(req.getEndAddr())){
+                if(!IpUtil.isValidIpAddress(req.getEndAddr())){
+                    throw new WebControllerException(WebControllerExceptionEnum.WEB_IP_FORMAT_ERROR);
+                }else{
+                    if(!IpUtil.isInSameSubnet(req.getEndAddr(),req.getNetworkAddress(),req.getMask())){
+                        throw new WebControllerException(WebControllerExceptionEnum.WEB_IP_NOT_IN_SAME_NETWORK);
+                    }
+                }
+
+            }
+
+        }else {
+            throw new WebControllerException(WebControllerExceptionEnum.WEB_IP_FORMAT_ERROR);
+        }
+
         if(!req.isCreate()){
             if(ObjUtil.isEmpty(req.getPoolId())){
                 throw new WebControllerException(WebControllerExceptionEnum.WEB_IP_POOL_REQ_ID_EMPTY);
