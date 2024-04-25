@@ -23,7 +23,7 @@ public class ServerInfoManagerService {
      * @param poolId 池ID，用于标识要删除的服务器信息所属的池。
      */
     public void deleteAllByPoolId(Long poolId) {
-        if(serverInfoDetailRepository.findAllByPoolId(poolId).isEmpty()) {
+        if(!serverInfoDetailRepository.findAllByPoolId(poolId).isEmpty()) {
             serverInfoDetailRepository.deleteAllByPoolId(poolId);
         }
     }
