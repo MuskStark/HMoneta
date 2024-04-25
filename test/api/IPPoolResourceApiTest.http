@@ -1,0 +1,14 @@
+###
+// 新增IpPool
+POST localhost:8080/pool/modify
+Content-Type: application/json
+
+{
+  "poolId": "",
+  "poolName": "Test",
+  "networkAddress": "192.168.1.0",
+  "mask": "/24",
+  "startAddr": "192.168.1.1",
+  "endAddr": "192.168.1.50",
+  "create": true
+}
