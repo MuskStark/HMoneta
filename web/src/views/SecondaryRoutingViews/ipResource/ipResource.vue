@@ -104,10 +104,10 @@ const onEdit = (record) => {
   open.value = true;
 
 }
-const onDelete = (addrGroup) => {
-  axios.get("/pool/delete/" + addrGroup).then((res) => {
+const onDelete = (record) => {
+  axios.delete("/pool/delete/" + record.poolId).then((res) => {
     if (res.data.status) {
-      message.success('{}删除成功', addrGroup)
+      message.success('{}删除成功', record.poolName)
       queryInfo();
     } else {
       message.error(res.data.message)
@@ -187,7 +187,7 @@ onUnmounted(()=>{
           <a-popconfirm
               v-if="ipPoolTable.length"
               title="Sure to delete?"
-              @confirm="onDelete(record.addrGroup)"
+              @confirm="onDelete(record)"
           >
             <a-button danger>Delete</a-button>
           </a-popconfirm>
