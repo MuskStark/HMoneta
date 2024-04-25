@@ -1,5 +1,6 @@
 package fan.summer.hmoneta.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjUtil;
 import fan.summer.hmoneta.common.enums.WebControllerExceptionEnum;
 import fan.summer.hmoneta.common.exception.WebControllerException;
@@ -9,11 +10,11 @@ import fan.summer.hmoneta.service.ServerInfoManagerService;
 import fan.summer.hmoneta.util.IpUtil;
 import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
 import fan.summer.hmoneta.webEntity.req.serverInfo.ServerInfoDetailReq;
+import fan.summer.hmoneta.webEntity.resp.serverInfo.ServerInfoDetailResp;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 /**
@@ -31,6 +32,20 @@ public class ServerInfoManagerController {
     private ServerInfoManagerService serverInfoManagerService;
     @Resource
     private IpResourceManagerService ipResourceManagerService;
+
+
+    /**
+     * 查询所有服务器信息
+     *
+     * 该接口不需要接收任何参数，通过调用 {@code serverInfoManagerService.findAllServerInfo()} 方法，
+     * 获取所有服务器基本信息，并将其转换为 {@code ServerInfoDetailResp} 类型的列表后，封装到 {@code ApiRestResponse} 中返回。
+     *
+     * @return {@code ApiRestResponse<List<ServerInfoDetailResp>>} 包含所有服务器详细信息的响应对象。
+     */
+    @GetMapping("/info")
+    public ApiRestResponse<List<ServerInfoDetailResp>> queryAllInfo(){
+        return ApiRestResponse.success(BeanUtil.copyToList(serverInfoManagerService.findAllServerInfo(),ServerInfoDetailResp.class));
+    }
 
     /**
      * 修改服务器信息

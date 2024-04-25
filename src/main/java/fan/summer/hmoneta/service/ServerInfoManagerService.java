@@ -11,6 +11,8 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * 管理HMoneta系统中服务器资源
  *
@@ -23,6 +25,15 @@ public class ServerInfoManagerService {
 
     @Resource
     private ServerInfoDetailRepository serverInfoDetailRepository;
+
+    /**
+     * 查找并返回所有服务器信息的详细列表。
+     *
+     * @return List<ServerInfoDetail> - 服务器信息详细列表。该列表包含了所有服务器的详细信息。
+     */
+    public List<ServerInfoDetail> findAllServerInfo() {
+        return serverInfoDetailRepository.findAll();
+    }
 
     /**
      * 修改服务器信息。
