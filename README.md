@@ -1,13 +1,15 @@
 
 <!-- PROJECT LOGO -->
 <br />
-
 <p align="center">
   <a href="https://git.summer.fan:9443/jack/hmoneta/">
     <img src="asset/projectLogo.png" alt="Logo" width="300" height="80">
   </a>
+</p>
 
-<h3 align="center">HMoneta</h3>
+<h3>
+<div style="text-align: center;">HMoneta</div>
+</h3>
   <p align="center">
     专注于为家庭提供统一的家庭服务管理平台
     <br />
