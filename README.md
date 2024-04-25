@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://git.summer.fan:9443/jack/hmoneta/">
-    <img src="web/src/assets/long-logo.png" alt="Logo" width="300" height="80">
+    <img src="asset/projectLogo.png" alt="Logo" width="300" height="80">
   </a>
 
 <h3 align="center">HMoneta</h3>
