@@ -11,10 +11,12 @@ import fan.summer.hmoneta.database.repository.IpPoolUsedDetailRepository;
 import fan.summer.hmoneta.util.IpUtil;
 import fan.summer.hmoneta.util.SnowFlakeUtil;
 import fan.summer.hmoneta.webEntity.req.ipPool.IpPoolModifyReq;
+import fan.summer.hmoneta.webEntity.resp.ipPool.IpPoolSelectValueResp;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -75,6 +77,24 @@ public class IpResourceManagerService {
      */
     public List<IpPool> findAllIpPool() {
         return ipPoolRepository.findAll();
+    }
+
+    /**
+     * 查找所有IP池可选值
+     * 该方法不接受任何参数，返回一个IP池可选值的列表。每个可选值包含IP池的ID和名称。
+     *
+     * @return List<IpPoolSelectValueResp> IP池可选值的列表，每个列表项包含IP池的ID（value）和名称（label）。
+     */
+    public List<IpPoolSelectValueResp> findAllIpPoolSelectValue() {
+        List<IpPool> ipPoolList = findAllIpPool();
+        List<IpPoolSelectValueResp> result = new ArrayList<>();
+        ipPoolList.forEach(ipPool -> {
+            IpPoolSelectValueResp ipPoolSelectValueResp = new IpPoolSelectValueResp();
+            ipPoolSelectValueResp.setValue(ipPool.getPoolId());
+            ipPoolSelectValueResp.setLabel(ipPool.getPoolName());
+            result.add(ipPoolSelectValueResp);
+        });
+        return result;
     }
 
     /**

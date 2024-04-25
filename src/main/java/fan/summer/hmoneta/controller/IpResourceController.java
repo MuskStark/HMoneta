@@ -11,7 +11,9 @@ import fan.summer.hmoneta.util.IpUtil;
 import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
 import fan.summer.hmoneta.webEntity.req.ipPool.IpPoolModifyReq;
 import fan.summer.hmoneta.webEntity.resp.ipPool.IpPoolInfoResp;
+import fan.summer.hmoneta.webEntity.resp.ipPool.IpPoolSelectValueResp;
 import jakarta.annotation.Resource;
+import lombok.Getter;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,6 +44,20 @@ public class IpResourceController {
     public ApiRestResponse<List<IpPoolInfoResp>> queryAllInfo(){
         List<IpPool> allIpPool = ipResourceManagerService.findAllIpPool();
         return ApiRestResponse.success(BeanUtil.copyToList(allIpPool, IpPoolInfoResp.class));
+    }
+
+    /**
+     * 查询所有可选的IP池值
+     *
+     * 该接口不需要接收任何参数，通过调用 {@code ipResourceManagerService.findAllIpPoolSelectValue()}
+     * 方法从IP资源管理服务中查询所有可用的IP池选择值，并将这些值封装在 {@code ApiRestResponse} 对象中返回。
+     *
+     * @return {@code ApiRestResponse<List<IpPoolSelectValueResp>>} - 包含所有IP池选择值的列表的API响应。
+     */
+    @GetMapping("/selectValue")
+    public ApiRestResponse<List<IpPoolSelectValueResp>> queryAllSelectValue(){
+        List<IpPoolSelectValueResp> allIpPool = ipResourceManagerService.findAllIpPoolSelectValue();
+        return ApiRestResponse.success(allIpPool);
     }
 
     /**
