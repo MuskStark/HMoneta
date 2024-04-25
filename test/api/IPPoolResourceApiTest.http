@@ -12,3 +12,7 @@ Content-Type: application/json
   "endAddr": "192.168.1.50",
   "create": true
 }
+
+###
+//查询SelectValue
+GET localhost:8080/pool/selectValue
