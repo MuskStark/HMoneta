@@ -7,7 +7,7 @@ import {message} from "ant-design-vue";
 const title = ref();
 const open = ref(false);
 const formState = ref({
-  ipGroupName: '',
+  poolId: '',
   serverName: '',
   serverMacAddr: '',
   serverIpAddr: '',
@@ -46,7 +46,7 @@ const insert = () => {
 }
 // Table
 // 属性
-const ipGroups = ref([])
+const ipPoolSelect = ref([])
 const serverData = ref([])
 const columns = [
   {
@@ -56,7 +56,7 @@ const columns = [
   },
   {
     title: '地址池',
-    dataIndex: 'ipGroupName',
+    dataIndex: 'poolName',
   },
   {
     title: '服务器IP地址',
@@ -110,17 +110,11 @@ const onDelete = (serverName) => {
 // Common
 // 属性
 // 方法
-const getIpGroups = () => {
-  axios.get('/ip_pool/get_group_name').then(res => {
+const getIpPoolSelect = async () => {
+  await axios.get('/pool/selectValue').then(res => {
         const json = res.data;
         if (json.status) {
-          const groupList = json.data
-          groupList.forEach(item => {
-            ipGroups.value.push({
-              label: item,
-              value: item,
-            })
-          })
+          ipPoolSelect.value = json.data
         }
       })
 }
@@ -136,19 +130,27 @@ const issueIp = () => {
   }
 
 }
-const getServerData = () => {
-  axios.get('/server/info').then(res => {
+const getServerData = async () => {
+  await axios.get('/server/info').then(res => {
     const json = res.data;
     if (json.status) {
-      serverData.value = json.data
+      const ipPoolSelectMap = new Map();
+      ipPoolSelect.value.forEach(item => {
+        ipPoolSelectMap.set(item.value, item.label);
+      });
+      json.data.forEach(item => {
+        item["poolName"] = ipPoolSelectMap.get(item.poolId)
+        serverData.value.push(item);
+      })
     }
+    console.log(serverData.value)
   })
 }
 // 定时刷新界面
 let interval
 
 onMounted(()=>{
-  getIpGroups()
+  getIpPoolSelect()
   getServerData()
   interval = setInterval(()=>{
     getServerData()
@@ -169,13 +171,13 @@ onUnmounted(() => {
     >
       <a-form-item
           label="IP地址池"
-          name="ipGroupName"
+          name="poolName"
       >
         <a-select
             ref="select"
-            v-model:value="formState.ipGroupName"
+            v-model:value="formState.poolId"
             style="width: 120px"
-            :options="ipGroups"
+            :options="ipPoolSelect"
         ></a-select>
       </a-form-item>
       <a-form-item
