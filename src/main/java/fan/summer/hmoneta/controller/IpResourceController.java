@@ -13,10 +13,7 @@ import fan.summer.hmoneta.webEntity.req.ipPool.IpPoolModifyReq;
 import fan.summer.hmoneta.webEntity.resp.ipPool.IpPoolInfoResp;
 import jakarta.annotation.Resource;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -55,7 +52,7 @@ public class IpResourceController {
      * @return 返回一个表示操作成功的API响应对象。
      * @throws WebControllerException 如果请求对象或请求对象中的IP池ID为空，抛出此异常。
      */
-    @RequestMapping("/modify")
+    @PostMapping("/modify")
     @Transactional
     public ApiRestResponse<ObjUtil> modifyIpPool(@RequestBody IpPoolModifyReq req) {
         if(ObjUtil.isEmpty(req)){
@@ -99,6 +96,23 @@ public class IpResourceController {
         if(needModifyServer){
             serverInfoManagerService.deleteAllByPoolId(req.getPoolId());
         }
+        return ApiRestResponse.success();
+    }
+
+    /**
+     * 删除IP池
+     *
+     * @param req 包含要删除的IP池信息的请求体，不能为空且必须包含有效的poolId。
+     * @return 返回一个表示操作成功的API响应体，包含操作结果的详细信息。
+     */
+    @DeleteMapping("/delete/{poolId}")
+    @Transactional
+    public ApiRestResponse<ObjUtil> deleteIpPool(@PathVariable Long poolId) {
+        if(ObjUtil.isEmpty(poolId)){
+            throw new WebControllerException(WebControllerExceptionEnum.WEB_IP_POOL_REQ_ID_EMPTY);
+        }
+        ipResourceManagerService.deleteIpPool(poolId);
+        serverInfoManagerService.deleteAllByPoolId(poolId);
         return ApiRestResponse.success();
     }
 

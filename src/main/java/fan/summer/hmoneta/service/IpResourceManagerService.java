@@ -149,6 +149,24 @@ public class IpResourceManagerService {
     }
 
     /**
+     * 删除指定的IP池。
+     *
+     * @param poolId IP池的唯一标识符。
+     * @throws BusinessException 如果指定的IP池不存在，则抛出业务异常。
+     */
+    @Transactional
+    public void deleteIpPool(Long poolId) {
+        IpPool poolIdDb = ipPoolRepository.findByPoolId(poolId);
+        if(ObjectUtil.isEmpty(poolIdDb)){
+            throw new BusinessException(BusinessExceptionEnum.IP_POOL_NOT_EXISTS_ERROR);
+        }
+        ipPoolRepository.delete(poolIdDb);
+        if(!ipPoolUsedDetailRepository.findByPoolId(poolId).isEmpty()) {
+            ipPoolUsedDetailRepository.deleteAllByPoolId(poolId);
+        }
+    }
+
+    /**
      * 生成IP池资源。
      * 该方法根据提供的IP池信息（网络地址和子网掩码），计算出可用的IP地址范围，并设置IP池的起始地址、结束地址以及可用IP数量等信息。
      *
