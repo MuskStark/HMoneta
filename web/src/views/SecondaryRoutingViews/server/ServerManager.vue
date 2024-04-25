@@ -74,7 +74,7 @@ const columns = [
     key: 'serverMacAddr',
   },
   {
-    title: '服务器在线壮态',
+    title: '服务器状态',
     dataIndex: 'isAlive',
     key: 'isAlive',
   },
@@ -137,7 +137,7 @@ const issueIp = () => {
 
 }
 const getServerData = () => {
-  axios.get('/server/all').then(res => {
+  axios.get('/server/info').then(res => {
     const json = res.data;
     if (json.status) {
       serverData.value = json.data
