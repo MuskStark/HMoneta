@@ -87,7 +87,7 @@ const columns = [
 // 方法
 const editInfo = (row) => {
   title.value = "修改" + row.serverName + "服务器信息";
-  formState.value.ipGroupName = row.ipGroupName;
+  formState.value.poolId = row.poolId;
   formState.value.serverName = row.serverName;
   formState.value.serverIpAddr = row.serverIpAddr;
   formState.value.serverMacAddr = row.serverMacAddr;
@@ -150,8 +150,10 @@ const getServerData = async () => {
 let interval
 
 onMounted(()=>{
-  getIpPoolSelect()
-  getServerData()
+  getIpPoolSelect().then(()=>{
+    getServerData()
+  })
+
   interval = setInterval(()=>{
     getServerData()
   },300000)
