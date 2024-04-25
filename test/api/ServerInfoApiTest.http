@@ -1,0 +1,13 @@
+###
+//正常写入测试
+POST localhost:8080/server/modify
+Content-Type: application/json
+
+{
+  "id": "",
+  "poolId": "1783414960022491136",
+  "serverName": "test",
+  "serverMacAddr": "64:16:7F:41:77:59",
+  "serverIpAddr": "192.168.1.2",
+  "serverPort": "80"
+}
