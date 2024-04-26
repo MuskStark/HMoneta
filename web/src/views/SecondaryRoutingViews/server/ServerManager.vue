@@ -136,6 +136,8 @@ const getServerData = async () => {
   await axios.get('/server/info').then(res => {
     const json = res.data;
     if (json.status) {
+      // 清空列表
+      serverData.value.length = 0;
       const ipPoolSelectMap = new Map();
       ipPoolSelect.value.forEach(item => {
         ipPoolSelectMap.set(item.value, item.label);
