@@ -102,6 +102,15 @@ public class IpResourceManagerService {
     public List<String> findAllPoolName() {
         return ipPoolRepository.findAllPoolName();
     }
+    /**
+     * 保存所有IP池信息
+     *
+     * @param ipPoolList 要保存的信息
+     */
+    @Transactional
+    public void saveAllIpPool(List<IpPool> ipPoolList) {
+        ipPoolRepository.saveAll(ipPoolList);
+    }
 
     /**
      * 修改IP池信息。根据请求的不同，该方法要么创建一个新的IP池，要么更新一个已存在的IP池。
