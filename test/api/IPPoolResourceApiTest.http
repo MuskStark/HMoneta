@@ -16,3 +16,11 @@ Content-Type: application/json
 ###
 //查询SelectValue
 GET localhost:8080/pool/selectValue
+
+###
+@isRandom = true
+@poolId = 1783414960022491136
+//获取ip地址
+GET http://localhost:8080/pool/generate?
+    poolId={{poolId}}&
+    isRandom={{isRandom}}
