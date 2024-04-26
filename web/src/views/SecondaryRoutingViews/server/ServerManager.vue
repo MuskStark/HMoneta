@@ -119,10 +119,12 @@ const getIpPoolSelect = async () => {
       })
 }
 const issueIp = () => {
-  if(formState.value.ipGroupName === ''){
+  if(formState.value.poolId === ''){
     message.error('请选择IP池！');
   }else {
-    axios.get("/ip_pool/get_ip/" + formState.value.ipGroupName + "/" + isRandom.value).then(res => {
+    axios.get("/pool/generate", {params: {
+      poolId: formState.value.poolId, isRandom: isRandom.value
+    }}).then(res => {
       if (res.data.status) {
         formState.value.serverIpAddr = res.data.data
       }
