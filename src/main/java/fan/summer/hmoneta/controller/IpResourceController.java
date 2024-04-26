@@ -12,8 +12,8 @@ import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
 import fan.summer.hmoneta.webEntity.req.ipPool.IpPoolModifyReq;
 import fan.summer.hmoneta.webEntity.resp.ipPool.IpPoolInfoResp;
 import fan.summer.hmoneta.webEntity.resp.ipPool.IpPoolSelectValueResp;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Resource;
-import lombok.Getter;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,6 +44,12 @@ public class IpResourceController {
     public ApiRestResponse<List<IpPoolInfoResp>> queryAllInfo(){
         List<IpPool> allIpPool = ipResourceManagerService.findAllIpPool();
         return ApiRestResponse.success(BeanUtil.copyToList(allIpPool, IpPoolInfoResp.class));
+    }
+
+    @GetMapping("/generate")
+    public ApiRestResponse<String> generateIpAddr(@RequestParam @Nonnull Long poolId, @RequestParam boolean isRandom){
+        String ip = ipResourceManagerService.issueIpAddrByPoolId(poolId, isRandom);
+        return ApiRestResponse.success(ip);
     }
 
     /**

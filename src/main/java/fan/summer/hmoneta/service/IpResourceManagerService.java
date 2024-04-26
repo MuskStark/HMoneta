@@ -16,10 +16,7 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * 管理HMoneta系统中IP资源
@@ -184,6 +181,41 @@ public class IpResourceManagerService {
         if(!ipPoolUsedDetailRepository.findByPoolId(poolId).isEmpty()) {
             ipPoolUsedDetailRepository.deleteAllByPoolId(poolId);
         }
+    }
+
+    /**
+     * 根据池ID和随机标志从IP池中分配IP地址。
+     *
+     * @param poolId IP池的ID，用于查找对应的IP池。
+     * @param isRandom 是否随机分配IP地址。如果为true，则随机分配一个可用的IP地址；如果为false，则按顺序分配下一个可用的IP地址。
+     * @return 返回分配的IP地址字符串。
+     * @throws BusinessException 如果指定的IP池不存在，抛出此异常。
+     */
+    public String issueIpAddrByPoolId(Long poolId, boolean isRandom) {
+        IpPool pool = ipPoolRepository.findByPoolId(poolId);
+        if(ObjectUtil.isEmpty(pool)){
+            throw new BusinessException(BusinessExceptionEnum.IP_POOL_NOT_EXISTS_ERROR);
+        }
+        List<String> inuseIpList = ipPoolUsedDetailRepository.findIssuedIpByPoolId(pool.getPoolId());
+        int ip_int = 0;
+        if(isRandom) {
+            int start = IpUtil.ipToInt(pool.getStartAddr());
+            do {
+                ip_int = start + new Random().nextInt(pool.getAvailable());
+            } while (inuseIpList.contains(IpUtil.intToIp(ip_int)));
+        }else {
+            if(inuseIpList.isEmpty()){
+                return pool.getStartAddr();
+            }else {
+                IpUtil.ipOrder(inuseIpList, "asc");
+                ip_int = IpUtil.ipToInt(inuseIpList.getFirst());
+                do {
+                    ip_int++;
+                }while (inuseIpList.contains(IpUtil.intToIp(ip_int)));
+            }
+
+        }
+        return IpUtil.intToIp(ip_int);
     }
 
     /**
