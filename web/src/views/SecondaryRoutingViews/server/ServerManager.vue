@@ -25,7 +25,7 @@ const handleOk = () => {
   isSysIssueIp.value = false
   isRandom.value = false
   open.value = false
-  axios.post('/server/insert', formState.value).then(res => {
+  axios.post('/server/modify', formState.value).then(res => {
     if (res.data.status) {
       message.success('添加成功！');
       // 将formState所有值变成空
