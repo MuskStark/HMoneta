@@ -51,6 +51,16 @@ public class ServerInfoManagerService {
         serverInfoDetail.setIsAlive(false);
         serverInfoDetailRepository.save(serverInfoDetail);
     }
+    /**
+     * 保存所有服务器信息到数据库。
+     *
+     * @param serverInfoDetailList 服务器信息详情列表，不可为空。包含待保存的服务器的详细信息。
+     *                             利用Spring Data JPA的saveAll方法批量保存至数据库。
+     */
+    @Transactional
+    public void saveAllServerInfo(List<ServerInfoDetail> serverInfoDetailList) {
+        serverInfoDetailRepository.saveAll(serverInfoDetailList);
+    }
 
     /**
      * 根据池ID删除所有关联的服务器信息。
