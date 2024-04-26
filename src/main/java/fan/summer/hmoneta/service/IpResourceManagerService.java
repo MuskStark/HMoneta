@@ -283,10 +283,20 @@ public class IpResourceManagerService {
     }
 
     /**
+     * 保存所有IP池使用详情信息
+     * @param ipPoolUsedDetailList IP池使用详情列表，包含了多个IP池的使用细节信息
+     */
+    @Transactional
+    public void saveAllIpPoolUsedDetail(List<IpPoolUsedDetail> ipPoolUsedDetailList){
+        ipPoolUsedDetailRepository.saveAll(ipPoolUsedDetailList);
+    }
+
+    /**
      * 根据池ID删除所有IP池使用详情记录
      *
      * @param poolId 池ID，用于指定要删除的IP池使用详情记录所属的池
      */
+    @Transactional
     public void deleteAllByPoolId(Long poolId){
         ipPoolUsedDetailRepository.deleteAllByPoolId(poolId);
     }
@@ -296,6 +306,7 @@ public class IpResourceManagerService {
      * @param poolId IP池的ID，用于确定要操作的IP池。
      * @param serverIpAddr 需要被删除使用的IP地址，指定要删除的具体IP。
      */
+    @Transactional
     public void deleteIpUsedDetail(Long poolId,String serverIpAddr){
         ipPoolUsedDetailRepository.deleteByAddrAndPoolId(serverIpAddr,poolId);
     }
