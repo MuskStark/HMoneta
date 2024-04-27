@@ -35,7 +35,7 @@ public class ServerStatusUpdateTask {
     @Resource
     private IpResourceManagerService ipResourceManagerService;
 
-    @Scheduled(cron = "* 0/5 * * * ?")
+    @Scheduled(cron = "0 0/5 * * * ?")
     @Transactional
     protected void updateServerStatus() {
         LOG.info(">>>>>>>开始服务器状态服务>>>>>>>>>");
