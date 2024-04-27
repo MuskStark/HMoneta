@@ -17,7 +17,7 @@ public interface IpPoolUsedDetailRepository extends JpaRepository<IpPoolUsedDeta
     List<IpPoolUsedDetail> findByPoolId(Long poolId);
 
     @Query(value = """
-            select p.isUsed from IpPoolUsedDetail p where  p.poolId= ?1""")
+            select p.issuedIp from IpPoolUsedDetail p where  p.poolId= ?1""")
     List<String> findIssuedIpByPoolId(Long poolId);
 
     // Delete
