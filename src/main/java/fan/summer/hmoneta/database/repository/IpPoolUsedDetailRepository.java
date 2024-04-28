@@ -26,7 +26,7 @@ public interface IpPoolUsedDetailRepository extends JpaRepository<IpPoolUsedDeta
     @Modifying
     @Query(value = """
             delete from IpPoolUsedDetail p where p.poolId= ?1 and p.issuedIp= ?2""")
-    void deleteByAddrAndPoolId(String addr, Long poolId);
+    void deleteByAddrAndPoolId(Long poolId, String serverIpAddr);
 
     //Other
     @Query(value = """ 

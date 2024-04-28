@@ -317,7 +317,7 @@ public class IpResourceManagerService {
      */
     @Transactional
     public void deleteIpUsedDetail(Long poolId,String serverIpAddr){
-        ipPoolUsedDetailRepository.deleteByAddrAndPoolId(serverIpAddr,poolId);
+        ipPoolUsedDetailRepository.deleteByAddrAndPoolId(poolId,serverIpAddr);
     }
 
     /*
