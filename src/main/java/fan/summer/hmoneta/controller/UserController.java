@@ -9,6 +9,7 @@ import fan.summer.hmoneta.service.UserService;
 import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
 import fan.summer.hmoneta.webEntity.req.user.UserLoginReq;
 import fan.summer.hmoneta.webEntity.req.user.UserRegReq;
+import fan.summer.hmoneta.webEntity.req.user.UserUpdateReq;
 import fan.summer.hmoneta.webEntity.resp.user.UserResp;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,6 +54,17 @@ public class UserController {
         User user = userService.addUser(req);
         return ApiRestResponse.success(BeanUtil.copyProperties(user, UserResp.class));
 
+    }
+
+    /**
+     * 更新用户信息。
+     *
+     * @param req 用户更新请求对象，包含需要更新的用户信息。
+     * @return 返回一个API响应对象，其中包含更新成功的用户信息。
+     */
+    public ApiRestResponse<UserResp> updateUser(@RequestBody UserUpdateReq req){
+        userService.updateUser(req);
+        return ApiRestResponse.success(BeanUtil.copyProperties(req, UserResp.class));
     }
 
     /**
