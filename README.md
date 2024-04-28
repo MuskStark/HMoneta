@@ -47,7 +47,7 @@
 - Nodejs-20.12.2
 ###### **项目安装**
 
-1. 拉取项目至本地 [https://example.com](https://example.com)
+1. 拉取项目至本地
 ```sh
 git clone https://git.summer.fan:9443/jack/hmoneta.git
 ```
@@ -64,21 +64,32 @@ yarn
 
 
 ### 文件目录说明
-eg:
 
 ```
 filetree 
+.
+├── HMoneta.iml
+├── LICENSE
 ├── README.md
+├── asset
+│   ├── projectLogo.png
+│   └── webLogo.png
+├── deploy
+│   ├── envSetup.sh
+│   └── startup.sh
 ├── doc
-│   └── wiki.md
+│   └── wiki.md
 ├── pom.xml
 ├── src
-│   ├── main
-│   └── test
+│   ├── main
+│   └── test
+├── test
+│   └── api
 └── web
     ├── README.md
     ├── index.html
     ├── jsconfig.json
+    ├── node_modules
     ├── package.json
     ├── public
     ├── src
@@ -86,21 +97,9 @@ filetree
     └── yarn.lock
 
 ```
-
-
-
-
-
 ### 开发的架构
-
-
-
 ### 部署
-
-
-
 ### 使用到的框架
-
 - [SpringBoot3](https://spring.io/projects/spring-boot)
 - [Vue3](https://cn.vuejs.org/)
 - [Mysql8.0](https://www.mysql.com/)
@@ -112,18 +111,8 @@ filetree
 - [ ] 家庭DDNS、内网穿透
 - [ ] 家庭服务器反向代理
 ### 贡献者
-
-
-
 #### 如何参与开源项目
-
-
-
-
 ### 版本控制
-
-
-
 ### 作者
 
 
