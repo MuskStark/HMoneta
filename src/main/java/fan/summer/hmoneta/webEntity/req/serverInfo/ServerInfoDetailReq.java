@@ -30,5 +30,6 @@ public class ServerInfoDetailReq {
     private String serverIpAddr;
     @NotBlank(message = "服务器端口不能为空")
     private String serverPort;
+    private boolean create;
 
 }

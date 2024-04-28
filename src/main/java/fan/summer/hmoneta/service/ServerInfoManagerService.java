@@ -54,12 +54,19 @@ public class ServerInfoManagerService {
     @Transactional
     public void modifyServerInfo(ServerInfoDetailReq req) {
         ServerInfoDetail db = serverInfoDetailRepository.findByServerName(req.getServerName());
-        if(ObjUtil.isNotEmpty(db)){
-            throw new BusinessException(BusinessExceptionEnum.SM_SERVER_EXISTS_ERROR);
+        if(req.isCreate()){
+            if(ObjUtil.isNotEmpty(db)){
+                throw new BusinessException(BusinessExceptionEnum.SM_SERVER_EXISTS_ERROR);
+            }
+            db = new ServerInfoDetail();
+        }else {
+            if(ObjUtil.isEmpty(db)){
+                throw new BusinessException(BusinessExceptionEnum.SM_SERVER_NOT_EXISTS_ERROR);
+            }
         }
-        ServerInfoDetail serverInfoDetail = BeanUtil.copyProperties(req, ServerInfoDetail.class);
-        serverInfoDetail.setIsAlive(false);
-        serverInfoDetailRepository.save(serverInfoDetail);
+        BeanUtil.copyProperties(req, db);
+        db.setIsAlive(false);
+        serverInfoDetailRepository.save(db);
     }
     /**
      * 保存所有服务器信息到数据库。
