@@ -19,7 +19,13 @@ const routes = [{
         path: '/ip',
         name: 'ip',
         component: () => import('@/views/SecondaryRoutingViews/ipResource/ipResource.vue')
-      }
+      },
+    {
+      path: '/user',
+      name: 'user',
+      component: () => import('@/views/SecondaryRoutingViews/user/userinfo.vue')
+    },
+
   ]
 
 },

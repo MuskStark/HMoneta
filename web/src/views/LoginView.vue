@@ -27,13 +27,13 @@ const rules = {
 const userContract = () => {
   console.log('点击用户协议');
 }
+let base64PublicKey;
 const login = async () => {
   if (formData.agree) {
     let loginData = {
       userName: formData.userName,
       password: formData.password,
     }
-    let base64PublicKey = undefined;
     const tmpDate = {
       userName: formData.userName,
     }
@@ -56,7 +56,9 @@ const login = async () => {
     await axios.post("/login", loginData).then((response) => {
       const json = response.data;
       if (json.status) {
-        store.commit("setUserInfo", json.data);
+        let userInfo = json.data;
+        userInfo['publicKey'] = base64PublicKey;
+        store.commit("setUserInfo", userInfo);
         message.success('欢迎' + json.data.userName + '！')
         // 界面跳转
         router.push("/");

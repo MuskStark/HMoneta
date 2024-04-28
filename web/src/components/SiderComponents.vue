@@ -5,20 +5,6 @@
         mode="inline"
         :style="{ height: '100%', borderRight: 0 }"
     >
-      <a-sub-menu key="server" >
-        <template #title>
-          <span>
-            服务器管理
-          </span>
-        </template>
-
-        <a-menu-item key="/server">
-          <router-link to="/server">
-            <DesktopOutlined /> &nbsp; 新增服务器
-          </router-link>
-        </a-menu-item>
-
-      </a-sub-menu>
       <a-sub-menu key="ip" >
         <template #title>
           <span>
@@ -33,11 +19,34 @@
         </a-menu-item>
 
       </a-sub-menu>
-      <a-menu-item key="/userinfo">
-        <router-link to="/info">
-          <SettingOutlined /> &nbsp; 设置
-        </router-link>
-      </a-menu-item>
+      <a-sub-menu key="server" >
+        <template #title>
+          <span>
+            服务器管理
+          </span>
+        </template>
+
+        <a-menu-item key="/server">
+          <router-link to="/server">
+            <DesktopOutlined /> &nbsp; 新增服务器
+          </router-link>
+        </a-menu-item>
+
+      </a-sub-menu>
+      <a-sub-menu key="setting" >
+        <template #title>
+          <span>
+            系统设置
+          </span>
+        </template>
+
+        <a-menu-item key="/user">
+          <router-link to="/user">
+            <UserOutlined /> &nbsp; 用户管理
+          </router-link>
+        </a-menu-item>
+
+      </a-sub-menu>
     </a-menu>
   </a-layout-sider>
 

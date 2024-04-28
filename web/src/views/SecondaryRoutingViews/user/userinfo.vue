@@ -60,6 +60,7 @@ const updateUserInfo = () => {
   axios.post("/user/update", formState.value).then((response) => {
     const json = response.data;
     if (json.status) {
+      let publicKey = store.state.User.publicKey;
       notification.success({
         message: "更新成功, 请重新登录",
       })
@@ -68,7 +69,9 @@ const updateUserInfo = () => {
         userInfo.value.email = json.data.email;
         // 刷新缓存
         windows.sessionStorage.removeItem("setUserInfo");
-        store.commit("setUserInfo", json.data);
+        let userInfo = json.data;
+        userInfo['publicKey'] = publicKey;
+        store.commit("setUserInfo", userInfo);
       } else {
         // 置空浏览器本地存储
         windows.sessionStorage.removeItem("setUserInfo");
@@ -110,13 +113,13 @@ onMounted(() => {
           label="用户名"
           name="username"
       >
-        <a-input v-model:value="formState.userName"/>
+        <a-input disabled v-model:value="formState.userName"/>
       </a-form-item>
       <a-form-item
           label="邮箱"
           name="email"
       >
-        <a-input v-model:value="formState.email"/>
+        <a-input disabled v-model:value="formState.email"/>
       </a-form-item>
 
       <a-form-item
