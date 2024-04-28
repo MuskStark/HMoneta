@@ -36,6 +36,16 @@ public class ServerInfoManagerService {
     }
 
     /**
+     * 根据服务器名称查找服务器信息详情。
+     *
+     * @param serverName 服务器的名称，用于查询特定服务器的信息。
+     * @return 返回匹配给定服务器名称的服务器信息详情对象。如果没有找到匹配的服务器信息，则返回null。
+     */
+    public ServerInfoDetail findServerInfoByServerName(String serverName) {
+        return serverInfoDetailRepository.findByServerName(serverName);
+    }
+
+    /**
      * 修改服务器信息。
      *
      * @param req 包含服务器信息详情的请求对象，其中必须包含服务器名称。
@@ -60,6 +70,20 @@ public class ServerInfoManagerService {
     @Transactional
     public void saveAllServerInfo(List<ServerInfoDetail> serverInfoDetailList) {
         serverInfoDetailRepository.saveAll(serverInfoDetailList);
+    }
+
+    /**
+     * 删除指定服务器信息
+     * @param serverName 服务器名称
+     * @throws BusinessException 如果服务器不存在，抛出此异常
+     */
+    @Transactional
+    public void deleteServerInfo(String serverName) {
+        ServerInfoDetail db = serverInfoDetailRepository.findByServerName(serverName);
+        if(ObjUtil.isEmpty(db)){
+            throw new BusinessException(BusinessExceptionEnum.SM_SERVER_NOT_EXISTS_ERROR);
+        }
+        serverInfoDetailRepository.deleteByServerName(serverName);
     }
 
     /**

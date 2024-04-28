@@ -5,13 +5,16 @@ import cn.hutool.core.util.ObjUtil;
 import fan.summer.hmoneta.common.enums.WebControllerExceptionEnum;
 import fan.summer.hmoneta.common.exception.WebControllerException;
 import fan.summer.hmoneta.database.entity.ipPool.IpPool;
+import fan.summer.hmoneta.database.entity.serverInfo.ServerInfoDetail;
 import fan.summer.hmoneta.service.IpResourceManagerService;
 import fan.summer.hmoneta.service.ServerInfoManagerService;
 import fan.summer.hmoneta.util.IpUtil;
 import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
 import fan.summer.hmoneta.webEntity.req.serverInfo.ServerInfoDetailReq;
 import fan.summer.hmoneta.webEntity.resp.serverInfo.ServerInfoDetailResp;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Resource;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -74,6 +77,24 @@ public class ServerInfoManagerController {
             throw new WebControllerException(WebControllerExceptionEnum.WEB_SM_REQ_IP_IS_NOT_IN_POOL);
         }
         serverInfoManagerService.modifyServerInfo(req);
+        return ApiRestResponse.success();
+    }
+
+    /**
+     * 通过服务器名称删除服务器信息。
+     *
+     * @param serverName 服务器名称，不可为空。
+     * @return 返回一个表示操作成功的ApiRestResponse对象，其中包含可能的通用响应数据。
+     */
+    @DeleteMapping("/delete")
+    @Transactional
+    public ApiRestResponse<Object> deleteServerInfo(@RequestParam @Nonnull String serverName){
+        ServerInfoDetail serverInfoDb = serverInfoManagerService.findServerInfoByServerName(serverName);
+        if (ObjUtil.isEmpty(serverInfoDb)){
+            throw new WebControllerException(WebControllerExceptionEnum.WEB_SM_REQ_SERVER_NOT_EXIST);
+        }
+        serverInfoManagerService.deleteServerInfo(serverName);
+        ipResourceManagerService.deleteIpUsedDetail(serverInfoDb.getPoolId(),serverInfoDb.getServerIpAddr());
         return ApiRestResponse.success();
     }
 }
