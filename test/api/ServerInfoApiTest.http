@@ -11,3 +11,8 @@ Content-Type: application/json
   "serverIpAddr": "192.168.1.2",
   "serverPort": "80"
 }
+
+###
+@serverName= test1
+// 删除测试
+DELETE localhost:8080/server/delete?serverName={{serverName}}
