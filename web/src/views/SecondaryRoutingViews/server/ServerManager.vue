@@ -96,8 +96,7 @@ const editInfo = (row) => {
 }
 const onDelete = (serverName) => {
 
-  axios.get(`/server/delete/${serverName}`).then(res => {
-    console.log(res.data.status)
+  axios.delete(`/server/delete`, {params: {serverName: serverName}}).then(res => {
     if (res.data.status) {
       message.success("删除成功")
       getServerData()
@@ -136,7 +135,7 @@ const getServerData = async () => {
   await axios.get('/server/info').then(res => {
     const json = res.data;
     if (json.status) {
-      // 清空列表
+      // 清空列表d
       serverData.value.length = 0;
       const ipPoolSelectMap = new Map();
       ipPoolSelect.value.forEach(item => {
