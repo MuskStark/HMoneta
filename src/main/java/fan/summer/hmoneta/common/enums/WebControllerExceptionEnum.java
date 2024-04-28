@@ -9,6 +9,7 @@ public enum WebControllerExceptionEnum {
     WEB_SM_REQ_MAC_FORMAT_ERROR(1006,"服务器MAC地址格式错误"),
     WEB_SM_REQ_IP_FORMAT_ERROR(1007,"服务器IP地址格式错误"),
     WEB_SM_REQ_IP_IS_NOT_IN_POOL(1008,"服务器IP地址不在IP池中"),
+    WEB_SM_REQ_SERVER_NOT_EXIST(1009,"服务器不存在")
     ;
     private int code;
     private String message;
