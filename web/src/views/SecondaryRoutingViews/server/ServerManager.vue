@@ -7,11 +7,13 @@ import {message} from "ant-design-vue";
 const title = ref();
 const open = ref(false);
 const formState = ref({
+  id: '',
   poolId: '',
   serverName: '',
   serverMacAddr: '',
   serverIpAddr: '',
   serverPort: '',
+  create: false
 });
 const isSysIssueIp = ref(false)
 const isRandom = ref(false)
@@ -34,7 +36,7 @@ const handleOk = () => {
       })
       getServerData()
     } else {
-      message.error('添加失败！');
+      message.error(res.data.message);
     }
   })
 
@@ -42,6 +44,7 @@ const handleOk = () => {
 }
 const insert = () => {
   title.value = "新增服务器";
+  formState.value.create = true;
   open.value = true;
 }
 // Table
@@ -87,6 +90,8 @@ const columns = [
 // 方法
 const editInfo = (row) => {
   title.value = "修改" + row.serverName + "服务器信息";
+  formState.value.create = false;
+  formState.value.id = row.id;
   formState.value.poolId = row.poolId;
   formState.value.serverName = row.serverName;
   formState.value.serverIpAddr = row.serverIpAddr;
