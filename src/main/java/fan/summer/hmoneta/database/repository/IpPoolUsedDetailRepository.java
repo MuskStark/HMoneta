@@ -16,6 +16,8 @@ public interface IpPoolUsedDetailRepository extends JpaRepository<IpPoolUsedDeta
     //Find
     List<IpPoolUsedDetail> findByPoolId(Long poolId);
 
+    IpPoolUsedDetail findByServerName(String serverName);
+
     @Query(value = """
             select p.issuedIp from IpPoolUsedDetail p where  p.poolId= ?1""")
     List<String> findIssuedIpByPoolId(Long poolId);

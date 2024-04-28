@@ -1,5 +1,6 @@
 package fan.summer.hmoneta.task.scheduled;
 
+import cn.hutool.core.util.ObjUtil;
 import fan.summer.hmoneta.database.entity.ipPool.IpPoolUsedDetail;
 import fan.summer.hmoneta.database.entity.serverInfo.ServerInfoDetail;
 import fan.summer.hmoneta.service.IpResourceManagerService;
@@ -47,7 +48,6 @@ public class ServerStatusUpdateTask {
         }
         List<IpPoolUsedDetail> resultList = new ArrayList<>();
         for (ServerInfoDetail serverInfoDetail : serverInfoDetails) {
-            IpPoolUsedDetail detail = new IpPoolUsedDetail();
             try (SocketChannel channel = SocketChannel.open()) {
                 channel.configureBlocking(false);
                 channel.connect(new InetSocketAddress(serverInfoDetail.getServerIpAddr(), Integer.parseInt(serverInfoDetail.getServerPort())));
@@ -61,6 +61,11 @@ public class ServerStatusUpdateTask {
                 }
                 LOG.info("设置{}服务器状态", serverInfoDetail.getServerIpAddr());
                 serverInfoDetail.setIsAlive(channel.isConnected());
+                // 同步更新IpPoolUsedDetail表
+                IpPoolUsedDetail detail = ipResourceManagerService.findIpPoolUsedDetailByServerName(serverInfoDetail.getServerName());
+                if(ObjUtil.isEmpty(detail)){
+                    detail = new IpPoolUsedDetail();
+                }
                 detail.setPoolId(serverInfoDetail.getPoolId());
                 detail.setServerName(serverInfoDetail.getServerName());
                 detail.setIssuedIp(serverInfoDetail.getServerIpAddr());
@@ -69,6 +74,10 @@ public class ServerStatusUpdateTask {
 
             } catch (IOException e) {
                 LOG.error("{}链接异常", serverInfoDetail.getServerIpAddr());
+                IpPoolUsedDetail detail = ipResourceManagerService.findIpPoolUsedDetailByServerName(serverInfoDetail.getServerName());
+                if(ObjUtil.isEmpty(detail)){
+                    detail = new IpPoolUsedDetail();
+                }
                 detail.setPoolId(serverInfoDetail.getPoolId());
                 detail.setServerName(serverInfoDetail.getServerName());
                 detail.setIssuedIp(serverInfoDetail.getServerIpAddr());

@@ -1,9 +1,6 @@
 package fan.summer.hmoneta.database.entity.ipPool;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,6 +14,8 @@ import lombok.Setter;
 public class IpPoolUsedDetail {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
     @Column(name = "pool_id", nullable = false)
     private Long poolId;
     @Column(name = "server_name", nullable = false)

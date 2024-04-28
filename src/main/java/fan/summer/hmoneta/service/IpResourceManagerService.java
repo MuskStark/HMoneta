@@ -272,6 +272,16 @@ public class IpResourceManagerService {
     }
 
     /**
+     * 根据服务器名称查找IP池使用详情。
+     *
+     * @param serverName 服务器的名称，用于查询对应的IP池使用详细信息。
+     * @return IpPoolUsedDetail 返回查询到的IP池使用详细信息对象。
+     */
+    public IpPoolUsedDetail findIpPoolUsedDetailByServerName(String serverName){
+        return ipPoolUsedDetailRepository.findByServerName(serverName);
+    }
+
+    /**
      * 根据池ID查找已分配的IP地址列表。
      *
      * @param poolId 池ID，用于指定要查询的IP池。
