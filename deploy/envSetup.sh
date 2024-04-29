@@ -3,10 +3,28 @@
 echo "开始更新系统"
 sudo dnf -y update
 sudo dnf -y install wget
-sudo dnf -y install maven
+# 清除老版本java环境
+sudo dnf remove -y 'java-11-openjdk*'
+sudo dnf remove -y java-*-openjdk
 # 安装java
 echo "安装Java环境"
 sudo dnf install java-21-openjdk java-21-openjdk-devel -y
+# 下载并解压Maven
+MAVEN_VERSION="apache-maven-3.9.6"
+MAVEN_DOWNLOAD_URL="https://dlcdn.apache.org/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz"
+MAVEN_INSTALL_DIR="/maven"
+mkdir "/tmp"
+mkdir "/maven"
+echo "下载 Maven..."
+wget -q "${MAVEN_DOWNLOAD_URL}" -P /tmp
+echo "解压 Maven..."
+sudo tar xf /tmp/${MAVEN_VERSION}-bin.tar.gz -C ${MAVEN_INSTALL_DIR}
+# 添加Maven的bin目录到PATH
+echo "添加 Maven 到 PATH..."
+echo "export PATH=\$PATH:${MAVEN_INSTALL_DIR}/${MAVEN_VERSION}/bin" >> ~/.bashrc
+# 使更改生效
+# shellcheck disable=SC1090
+source ~/.bashrc
 # 开放防火墙端口
 echo "开始开放80端口"
 firewall-cmd --zone=public --add-port=8080/tcp --permanent
@@ -47,11 +65,12 @@ FLUSH PRIVILEGES;
 MYSQL_SCRIPT
 # spring配置信息
 SPRING_PATH="../src/main/resources/application.yaml"
-URL="jdbc:mysql://localhost:3306/$HMONETA_DATABASE?useSSL=false&useUnicode=true&characterEncoding=utf-8"
-sed -i "s/url:.*/url: $URL/" $SPRING_PATH
+URL="jdbc:mysql://localhost:3306/$HMONETA_DATABASE?useUnicode=true;characterEncoding=UTF-8"
+escaped_url=$(printf '%s\n' "$URL" | sed 's/[&/\?]/\\&/g')
+sed -i "s/url:.*/url: $escaped_url/" $SPRING_PATH
 sed -i "s/username:.*/username: $HMONETA_USERNAME/" $SPRING_PATH
 sed -i "s/password:.*/password: $HMONETA_PASSWORD/" $SPRING_PATH
-echo">>>>>>>>>>>环境信息>>>>>>>>>>>>"
+echo ">>>>>>>>>>>环境信息>>>>>>>>>>>>"
 echo "MysqlRoot密码"
 grep "password" /var/log/mysqld.log
 echo "Mysql用户名"
@@ -65,4 +84,7 @@ firewall-cmd --reload
 firewall-cmd --list-ports
 echo "JDK版本信息"
 java --version
-echo">>>>>>>>>>>环境信息>>>>>>>>>>>>"
+echo ">>>>>>>>>>>环境信息>>>>>>>>>>>>"
+# shellcheck disable=SC2164
+#cd ~/hmoneta
+#mvn clean install -PAll-in-one -DskipTests
