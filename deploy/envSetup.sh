@@ -31,6 +31,8 @@ HMONETA_PASSWORD=$(tr -dc "$CHAR_SET" < /dev/urandom | head -c "$PASSWORD_LENGTH
 # 数据名称
 HMONETA_DATABASE="hmoneta"
 # 连接到MySQL服务器
+# shellcheck disable=SC2162
+read -s -p "请输入密码: " MYSQL_PASSWORD
 mysql -u root -p"${MYSQL_PASSWORD}" <<MYSQL_SCRIPT
 # 创建数据库
 CREATE DATABASE $HMONETA_DATABASE;
