@@ -1,0 +1,24 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: HMoneta
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.1.102:3306/home_lab_server?useUnicode=true&characterEncoding=UTF-8
+    hikari:
+      username: homelab
+      password: HomeLab215178^&%@&#$gu
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  task:
+    scheduling:
+      pool:
+        size: 1
+
+logging:
+  level:
+    sql: info
+
