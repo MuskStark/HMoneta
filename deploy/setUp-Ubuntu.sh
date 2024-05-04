@@ -3,57 +3,21 @@
 echo "开始更新系统"
 sudo apt-get update
 sudo apt-get install -y wget
-
 # 清除老版本java环境
 sudo apt-get remove -y openjdk-\*
-
 # 安装java
 echo "安装Java环境"
 sudo apt-get install -y openjdk-21-jdk
-
 # 下载并解压Maven
-MAVEN_VERSION="apache-maven-3.9.6"
-MAVEN_DOWNLOAD_URL="https://dlcdn.apache.org/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz"
-MAVEN_INSTALL_DIR="/maven"
-mkdir "/tmp"
-mkdir "/maven"
-echo "下载 Maven..."
-wget -q "${MAVEN_DOWNLOAD_URL}" -P /tmp
-echo "解压 Maven..."
-sudo tar xf /tmp/${MAVEN_VERSION}-bin.tar.gz -C ${MAVEN_INSTALL_DIR}
-
-# 添加Maven的bin目录到PATH
-echo "添加 Maven 到 PATH..."
-echo "export PATH=\$PATH:${MAVEN_INSTALL_DIR}/${MAVEN_VERSION}/bin" >> ~/.bashrc
-
-# 使更改生效
-# shellcheck disable=SC1090
-source ~/.bashrc
-
+sudo aot-get install -y maven
 # 开放防火墙端口
 echo "开始开放80端口"
 sudo ufw allow 8080/tcp
-
 # 安装mysql
 echo "安装MySQL环境"
 sudo apt-get install -y mysql-server
-
 # 启动MySQL服务
 sudo systemctl start mysql
-
-# 获取MySQL Root密码
-MYSQL_ROOT_PASSWORD=$(sudo grep -oP 'root@localhost: \K\w+' /var/log/mysql/error.log)
-
-# 执行MySQL安全设置
-sudo mysql_secure_installation <<EOF
-$MYSQL_ROOT_PASSWORD
-y
-n
-y
-y
-y
-EOF
-
 # 初始化参数
 # 数据库用户创建
 HMONETA_USERNAME="hmoneta"
