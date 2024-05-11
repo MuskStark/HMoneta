@@ -1,11 +1,18 @@
 package fan.summer.hmoneta.database.entity.ipPool;
 
-import jakarta.persistence.*;
-import lombok.Data;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.*;
+import org.hibernate.proxy.HibernateProxy;
+
+import java.util.Objects;
 
 @Entity
 @Table(name = "ip_pool")
-@Data
+@Getter
+@Setter
 public class IpPool {
 
     @Id

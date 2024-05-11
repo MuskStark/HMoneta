@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
+
 public interface IpPoolRepository extends JpaRepository<IpPool, Long> {
 
     //Find

@@ -2,10 +2,13 @@ package fan.summer.hmoneta.database.entity.serverInfo;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "server_info_detail")
-@Data
+@Getter
+@Setter
 public class ServerInfoDetail {
 
     @Id
