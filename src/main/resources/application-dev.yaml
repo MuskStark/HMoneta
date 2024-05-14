@@ -22,3 +22,10 @@ logging:
   level:
     sql: info
 
+hmoneta:
+  master:
+    report-url: http://localhost
+  agent:
+    port: 477
+
+
