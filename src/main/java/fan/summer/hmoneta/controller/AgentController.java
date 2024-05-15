@@ -1,7 +1,9 @@
 package fan.summer.hmoneta.controller;
 
+import fan.summer.hmoneta.service.AgentService;
 import fan.summer.hmoneta.webEntity.agent.SystemInfoEntity;
 import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,10 +20,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/agent/api")
 public class AgentController {
 
+    @Resource
+    private AgentService agentService;
+
     @PostMapping("/report")
     public ApiRestResponse<Object> receiveAgentStatus(@RequestBody SystemInfoEntity info) {
         assert info != null;
-        System.out.println(info);
+        agentService.receiveAgentReport(info);
         return ApiRestResponse.success();
     }
 

@@ -1,13 +1,17 @@
 package fan.summer.hmoneta.service;
 
 
+import cn.hutool.core.util.ObjUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import fan.summer.hmoneta.database.entity.agent.AgentInfo;
+import fan.summer.hmoneta.database.entity.agent.AgentReport;
 import fan.summer.hmoneta.database.repository.AgentInfoRepository;
+import fan.summer.hmoneta.database.repository.AgentReportRepository;
 import fan.summer.hmoneta.webEntity.agent.AgentStatus;
 import fan.summer.hmoneta.webEntity.agent.ConfigEntity;
+import fan.summer.hmoneta.webEntity.agent.SystemInfoEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +44,15 @@ public class AgentService {
     @Value("${hmoneta.agent.port}")
     private int AGENT_PORT;
     private final RestTemplate restTemplate;
-    private AgentInfoRepository agentInfoRepository;
+    private final AgentInfoRepository agentInfoRepository;
+    private final AgentReportRepository reportRepository;
+
 
     @Autowired
-    public AgentService(RestTemplate restTemplate, AgentInfoRepository agentInfoRepository) {
+    public AgentService(RestTemplate restTemplate, AgentInfoRepository agentInfoRepository, AgentReportRepository reportRepository) {
         this.restTemplate = restTemplate;
         this.agentInfoRepository = agentInfoRepository;
+        this.reportRepository = reportRepository;
     }
 
     public List<AgentInfo> findAllAgent(){
@@ -85,20 +92,49 @@ public class AgentService {
      * @throws JsonProcessingException 当JSON处理出错时抛出
      */
     public boolean issueConfig(AgentInfo agentInfo) throws JsonProcessingException {
+        LOG.info("开始下发配置文件");
         ConfigEntity config = new ConfigEntity();
         String targetUrl = "http://" +agentInfo.getServerIp()+":"+AGENT_PORT+"/agent/api/config";
+        LOG.info("配置文件下发地址:{}",targetUrl);
         config.setAgentId(agentInfo.getAgentId());
+        LOG.info("接收配置文件AgentId:{}",agentInfo.getAgentId());
         config.setReportUrl(AGENT_REPORT_API_URL + ":" + AGENT_REPORT_API_PORT);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         String json = mapper.writeValueAsString(config);
+        LOG.info("配置文件内容:{}",json);
         HttpEntity<String> entity = new HttpEntity<String>(json, headers);
         // 发送POST请求并获取响应
         ResponseEntity<AgentStatus> response = restTemplate.exchange(targetUrl, HttpMethod.POST, entity, AgentStatus.class);
+        LOG.info("配置文件下发结果:{}",response.getBody().isStatus());
         return response.getBody().isStatus();
 
+    }
+
+    public void receiveAgentReport(SystemInfoEntity info){
+        Long agentId = info.getAgentId();
+        AgentInfo agent = agentInfoRepository.findByAgentId(agentId);
+        agent.setReceivedReport(true);
+        agentInfoRepository.save(agent);
+        AgentReport agentReport = reportRepository.findByAgentId(agentId);
+        if(ObjUtil.isEmpty(agentReport)){
+            agentReport = new AgentReport();
+            agentReport.setAgentId(agentId);
+        }
+        agentReport.setCpuName(info.getCpuName());
+        int coreNum = info.getCupLoad().length;
+        double totalLoad = 0.0;
+        for (double load : info.getCupLoad()){
+            totalLoad += load;
+        }
+        agentReport.setCpuCoreNum(coreNum);
+        agentReport.setCupAvgLoad(totalLoad/coreNum);
+        agentReport.setTotalDisk(info.getTotalDisk());
+        agentReport.setTotalMemory(info.getTotalMemory());
+        agentReport.setFreeMemory(info.getFreeMemory());
+        reportRepository.save(agentReport);
     }
 
 }
