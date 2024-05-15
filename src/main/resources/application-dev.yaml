@@ -24,7 +24,7 @@ logging:
 
 hmoneta:
   master:
-    report-url: http://localhost
+    report-url: http://127.0.0.1
   agent:
     port: 477
 
