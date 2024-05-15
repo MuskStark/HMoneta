@@ -23,9 +23,11 @@ public class AgentInfo {
     private Long serverId;
     @Column(name = "server_ip", nullable = false)
     private String serverIp;
-    @Column(name = "is_alive", nullable = false)
-    private Boolean isAlive;
-    @Column(name = "is_issue_config", nullable = false)
-    private Boolean isIssueConfig;
+    @Column(name = "alive", nullable = false)
+    private Boolean alive;
+    @Column(name = "issue_config", nullable = false)
+    private Boolean issueConfig;
+    @Column(name = "received_report", nullable = false)
+    private Boolean receivedReport;
 
 }
