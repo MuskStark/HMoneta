@@ -13,6 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SystemInfoEntity {
+    private Long agentId;
     private String cpuName;
     private double[] cupLoad;
     private long totalMemory;
