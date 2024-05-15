@@ -15,4 +15,6 @@ public interface AgentInfoRepository extends JpaRepository<AgentInfo, Long> {
 
     AgentInfo findByServerId(Long serverId);
 
+    AgentInfo findByAgentId(Long agentId);
+
 }
