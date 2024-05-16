@@ -43,10 +43,15 @@ public class AgentScanTask {
         this.allServerId = service.findAllServerId();
     }
 
+    /**
+     * 定时任务，每隔30秒执行一次，用于监听和更新代理信息。
+     * 通过查询所有服务器信息，比对当前已知的代理信息，进行信息的更新或下发配置。
+     */
     @Scheduled(cron = "0/30 * * * * ?")
     protected void agentListener() {
         List<ServerInfoDetail> allServerInfo = infoManagerService.findAllServerInfo();
         allServerInfo.forEach(serverInfoDetail -> {
+            // TODO:Bug:Agent信息数据库写入问题
             try {
                 if (allServerId.contains(serverInfoDetail.getId())) {
                     boolean needUpdateInfo = false;
@@ -59,11 +64,17 @@ public class AgentScanTask {
                     boolean installAgentClient = service.isInstallAgentClient(agentByServerId.getServerIp());
                     // 判断是否下发配置信息
                     if (installAgentClient) {
-                        if(!agentByServerId.getIsAlive()) {
-                            agentByServerId.setIsAlive(true);
+                        if(!agentByServerId.getAlive()) {
+                            agentByServerId.setAlive(true);
                             needUpdateInfo = true;
                         }
-                        service.issueConfig(agentByServerId);
+                        if(!agentByServerId.getIssueConfig()) {
+                            boolean success = service.issueConfig(agentByServerId);
+                            if(success){
+                                agentByServerId.setIssueConfig(true);
+                                needUpdateInfo = true;
+                            }
+                        }
                     }
                     if(needUpdateInfo){
                         service.save(agentByServerId);
@@ -74,9 +85,12 @@ public class AgentScanTask {
                     info.setAgentId(SnowFlakeUtil.getSnowFlakeNextId());
                     info.setServerId(serverInfoDetail.getId());
                     info.setServerIp(serverInfoDetail.getServerIpAddr());
-                    info.setIsAlive(service.isInstallAgentClient(info.getServerIp()));
-                    if(info.getIsAlive()){
+                    info.setAlive(service.isInstallAgentClient(info.getServerIp()));
+                    if(info.getAlive()){
                         service.issueConfig(info);
+                        info.setIssueConfig(true);
+                    }else {
+                        info.setIssueConfig(false);
                     }
                     service.save(info);
                     allServerId.add(serverInfoDetail.getId());

@@ -17,7 +17,6 @@ import lombok.Setter;
 @Setter
 public class AgentInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long agentId;
     @Column(name = "server_id", nullable = false)
     private Long serverId;
@@ -27,7 +26,7 @@ public class AgentInfo {
     private Boolean alive;
     @Column(name = "issue_config", nullable = false)
     private Boolean issueConfig;
-    @Column(name = "received_report", nullable = false)
+    @Column(name = "received_report")
     private Boolean receivedReport;
 
 }
