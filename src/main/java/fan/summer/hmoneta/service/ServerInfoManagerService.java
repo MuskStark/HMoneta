@@ -4,13 +4,16 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjUtil;
 import fan.summer.hmoneta.common.enums.BusinessExceptionEnum;
 import fan.summer.hmoneta.common.exception.BusinessException;
+import fan.summer.hmoneta.database.entity.agent.AgentInfo;
 import fan.summer.hmoneta.database.entity.serverInfo.ServerInfoDetail;
 import fan.summer.hmoneta.database.repository.ServerInfoDetailRepository;
 import fan.summer.hmoneta.webEntity.req.serverInfo.ServerInfoDetailReq;
+import fan.summer.hmoneta.webEntity.resp.serverInfo.ServerInfoDetailResp;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,6 +28,8 @@ public class ServerInfoManagerService {
 
     @Resource
     private ServerInfoDetailRepository serverInfoDetailRepository;
+    @Resource
+    private AgentService agentService;
 
     /**
      * 查找并返回所有服务器信息的详细列表。
@@ -33,6 +38,7 @@ public class ServerInfoManagerService {
      */
     public List<ServerInfoDetail> findAllServerInfo() {
         return serverInfoDetailRepository.findAll();
+
     }
 
     /**
@@ -54,13 +60,13 @@ public class ServerInfoManagerService {
     @Transactional
     public void modifyServerInfo(ServerInfoDetailReq req) {
         ServerInfoDetail db = serverInfoDetailRepository.findByServerName(req.getServerName());
-        if(req.isCreate()){
-            if(ObjUtil.isNotEmpty(db)){
+        if (req.isCreate()) {
+            if (ObjUtil.isNotEmpty(db)) {
                 throw new BusinessException(BusinessExceptionEnum.SM_SERVER_EXISTS_ERROR);
             }
             db = new ServerInfoDetail();
-        }else {
-            if(ObjUtil.isEmpty(db)){
+        } else {
+            if (ObjUtil.isEmpty(db)) {
                 throw new BusinessException(BusinessExceptionEnum.SM_SERVER_NOT_EXISTS_ERROR);
             }
         }
@@ -68,6 +74,7 @@ public class ServerInfoManagerService {
         db.setIsAlive(false);
         serverInfoDetailRepository.save(db);
     }
+
     /**
      * 保存所有服务器信息到数据库。
      *
@@ -81,13 +88,14 @@ public class ServerInfoManagerService {
 
     /**
      * 删除指定服务器信息
+     *
      * @param serverName 服务器名称
      * @throws BusinessException 如果服务器不存在，抛出此异常
      */
     @Transactional
     public void deleteServerInfo(String serverName) {
         ServerInfoDetail db = serverInfoDetailRepository.findByServerName(serverName);
-        if(ObjUtil.isEmpty(db)){
+        if (ObjUtil.isEmpty(db)) {
             throw new BusinessException(BusinessExceptionEnum.SM_SERVER_NOT_EXISTS_ERROR);
         }
         serverInfoDetailRepository.deleteByServerName(serverName);
@@ -100,7 +108,7 @@ public class ServerInfoManagerService {
      */
     @Transactional
     public void deleteAllByPoolId(Long poolId) {
-        if(!serverInfoDetailRepository.findAllByPoolId(poolId).isEmpty()) {
+        if (!serverInfoDetailRepository.findAllByPoolId(poolId).isEmpty()) {
             serverInfoDetailRepository.deleteAllByPoolId(poolId);
         }
     }

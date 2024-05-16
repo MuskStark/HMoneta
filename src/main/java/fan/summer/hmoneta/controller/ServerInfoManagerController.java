@@ -4,8 +4,10 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjUtil;
 import fan.summer.hmoneta.common.enums.WebControllerExceptionEnum;
 import fan.summer.hmoneta.common.exception.WebControllerException;
+import fan.summer.hmoneta.database.entity.agent.AgentInfo;
 import fan.summer.hmoneta.database.entity.ipPool.IpPool;
 import fan.summer.hmoneta.database.entity.serverInfo.ServerInfoDetail;
+import fan.summer.hmoneta.service.AgentService;
 import fan.summer.hmoneta.service.IpResourceManagerService;
 import fan.summer.hmoneta.service.ServerInfoManagerService;
 import fan.summer.hmoneta.util.IpUtil;
@@ -17,6 +19,7 @@ import jakarta.annotation.Resource;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -35,19 +38,43 @@ public class ServerInfoManagerController {
     private ServerInfoManagerService serverInfoManagerService;
     @Resource
     private IpResourceManagerService ipResourceManagerService;
+    @Resource
+    private AgentService agentService;
 
 
     /**
-     * 查询所有服务器信息
+     * 查询所有服务器信息的API接口。
      *
-     * 该接口不需要接收任何参数，通过调用 {@code serverInfoManagerService.findAllServerInfo()} 方法，
-     * 获取所有服务器基本信息，并将其转换为 {@code ServerInfoDetailResp} 类型的列表后，封装到 {@code ApiRestResponse} 中返回。
+     * 该接口通过调用 {@code serverInfoManagerService.findAllServerInfo()} 方法获取所有服务器基本信息，
+     * 然后转换为前端可接收的响应格式。如果服务器信息存在，则将每条信息转换为 {@code ServerInfoDetailResp} 对象，
+     * 同时通过调用 {@code agentService.findAgentByServerId} 方法补充每个服务器的代理信息，
+     * 包括代理ID、在线状态、是否配置了问题以及是否接收到了报告。最后将转换后的信息列表封装在 {@code ApiRestResponse} 中返回。
+     * 如果没有服务器信息，则返回一个空的成功响应。
      *
-     * @return {@code ApiRestResponse<List<ServerInfoDetailResp>>} 包含所有服务器详细信息的响应对象。
+     * @return {@code ApiRestResponse<List<ServerInfoDetailResp>>} 包含服务器信息列表的响应对象，
+     *         如果没有服务器信息，则列表为空。
      */
     @GetMapping("/info")
     public ApiRestResponse<List<ServerInfoDetailResp>> queryAllInfo(){
-        return ApiRestResponse.success(BeanUtil.copyToList(serverInfoManagerService.findAllServerInfo(),ServerInfoDetailResp.class));
+        List<ServerInfoDetail> serverInfos = serverInfoManagerService.findAllServerInfo();
+        if (!serverInfos.isEmpty()) {
+            ArrayList<ServerInfoDetailResp> respList = new ArrayList<>();
+            for (ServerInfoDetail serverInfo : serverInfos) {
+                ServerInfoDetailResp resp = new ServerInfoDetailResp();
+                BeanUtil.copyProperties(serverInfo, resp);
+                AgentInfo serverAgent = agentService.findAgentByServerId(serverInfo.getId());
+                if (ObjUtil.isNotNull(serverAgent)) {
+                    resp.setAgentId(serverAgent.getAgentId());
+                    resp.setIsOnline(serverAgent.getAlive());
+                    resp.setIsIssueConfig(serverAgent.getIssueConfig());
+                    resp.setIsReceivedReport(serverAgent.getReceivedReport());
+                }
+                respList.add(resp);
+            }
+            return ApiRestResponse.success(respList);
+        } else {
+            return ApiRestResponse.success();
+        }
     }
 
     /**

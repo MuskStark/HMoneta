@@ -21,5 +21,10 @@ public class ServerInfoDetailResp {
     private String serverIpAddr;
     private String serverPort;
     private Boolean isAlive;
+    // agent
+    private Long agentId;
+    private Boolean isOnline;
+    private Boolean isIssueConfig;
+    private Boolean isReceivedReport;
 
 }
