@@ -2,7 +2,7 @@
 <!-- PROJECT LOGO -->
 <table align="center"><tr><td align="center" width="9999">
 <p align="center">
-  <a href="https://git.summer.fan:9443/jack/hmoneta/">
+  <a href="https://github.com/MuskStark/HMoneta">
     <img src="asset/projectLogo.png" alt="Logo" width="300" height="80">
   </a>
 </p>
