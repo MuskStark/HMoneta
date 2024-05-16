@@ -1,4 +1,8 @@
 ###
+//获取全部信息
+GET http://localhost:8080/server/info
+
+###
 //正常写入测试
 POST localhost:8080/server/modify
 Content-Type: application/json
