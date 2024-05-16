@@ -13,14 +13,13 @@
   <p align="center">
     专注于为家庭提供统一的家庭服务管理平台
     <br />
-    <a href="https://git.summer.fan:9443/jack/hmoneta/-/blob/main/doc/wiki.md?ref_type=heads"><strong>探索本项目的文档 »</strong></a>
+    <a href="https://github.com/MuskStark/HMoneta/blob/main/doc/wiki.md"><strong>探索本项目的文档 »</strong></a>
     <br />
     <br />
-    <a href="https://git.summer.fan:9443/jack/hmoneta">查看Demo</a>
     ·
-    <a href="https://git.summer.fan:9443/jack/hmoneta/issues">报告Bug</a>
+    <a href="https://github.com/MuskStark/HMoneta/issues">报告Bug</a>
     ·
-    <a href="https://git.summer.fan:9443/jack/hmoneta/issues">提出新特性</a>
+    <a href="https://github.com/MuskStark/HMoneta/issues">提出新特性</a>
   </p>
 </td></tr></table>
 <br />
@@ -49,7 +48,7 @@
 
 1. 拉取项目至本地
 ```sh
-git clone https://git.summer.fan:9443/jack/hmoneta.git
+git clone https://github.com/MuskStark/HMoneta.git
 ```
 2. 项目依赖安装
   - 后端依赖安装
@@ -68,7 +67,6 @@ yarn
 ```
 filetree 
 .
-├── HMoneta.iml
 ├── LICENSE
 ├── README.md
 ├── asset
@@ -76,6 +74,7 @@ filetree
 │   └── webLogo.png
 ├── deploy
 │   ├── envSetup.sh
+│   ├── setUp-Ubuntu.sh
 │   └── startup.sh
 ├── doc
 │   └── wiki.md
@@ -95,7 +94,6 @@ filetree
     ├── src
     ├── vite.config.js
     └── yarn.lock
-
 ```
 ### 开发的架构
 ### 部署
@@ -106,20 +104,19 @@ filetree
 - [Ant-Design-Vue](https://antdv.com/)
 ### 软件功能
 - [x] ~~家庭Ip地址池管理~~
-- [x] 家庭服务器管理
+- [x] ~~家庭服务器管理~~
 - [ ] 家庭服务器状态监控
 - [ ] 家庭DDNS、内网穿透
 - [ ] 家庭服务器反向代理
 ### 贡献者
+- [MuskStark](https://github.com/MuskStark)
 #### 如何参与开源项目
-### 版本控制
+
 ### 作者
-
-
-*您也可以在贡献者名单中参看所有参与该项目的开发者。*
+- [MuskStark](https://github.com/MuskStark)
 
 ### 版权说明
-
+本项目依据[GNU Affero General Public License v3.0](https://github.com/MuskStark/HMoneta?tab=AGPL-3.0-1-ov-file)进行开源
 
 ### 鸣谢
 
