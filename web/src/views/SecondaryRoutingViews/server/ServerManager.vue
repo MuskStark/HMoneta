@@ -82,6 +82,21 @@ const columns = [
     key: 'isAlive',
   },
   {
+    title: 'Agent状态',
+    dataIndex: 'isOnline',
+    key: 'isOnline',
+  },
+  {
+    title: '配置文件下发状态',
+    dataIndex: 'isIssueConfig',
+    key: 'isIssueConfig',
+  },
+  {
+    title: '是否上报报告',
+    dataIndex: 'isReceivedReport',
+    key: 'isReceivedReport',
+  },
+  {
     title: '操作',
     dataIndex: 'operation',
     key: 'operation'
@@ -242,6 +257,33 @@ onUnmounted(() => {
         </template>
         <template v-else>
           <a-tag :bordered="false" color="error">离线</a-tag>
+        </template>
+      </template>
+
+      <template v-if="column.dataIndex === 'isOnline'">
+        <template v-if="record.isOnline">
+          <a-tag :bordered="false" color="success">在线</a-tag>
+        </template>
+        <template v-else>
+          <a-tag :bordered="false" color="error">离线</a-tag>
+        </template>
+      </template>
+
+      <template v-if="column.dataIndex === 'isIssueConfig'">
+        <template v-if="record.isIssueConfig">
+          <a-tag :bordered="false" color="success">成功下发配置</a-tag>
+        </template>
+        <template v-else>
+          <a-tag :bordered="false" color="error">未下发配置</a-tag>
+        </template>
+      </template>
+
+      <template v-if="column.dataIndex === 'isReceivedReport'">
+        <template v-if="record.isReceivedReport">
+          <a-tag :bordered="false" color="success">已接收报告</a-tag>
+        </template>
+        <template v-else>
+          <a-tag :bordered="false" color="error">未接收报告</a-tag>
         </template>
       </template>
 
