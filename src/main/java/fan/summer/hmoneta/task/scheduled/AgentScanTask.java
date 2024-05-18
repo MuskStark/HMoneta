@@ -49,11 +49,15 @@ public class AgentScanTask {
      */
     @Scheduled(cron = "0/30 * * * * ?")
     protected void agentListener() {
+        LOG.info("----------------启动Agent扫描任务----------------");
         List<ServerInfoDetail> allServerInfo = infoManagerService.findAllServerInfo();
         allServerInfo.forEach(serverInfoDetail -> {
-            // TODO:Bug:Agent信息数据库写入问题
+            LOG.info("待扫描服务器名称{}", serverInfoDetail.getServerName());
             try {
-                if (allServerId.contains(serverInfoDetail.getId())) {
+                boolean isContain = allServerId.contains(serverInfoDetail.getId());
+                LOG.info("是否已记录该服务器Agent信息：{}",isContain);
+                if (isContain) {
+                    LOG.info("开始Agent信息更新");
                     boolean needUpdateInfo = false;
                     AgentInfo agentByServerId = service.findAgentByServerId(serverInfoDetail.getId());
                     // 检查服务器地址是否变化
@@ -79,8 +83,10 @@ public class AgentScanTask {
                     if(needUpdateInfo){
                         service.save(agentByServerId);
                     }
+                    LOG.info("Agent信息更新完成");
 
                 } else {
+                    LOG.info("Agent信息不存在，开始创建Agent信息");
                     AgentInfo info = new AgentInfo();
                     info.setAgentId(SnowFlakeUtil.getSnowFlakeNextId());
                     info.setServerId(serverInfoDetail.getId());
@@ -96,8 +102,10 @@ public class AgentScanTask {
                     allServerId.add(serverInfoDetail.getId());
 
                 }
+                LOG.info("----------------完成Agent扫描任务----------------");
             }catch (Exception e){
                 LOG.error("AgentListener error:{}", Objects.requireNonNull(e.getMessage()));
+                LOG.info("----------------完成Agent扫描任务----------------");
             }
         });
     }
