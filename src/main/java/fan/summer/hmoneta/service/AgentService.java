@@ -79,11 +79,27 @@ public class AgentService {
      * @return 如果机器上安装了Agent客户端并服务运行正常，则返回true；否则返回false。
      */
     public boolean isInstallAgentClient(String ip){
-        String url = "http://" +ip+":"+AGENT_PORT+"/agent/api/status";
-        // 发送GET请求并获取响应
-        AgentStatus response = restTemplate.getForObject(url, AgentStatus.class);
-        assert response != null;
-        return response.isStatus();
+        LOG.info("开始检查目标服务器Agent客户端状态");
+        try {
+            String url = "http://" + ip + ":" + AGENT_PORT + "/agent/api/status";
+            LOG.info("检查目标服务器Agent客户端地址:{}",url);
+            // 发送GET请求并获取响应
+            AgentStatus response = restTemplate.getForObject(url, AgentStatus.class);
+            assert response != null;
+            LOG.info("Agent客户端状态:{}",response.isStatus());
+            if(response.isStatus()){
+                LOG.info("完成检查目标服务器Agent客户端状态");
+                return true;
+            }else {
+                LOG.error("Agent客户端状态异常");
+                LOG.info("完成检查目标服务器Agent客户端状态");
+                return false;
+            }
+        }catch (Exception e){
+            LOG.error("检查Agent客户端发生异常:{}",e.getMessage());
+            LOG.info("完成检查目标服务器Agent客户端状态");
+            return false;
+        }
     }
     /**
      * 配置分发
