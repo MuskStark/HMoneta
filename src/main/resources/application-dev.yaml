@@ -23,6 +23,7 @@ logging:
     sql: info
 
 hmoneta:
+  version: @project.version@
   master:
     report-url: http://127.0.0.1
   agent:
