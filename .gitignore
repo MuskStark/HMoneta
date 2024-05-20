@@ -35,3 +35,4 @@ build/
 /mvnw
 /.mvn/
 /src/main/resources/rebel.xml
+/log/
