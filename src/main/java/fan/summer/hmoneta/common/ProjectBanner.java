@@ -21,7 +21,7 @@ public class ProjectBanner implements Banner {
                     "| |  | || |  | | (_) | | | | | |  __/ (__| || (_| |\n" +
                     "|_|  |_||_|  |_|\\___/|_| |_| |_|\\___|\\___|\\__\\__,_|\n" +
                     "                                                  \n" +
-                    "                    HMoneta-Agent (ver)               \n";
+                    "                    HMoneta (ver)               \n";
     @Override
     public void printBanner(Environment environment, Class<?> sourceClass, PrintStream out) {
         String version = environment.getProperty("hmoneta.version");
