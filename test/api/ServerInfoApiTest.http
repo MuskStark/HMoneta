@@ -1,10 +1,10 @@
 ###
 //获取全部信息
-GET http://localhost:8080/server/info
+GET http://localhost:8080/hm/server/info
 
 ###
 //正常写入测试
-POST localhost:8080/server/modify
+POST localhost:8080/hm/server/modify
 Content-Type: application/json
 
 {
@@ -19,4 +19,4 @@ Content-Type: application/json
 ###
 @serverName= test1
 // 删除测试
-DELETE localhost:8080/server/delete?serverName={{serverName}}
+DELETE localhost:8080/hm/server/delete?serverName={{serverName}}

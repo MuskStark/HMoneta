@@ -1,6 +1,6 @@
 ###
 // 新增IpPool
-POST localhost:8080/pool/modify
+POST localhost:8080/hm/pool/modify
 Content-Type: application/json
 
 {
@@ -15,12 +15,12 @@ Content-Type: application/json
 
 ###
 //查询SelectValue
-GET localhost:8080/pool/selectValue
+GET localhost:8080/hm/pool/selectValue
 
 ###
 @isRandom = true
 @poolId = 1783414960022491136
 //获取ip地址
-GET http://localhost:8080/pool/generate?
+GET http://localhost:8080/hm/pool/generate?
     poolId={{poolId}}&
     isRandom={{isRandom}}
