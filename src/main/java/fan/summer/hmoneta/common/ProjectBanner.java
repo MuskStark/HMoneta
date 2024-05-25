@@ -25,7 +25,9 @@ public class ProjectBanner implements Banner {
     @Override
     public void printBanner(Environment environment, Class<?> sourceClass, PrintStream out) {
         String version = environment.getProperty("hmoneta.version");
-        assert version != null;
+        if(version == null){
+            version = "config file can not be loaded";
+        }
         String banner = BANNER.replace("ver", version);
         out.print(banner);
     }
