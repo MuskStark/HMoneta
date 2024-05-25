@@ -1,0 +1,3 @@
+### GET request to example server
+GET localhost:8080/hm/master/get-report?serverId=1
+
