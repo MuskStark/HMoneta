@@ -66,9 +66,16 @@ public class AgentService {
     public AgentInfo findAgentByServerId(Long serverId){
         return agentInfoRepository.findByServerId(serverId);
     }
+
     @Transactional
     public void save(AgentInfo agentInfo){
         agentInfoRepository.save(agentInfo);
+    }
+
+
+    public AgentReport findAgentReportByServerId(Long serverId){
+        AgentInfo agentInfo = agentInfoRepository.findByServerId(serverId);
+        return reportRepository.findByAgentId(agentInfo.getAgentId());
     }
 
     /**
