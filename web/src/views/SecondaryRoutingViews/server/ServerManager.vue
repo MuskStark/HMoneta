@@ -126,6 +126,25 @@ const onDelete = (serverName) => {
     }
   })
 }
+// 服务器详情
+const SystemInfo = ref({
+  agentId:'',
+  cpuName:'',
+  cpuCoreNum:'',
+  cupAvgLoad:'',
+  totalMemory:'',
+  freeMemory:'',
+  totalDisk:'',
+  freeDisk:'',
+})
+const getSystemInfo = async (serviceId) => {
+  await axios.get('/master/get-report', {params: {serverId: serviceId}}).then(res => {
+    const json = res.data;
+    if (json.status) {
+      SystemInfo.value = json.data
+    }
+  })
+}
 // Common
 // 属性
 // 方法
@@ -253,7 +272,7 @@ onUnmounted(() => {
     <template #bodyCell="{ column, record }">
       <template v-if="column.dataIndex === 'isAlive'">
         <template v-if="record.isAlive">
-          <a-tag :bordered="false" color="success">在线</a-tag>
+          <a-tag :bordered="false" color="success" @click="getSystemInfo(record.id)">在线</a-tag>
         </template>
         <template v-else>
           <a-tag :bordered="false" color="error">离线</a-tag>
