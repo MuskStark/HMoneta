@@ -35,4 +35,6 @@ public class AgentReport {
     private long totalDisk;
     @Column(name = "free_disk")
     private String freeDisk;
+    @Column(name = "time_stamp", nullable = false)
+    private Long timeStamp;
 }

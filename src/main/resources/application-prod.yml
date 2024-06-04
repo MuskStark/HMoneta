@@ -30,3 +30,4 @@ hmoneta:
     report-url: http://localhost
   agent:
     port: 477
+    report-delay: 60000

@@ -137,6 +137,7 @@ public class AgentService {
     }
 
     public void receiveAgentReport(SystemInfoEntity info){
+        Long timeStamp = System.currentTimeMillis();
         Long agentId = info.getAgentId();
         AgentInfo agent = agentInfoRepository.findByAgentId(agentId);
         agent.setReceivedReport(true);
@@ -157,6 +158,7 @@ public class AgentService {
         agentReport.setTotalDisk(info.getTotalDisk());
         agentReport.setTotalMemory(info.getTotalMemory());
         agentReport.setFreeMemory(info.getFreeMemory());
+        agentReport.setTimeStamp(timeStamp);
         reportRepository.save(agentReport);
     }
 

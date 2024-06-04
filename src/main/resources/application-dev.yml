@@ -30,5 +30,6 @@ hmoneta:
     report-url: http://127.0.0.1
   agent:
     port: 477
+    report-delay: 60000
 
 
