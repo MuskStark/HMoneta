@@ -1,5 +1,6 @@
 package fan.summer.hmoneta.controller;
 
+import cn.hutool.core.util.ObjUtil;
 import fan.summer.hmoneta.database.entity.agent.AgentReport;
 import fan.summer.hmoneta.service.AgentService;
 import fan.summer.hmoneta.webEntity.agent.SystemInfoEntity;
@@ -21,17 +22,20 @@ public class AgentController {
 
     @Resource
     private AgentService agentService;
-
+    
+    //TODO:更改接口名称为query-report
     @GetMapping("/get-report")
     public ApiRestResponse<Object> getAgentReport(@RequestParam Long serverId) {
         AgentReport agentReportByServerId = agentService.findAgentReportByServerId(serverId);
         return ApiRestResponse.success(agentReportByServerId);
     }
 
+    //TODO:更改接口名称为receive-report
     @PostMapping("/report")
     public ApiRestResponse<Object> receiveAgentStatus(@RequestBody SystemInfoEntity info) {
-        assert info != null;
-        agentService.receiveAgentReport(info);
+        if(ObjUtil.isNotEmpty(info)) {
+            agentService.receiveAgentReport(info);
+        }
         return ApiRestResponse.success();
     }
 
