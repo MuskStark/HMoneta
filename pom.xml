@@ -58,13 +58,6 @@
         </dependency>
     </dependencies>
 
-
-    <resources>
-        <resource>
-            <directory>src/main/resources</directory>
-        </resource>
-    </resources>
-
     <profiles>
         <profile>
             <id>default</id>
@@ -101,13 +94,14 @@
             <build>
                 <finalName>${project.artifactId}-all-${project.version}</finalName>
                 <resources>
-                        <resource>
-                            <directory>${project.basedir}/src/main/resources</directory>
-                            <filtering>true</filtering>
-                        </resource>
+                    <resource>
+                        <directory>${project.basedir}/src/main/resources</directory>
+                        <filtering>false</filtering>
+                    </resource>
                     <resource>
                         <directory>${project.basedir}/web/dist</directory>
                         <targetPath>static</targetPath>
+                        <filtering>false</filtering>
                     </resource>
                 </resources>
                 <plugins>
