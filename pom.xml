@@ -96,12 +96,11 @@
                 <resources>
                     <resource>
                         <directory>${project.basedir}/src/main/resources</directory>
-                        <filtering>false</filtering>
+                        <filtering>true</filtering>
                     </resource>
                     <resource>
                         <directory>${project.basedir}/web/dist</directory>
                         <targetPath>static</targetPath>
-                        <filtering>false</filtering>
                     </resource>
                 </resources>
                 <plugins>
