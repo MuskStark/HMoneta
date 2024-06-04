@@ -77,6 +77,9 @@ public class AgentScanTask {
                         if(report.getTimeStamp()- System.currentTimeMillis() > reportDelay) {
                             agentInfo.setIssueConfig(service.issueConfig(agentInfo));
                         }
+                        if(!agentStatus.get("configStatus")){
+                            agentInfo.setIssueConfig(service.issueConfig(agentInfo));
+                        }
                     }else {
                         // 检测Agent地址信息是否与服务器信息一直
                         LOG.info("Agent地址信息是否正确：{}",agentInfo.getServerIp().equals(serverInfoDetail.getServerIpAddr()));
