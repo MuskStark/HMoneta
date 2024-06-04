@@ -12,10 +12,7 @@ import fan.summer.hmoneta.webEntity.req.user.UserRegReq;
 import fan.summer.hmoneta.webEntity.req.user.UserUpdateReq;
 import fan.summer.hmoneta.webEntity.resp.user.UserResp;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * HMoneta用户服务API
@@ -25,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @Date 2024/4/23
  */
 @RestController
+@RequestMapping("/hm")
 public class UserController {
 
     @Resource

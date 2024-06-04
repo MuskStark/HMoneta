@@ -31,7 +31,7 @@ import java.util.List;
  * @Date 2024/4/25
  */
 @RestController
-@RequestMapping("/server")
+@RequestMapping("/hm/server")
 public class ServerInfoManagerController {
 
     @Resource

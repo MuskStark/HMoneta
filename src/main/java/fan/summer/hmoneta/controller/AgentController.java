@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * @Date 2024/5/12
  */
 @RestController
-@RequestMapping("/master")
+@RequestMapping("/hm/master")
 public class AgentController {
 
     @Resource

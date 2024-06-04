@@ -27,7 +27,7 @@ import java.util.List;
  * @Date 2024/4/24
  */
 @RestController
-@RequestMapping("/pool")
+@RequestMapping("/hm/pool")
 public class IpResourceController {
 
     @Resource
