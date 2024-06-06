@@ -137,11 +137,16 @@ const SystemInfo = ref({
   totalDisk:'',
   freeDisk:'',
 })
+const infoModelSwitch = ref(false)
+const infoHandleOk = () => {
+  infoModelSwitch.value = false
+}
 const getSystemInfo = async (serviceId) => {
   await axios.get('/master/get-report', {params: {serverId: serviceId}}).then(res => {
     const json = res.data;
     if (json.status) {
       SystemInfo.value = json.data
+      infoModelSwitch.value = true
     }
   })
 }
@@ -267,6 +272,16 @@ onUnmounted(() => {
       </a-form-item>
 
     </a-form>
+  </a-modal>
+  <!--服务器详情-->
+  <a-modal v-model:open="infoModelSwitch" title="服务器详情" @ok="infoHandleOk">
+    <a-descriptions class="SystemInfo"  bordered>
+      <a-descriptions-item label="CPU名称">{{ SystemInfo.cpuName }}</a-descriptions-item>
+      <a-descriptions-item label="核心数">{{ SystemInfo.cpuCoreNum }}</a-descriptions-item>
+      <a-descriptions-item label="负载">{{ SystemInfo.cupAvgLoad }}</a-descriptions-item>
+      <a-descriptions-item label="总内存">{{ SystemInfo.totalMemory }}</a-descriptions-item>
+      <a-descriptions-item label="空闲内存">{{ SystemInfo.freeMemory }}</a-descriptions-item>
+    </a-descriptions>
   </a-modal>
   <a-table bordered :data-source="serverData" :columns="columns">
     <template #bodyCell="{ column, record }">
