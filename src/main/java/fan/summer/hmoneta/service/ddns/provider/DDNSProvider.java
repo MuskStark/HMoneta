@@ -1,4 +1,4 @@
-package fan.summer.hmoneta.service.ddns;
+package fan.summer.hmoneta.service.ddns.provider;
 
 /**
  * 所有DDNS服务商的父类，均需重新实现modifyDdns
