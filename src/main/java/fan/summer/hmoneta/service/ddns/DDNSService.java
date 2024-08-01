@@ -26,6 +26,17 @@ public class DDNSService {
         this.ddnsInfoRepository = ddnsInfoRepository;
     }
 
+    public void modifyDdnsProvider(DDNSInfo ddnsInfo) {
+        if (ddnsInfo == null){
+            throw new RuntimeException("DDNS供应商信息不能为空");
+        }
+        DDNSInfo byProviderName = ddnsInfoRepository.findByProviderName(ddnsInfo.getProviderName());
+        if (byProviderName != null){
+            ddnsInfo.setDdnsId(byProviderName.getDdnsId());
+        }
+        ddnsInfoRepository.save(ddnsInfo);
+    }
+
 
     public void createDdns(String providerName, String domain, String subDomain) {
         if (providerName == null || providerName.isEmpty()){
