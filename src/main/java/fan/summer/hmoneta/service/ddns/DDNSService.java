@@ -1,7 +1,10 @@
 package fan.summer.hmoneta.service.ddns;
 
+import fan.summer.hmoneta.database.entity.ddns.DDNSInfo;
+import fan.summer.hmoneta.database.repository.ddns.DDNSInfoRepository;
 import fan.summer.hmoneta.service.ddns.provider.DDNSProvider;
 import fan.summer.hmoneta.service.ddns.provider.Tencent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,12 +17,29 @@ import org.springframework.stereotype.Service;
 @Service
 public class DDNSService {
 
-    public void createDdns(String providerName) {
+    private final PublicIpChecker publicIpChecker;
+    private final DDNSInfoRepository ddnsInfoRepository;
 
+    @Autowired
+    public DDNSService(PublicIpChecker publicIpChecker, DDNSInfoRepository ddnsInfoRepository){
+        this.publicIpChecker = publicIpChecker;
+        this.ddnsInfoRepository = ddnsInfoRepository;
+    }
+
+
+    public void createDdns(String providerName, String domain, String subDomain) {
+        if (providerName == null || providerName.isEmpty()){
+            throw new RuntimeException("DDNS服务商不能为空");
+        }
+        String ip = publicIpChecker.getPublicIp();
+        if (ip == null || ip.isEmpty()){
+            throw new RuntimeException("获取公网IP失败");
+        }
+        DDNSInfo ddnsInfo = ddnsInfoRepository.findByProviderName(providerName);
         DDNSProvider provider = null;
         switch (providerName){
         case "tencent":
-            provider = new Tencent();
+            provider = new Tencent(ddnsInfo.getAccessKeyId(),ddnsInfo.getAccessKeySecret());
             break;
 //        case "aliyun":
 //            provider = new Aliyun();
@@ -30,6 +50,7 @@ public class DDNSService {
         default:
             throw new RuntimeException("不支持的DDNS服务商");
         }
-        provider.modifyDdns();
+
+        boolean b = provider.modifyDdns(domain, subDomain, ip);
     }
 }
