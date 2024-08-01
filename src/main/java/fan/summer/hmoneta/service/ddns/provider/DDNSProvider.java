@@ -7,9 +7,8 @@ package fan.summer.hmoneta.service.ddns.provider;
  * @version 1.00
  * @Date 2024/7/30
  */
-public class DDNSProvider {
-    public boolean modifyDdns(){
-        return true;
-    }
+public abstract class DDNSProvider {
+
+    public abstract boolean modifyDdns(String domain, String subDomain, String ip);
 
 }
