@@ -1,5 +1,7 @@
 package fan.summer.hmoneta.service.ddns;
 
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -13,6 +15,7 @@ import java.net.http.HttpResponse;
  * @version 1.00
  * @Date 2024/7/30
  */
+@Component
 public class PublicIpChecker {
 
     /**
