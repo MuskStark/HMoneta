@@ -61,7 +61,6 @@ public class DDNSService {
         default:
             throw new RuntimeException("不支持的DDNS服务商");
         }
-
-        boolean b = provider.modifyDdns(domain, subDomain, ip);
+        provider.DDNSOperation(domain, subDomain, ip);
     }
 }
