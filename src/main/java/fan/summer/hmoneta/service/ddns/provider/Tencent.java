@@ -7,13 +7,9 @@ import com.tencentcloudapi.common.profile.ClientProfile;
 import com.tencentcloudapi.common.profile.HttpProfile;
 import com.tencentcloudapi.dnspod.v20210323.DnspodClient;
 import com.tencentcloudapi.dnspod.v20210323.models.*;
-import fan.summer.hmoneta.task.scheduled.AgentScanTask;
 import lombok.Setter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 腾讯云DDNS实现
@@ -72,7 +68,7 @@ public class Tencent extends DDNSProvider {
         }
     }
     @Override
-    protected boolean modifyDdns(Map<String, Object> dnsCheckResult, String domain, String subDomain, String ip) {
+    protected void modifyDdns(Map<String, Object> dnsCheckResult, String domain, String subDomain, String ip) {
         try {
             logInfo("-----------------开始修改DNS信息-----------------");
             logInfo("域名：" + domain);
@@ -105,10 +101,8 @@ public class Tencent extends DDNSProvider {
                 }
             }
             logInfo("-----------------完成DNS信息修改-----------------");
-            return true;
         }catch (TencentCloudSDKException e){
             logError("修改DNS信息失败", e);
-            return false;
         }
     }
 }

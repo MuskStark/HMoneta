@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 所有DDNS服务商的父类，均需重新实现modifyDdns
@@ -36,7 +35,7 @@ public abstract class DDNSProvider {
 
     protected abstract Map<String,Object> dnsCheck(String domain, String subDomain);
 
-    protected abstract boolean modifyDdns(Map<String, Object> dnsCheckResult, String domain, String subDomain, String ip);
+    protected abstract void modifyDdns(Map<String, Object> dnsCheckResult, String domain, String subDomain, String ip);
 
     // 日志记录方法
     private void logStart() {
