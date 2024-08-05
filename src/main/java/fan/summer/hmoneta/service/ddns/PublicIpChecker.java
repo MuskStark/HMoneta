@@ -1,5 +1,7 @@
 package fan.summer.hmoneta.service.ddns;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -18,6 +20,8 @@ import java.net.http.HttpResponse;
 @Component
 public class PublicIpChecker {
 
+    private final Logger LOG = LoggerFactory.getLogger(PublicIpChecker.class);
+
     /**
      * 获取当前设备的公网IP地址。
      * 通过访问https://api.ipify.org API来获取IP地址。
@@ -27,6 +31,7 @@ public class PublicIpChecker {
     public String getPublicIp() {
         String ip = null;
         try (HttpClient client = HttpClient.newHttpClient()) {
+            LOG.info("-------------开始获取公网IP地址-------------");
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://api.ipify.org"))
                     .build();
@@ -35,18 +40,19 @@ public class PublicIpChecker {
 
             if (response.statusCode() == 200) {
                 ip = response.body();
-                System.out.println("您的公网IP地址是: " + ip);
+                LOG.info("获取公网IP地址成功,ip:{}", ip);
             } else {
-                System.out.println("无法获取IP地址。HTTP状态码: " + response.statusCode());
+                LOG.info("无法获取IP地址。HTTP状态码: {}" ,response.statusCode());
             }
         } catch (IOException e) {
-            System.out.println("发生IO错误: " + e.getMessage());
+            LOG.error("发生IO错误: {}", e.getMessage());
         } catch (InterruptedException e) {
-            System.out.println("操作被中断: " + e.getMessage());
+            LOG.error("发生中断错误: {}", e.getMessage());
             Thread.currentThread().interrupt(); // 重新设置中断标志
         } catch (Exception e) {
-            System.out.println("发生未预期的错误: " + e.getMessage());
+            LOG.error("发生未预期的错误: {}", e.getMessage());
         }
+        LOG.info("-------------完成获取公网IP地址-------------");
         return ip;
     }
 
