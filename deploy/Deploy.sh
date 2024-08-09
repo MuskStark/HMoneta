@@ -1,31 +1,8 @@
 #!/bin/bash
 # 基于Ubuntu24.x的安装脚本
-echo "欢迎使用HMoneta一键安装脚本"
-echo "选择安装功能:"
-echo "1) 安装前端环境"
-echo "2) 安装后端环境"
-echo "3) 一键安装HMoneta"
-read -p "请选择功能[1-3]: " choice
-
-# 根据用户的选择调用相应的函数
-case $choice in
-    1)
-      setupFrontEnv
-      ;;
-    2)
-      setupBackEnv
-      ;;
-    3)
-      buildOnePackage
-      ;;
-    *)
-      echo "非法输入"
-      ;;
-esac
-
-sudo apt-get update
-sudo apt-get upgrade -y
 function setupFrontEnv() {
+  sudo apt-get update
+  sudo apt-get upgrade -y
   # 安装所需的包
   sudo apt install curl gnupg2 software-properties-common apt-transport-https ca-certificates -y
   # 下载并导入 Yarn 的 GPG 密钥
@@ -50,6 +27,8 @@ function setupFrontEnv() {
 
 }
 function setupBackEnv() {
+  sudo apt-get update
+  sudo apt-get upgrade -y
   echo "-------开始配置Java环境-------"
   # 清除老版本java环境
   sudo apt-get remove -y openjdk-\*
@@ -57,7 +36,7 @@ function setupBackEnv() {
   echo "安装Java环境"
   sudo apt-get install -y openjdk-21-jdk
   echo "-------完成配置Java环境-------"
-    
+
 }
 function buildOnePackage() {
   setupBackEnv
@@ -109,5 +88,29 @@ MYSQL_SCRIPT
   source /etc/profile
   nohup java -jar -Dspring.profiles.active=prod ~/HMoneta.jar > /dev/null 2>&1 &
   echo "-------完成启动HMoneta-------"
-    
+
 }
+
+echo "欢迎使用HMoneta一键安装脚本"
+echo "选择安装功能:"
+echo "1) 安装前端环境"
+echo "2) 安装后端环境"
+echo "3) 一键安装HMoneta"
+read -p "请选择功能[1-3]: " choice
+
+# 根据用户的选择调用相应的函数
+case $choice in
+    1)
+      setupFrontEnv
+      ;;
+    2)
+      setupBackEnv
+      ;;
+    3)
+      buildOnePackage
+      ;;
+    *)
+      echo "非法输入"
+      ;;
+esac
+
