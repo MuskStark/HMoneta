@@ -1,5 +1,28 @@
 #!/bin/bash
 # 基于Ubuntu24.x的安装脚本
+echo "欢迎使用HMoneta一键安装脚本"
+echo "选择安装功能:"
+echo "1) 安装前端环境"
+echo "2) 安装后端环境"
+echo "3) 一键安装HMoneta"
+read -p "请选择功能[1-3]: " choice
+
+# 根据用户的选择调用相应的函数
+case $choice in
+    1)
+      setupFrontEnv
+      ;;
+    2)
+      setupBackEnv
+      ;;
+    3)
+      buildOnePackage
+      ;;
+    *)
+      echo "非法输入"
+      ;;
+esac
+
 sudo apt-get update
 sudo apt-get upgrade -y
 function setupFrontEnv() {
@@ -16,7 +39,7 @@ function setupFrontEnv() {
   # 验证安装
   yarn --version
   # 安装 Node.js
-  curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
   sudo apt install -y nodejs
   # 安装Nginx
   sudo apt install nginx -y
