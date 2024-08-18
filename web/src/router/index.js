@@ -25,7 +25,11 @@ const routes = [{
       name: 'user',
       component: () => import('@/views/SecondaryRoutingViews/user/userinfo.vue')
     },
-
+    {
+      path: '/dns',
+      name: 'dns',
+      component: () => import('../views/SecondaryRoutingViews/ddns/DDNSProviderManager.vue')
+    }
   ]
 
 },
@@ -33,7 +37,7 @@ const routes = [{
     path: '/login',
     name: 'login',
     component: () => import('../views/LoginView.vue')
-  },
+  }
 ]
 
 const router = createRouter({

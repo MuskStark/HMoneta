@@ -47,6 +47,18 @@
         </a-menu-item>
 
       </a-sub-menu>
+      <a-sub-menu key="network" >
+        <template #title>
+          <span>
+            网络服务
+          </span>
+        </template>
+        <a-menu-item key="/dns">
+          <router-link to="/dns">
+            <UserOutlined /> &nbsp; DNS供应商管理
+          </router-link>
+        </a-menu-item>
+      </a-sub-menu>
     </a-menu>
   </a-layout-sider>
 
