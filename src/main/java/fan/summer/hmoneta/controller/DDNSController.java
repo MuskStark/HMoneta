@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,12 +26,11 @@ public class DDNSController {
 
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
     private DDNSService ddnsService;
-    private Map<String, String> rsaKey;
+    private final Map<String, String> rsaKey = EncryptionUtil.generateKeyPair();
 
     @Autowired
-    public DDNSController(DDNSService ddnsService){
+    public DDNSController(DDNSService ddnsService) throws Exception {
         try {
-            this.rsaKey = EncryptionUtil.generateKeyPair();
             this.ddnsService = ddnsService;
         }catch (Exception e){
             LOG.error("初始化失败生成RSA密钥对失败:{}",e.getMessage());
@@ -40,6 +40,11 @@ public class DDNSController {
     @GetMapping("/publicKey")
     public ApiRestResponse<String> getPublicKey() {
         return ApiRestResponse.success(rsaKey.get("publicKey"));
+    }
+
+    @GetMapping("/provider/query")
+    public ApiRestResponse<List<DDNSInfo>> queryAllDDNSProvider() {
+        return ApiRestResponse.success(ddnsService.queryAllDDNSProvider());
     }
 
     @PostMapping("/provider/add")

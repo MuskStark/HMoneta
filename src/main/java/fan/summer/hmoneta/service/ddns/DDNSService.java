@@ -7,6 +7,8 @@ import fan.summer.hmoneta.service.ddns.provider.Tencent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * 提供DDNS服务
  *
@@ -24,6 +26,10 @@ public class DDNSService {
     public DDNSService(PublicIpChecker publicIpChecker, DDNSInfoRepository ddnsInfoRepository){
         this.publicIpChecker = publicIpChecker;
         this.ddnsInfoRepository = ddnsInfoRepository;
+    }
+
+    public List<DDNSInfo> queryAllDDNSProvider() {
+        return ddnsInfoRepository.findAll();
     }
 
     public void modifyDdnsProvider(DDNSInfo ddnsInfo) {
