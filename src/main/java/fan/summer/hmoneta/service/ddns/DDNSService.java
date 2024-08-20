@@ -1,5 +1,6 @@
 package fan.summer.hmoneta.service.ddns;
 
+import fan.summer.hmoneta.common.enums.DDNSProviders;
 import fan.summer.hmoneta.database.entity.ddns.DDNSInfo;
 import fan.summer.hmoneta.database.repository.ddns.DDNSInfoRepository;
 import fan.summer.hmoneta.service.ddns.provider.DDNSProvider;
@@ -54,9 +55,9 @@ public class DDNSService {
         }
         DDNSInfo ddnsInfo = ddnsInfoRepository.findByProviderName(providerName);
         DDNSProvider provider = null;
-        switch (providerName){
-        case "tencent":
-            provider = new Tencent(ddnsInfo.getAccessKeyId(),ddnsInfo.getAccessKeySecret());
+        switch (DDNSProviders.valueOf(providerName)){
+            case TencentCloud:
+                provider = new Tencent(ddnsInfo.getAccessKeyId(),ddnsInfo.getAccessKeySecret());
             break;
 //        case "aliyun":
 //            provider = new Aliyun();
