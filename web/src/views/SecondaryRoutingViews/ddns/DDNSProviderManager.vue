@@ -21,6 +21,11 @@ const getPublicKey = () => {
     }
   })
 }
+const open = ref(false)
+const title = ref('DDNS供应商维护')
+const modifyDDNSProvider = () => {
+  open.value = true
+}
 const addDdnsProvider = async (publicKey) => {
   ddnsProvider.value.accessKeySecret = encrypt(ddnsProvider.value.accessKeySecret, publicKey)
   await axios.post('/hm/ddns/addDdnsProvider', ddnsProvider.value).then(res => {
@@ -34,7 +39,7 @@ const addDdnsProvider = async (publicKey) => {
 </script>
 
 <template>
-  <a-button @click="open = true">测试按钮</a-button>
+  <a-button @click="modifyDDNSProvider">测试按钮</a-button>
   <a-modal v-model:open="open" :title="title" @ok="handleOk">
     <a-form
         :model="ddnsProvider"
@@ -42,7 +47,7 @@ const addDdnsProvider = async (publicKey) => {
         autocomplete="off"
     >
       <a-form-item
-          label="地址池名称"
+          label="DNS供应商名称"
           name="providerName"
       >
         <a-input v-model:value="ddnsProvider.providerName"/>
