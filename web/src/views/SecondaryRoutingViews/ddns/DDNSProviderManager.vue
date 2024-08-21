@@ -22,6 +22,10 @@ const getPublicKey = () => {
   })
 }
 const open = ref(false)
+const handleOk = () => {
+  addDdnsProvider(publicKey.value)
+  open.value = false
+}
 const title = ref('DDNS供应商维护')
 const modifyDDNSProvider = () => {
   open.value = true
