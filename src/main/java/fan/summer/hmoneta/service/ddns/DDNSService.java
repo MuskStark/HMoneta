@@ -8,6 +8,7 @@ import fan.summer.hmoneta.service.ddns.provider.Tencent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,6 +32,15 @@ public class DDNSService {
 
     public List<DDNSInfo> queryAllDDNSProvider() {
         return ddnsInfoRepository.findAll();
+    }
+
+    public List<String> queryAllDDNSProviderNames() {
+        List<String> names = new ArrayList<>();
+        DDNSProviders[] values = DDNSProviders.values();
+        for (DDNSProviders value : values) {
+            names.add(value.getName());
+        }
+        return names;
     }
 
     public void modifyDdnsProvider(DDNSInfo ddnsInfo) {

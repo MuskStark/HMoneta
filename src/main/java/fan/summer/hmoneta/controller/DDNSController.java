@@ -42,6 +42,11 @@ public class DDNSController {
         return ApiRestResponse.success(rsaKey.get("publicKey"));
     }
 
+    @GetMapping("/provider/list")
+    public ApiRestResponse<List<String>> getProviders() {
+        return ApiRestResponse.success(ddnsService.queryAllDDNSProviderNames());
+    }
+
     @GetMapping("/provider/query")
     public ApiRestResponse<List<DDNSInfo>> queryAllDDNSProvider() {
         return ApiRestResponse.success(ddnsService.queryAllDDNSProvider());
