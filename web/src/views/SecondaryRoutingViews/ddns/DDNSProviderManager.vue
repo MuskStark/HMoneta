@@ -4,6 +4,22 @@ import axios from "axios";
 import {message} from "ant-design-vue";
 import {encrypt} from "@/utils/common.js";
 
+const providerList = ref([])
+const queryDDNSProvider = () => {
+  axios.get('ddns/provider/list').then((response) => {
+    const json = response.data;
+    if (json.code === 200) {
+      const tmp = {
+        value: json.data,
+        label: json.data,
+      }
+      providerList.value.push(tmp)
+    } else {
+      message.success(response.data.message)
+    }
+
+  })
+}
 // DDNS供应商维护
 const ddnsProvider = ref({
   providerName: '',
@@ -13,7 +29,7 @@ const ddnsProvider = ref({
 // DDNS 供应商系统查询
 const publicKey = ref();
 const getPublicKey = () => {
-  axios.get('/hm/ddns/publicKey').then(res => {
+  axios.get('ddns/publicKey').then(res => {
     if (res.data.code === 200) {
       publicKey.value = res.data.data
     } else {
@@ -32,7 +48,7 @@ const modifyDDNSProvider = () => {
 }
 const addDdnsProvider = async (publicKey) => {
   ddnsProvider.value.accessKeySecret = encrypt(ddnsProvider.value.accessKeySecret, publicKey)
-  await axios.post('/hm/ddns/addDdnsProvider', ddnsProvider.value).then(res => {
+  await axios.post('ddns/addDdnsProvider', ddnsProvider.value).then(res => {
     if (res.data.code === 200) {
       message.success(res.data.message)
     } else {
@@ -40,6 +56,10 @@ const addDdnsProvider = async (publicKey) => {
     }
   })
 }
+onMounted(() => {
+  queryDDNSProvider()
+  getPublicKey()
+})
 </script>
 
 <template>
@@ -54,7 +74,12 @@ const addDdnsProvider = async (publicKey) => {
           label="DNS供应商名称"
           name="providerName"
       >
-        <a-input v-model:value="ddnsProvider.providerName"/>
+        <a-select
+            ref="select"
+            v-model:value="ddnsProvider.providerName"
+            style="width: 120px"
+            :options="providerList"
+        ></a-select>
       </a-form-item>
       <a-form-item
           label="授权ID"
