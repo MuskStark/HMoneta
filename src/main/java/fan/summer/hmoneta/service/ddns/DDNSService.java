@@ -1,10 +1,12 @@
 package fan.summer.hmoneta.service.ddns;
 
+import cn.hutool.core.bean.BeanUtil;
 import fan.summer.hmoneta.common.enums.DDNSProviders;
 import fan.summer.hmoneta.database.entity.ddns.DDNSInfo;
 import fan.summer.hmoneta.database.repository.ddns.DDNSInfoRepository;
 import fan.summer.hmoneta.service.ddns.provider.DDNSProvider;
 import fan.summer.hmoneta.service.ddns.provider.Tencent;
+import fan.summer.hmoneta.webEntity.resp.ddns.ProviderInfoResp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,8 +32,20 @@ public class DDNSService {
         this.ddnsInfoRepository = ddnsInfoRepository;
     }
 
-    public List<DDNSInfo> queryAllDDNSProvider() {
-        return ddnsInfoRepository.findAll();
+    public List<ProviderInfoResp> queryAllDDNSProvider() {
+        List<DDNSInfo> allProviders = ddnsInfoRepository.findAll();
+        if (allProviders.isEmpty()){
+            return null;
+        }else{
+            List<ProviderInfoResp> providerInfos = new ArrayList<>();
+            for (DDNSInfo ddnsInfo : allProviders){
+                ProviderInfoResp providerInfoResp = new ProviderInfoResp();
+                providerInfoResp.setProviderName(ddnsInfo.getProviderName());
+                providerInfoResp.setAccessKeyId(ddnsInfo.getAccessKeyId());
+                providerInfos.add(providerInfoResp);
+            }
+            return providerInfos;
+        }
     }
 
     public List<String> queryAllDDNSProviderNames() {

@@ -4,6 +4,7 @@ import fan.summer.hmoneta.database.entity.ddns.DDNSInfo;
 import fan.summer.hmoneta.service.ddns.DDNSService;
 import fan.summer.hmoneta.util.EncryptionUtil;
 import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
+import fan.summer.hmoneta.webEntity.resp.ddns.ProviderInfoResp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class DDNSController {
     }
 
     @GetMapping("/provider/query")
-    public ApiRestResponse<List<DDNSInfo>> queryAllDDNSProvider() {
+    public ApiRestResponse<List<ProviderInfoResp>> queryAllDDNSProvider() {
         return ApiRestResponse.success(ddnsService.queryAllDDNSProvider());
     }
 
