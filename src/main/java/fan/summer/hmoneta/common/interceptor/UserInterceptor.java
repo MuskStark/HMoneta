@@ -35,13 +35,12 @@ public class UserInterceptor implements HandlerInterceptor {
             UserResp userResp = JSONUtil.toBean(loginUser, UserResp.class);
             LoginUserContext.setMember(userResp);
             LOG.info("<<<<<<<<<<< UserInterceptor本地线程变量设置完毕 <<<<<<<<<<<");
+            return true;
         }else{
             LOG.info("请求中不包含token");
             LOG.info("<<<<<<<<<<< UserInterceptor本地线程变量设置失败 <<<<<<<<<<<");
+            return false;
         }
-
-        return true;
-
     }
 
 }
