@@ -48,7 +48,7 @@ const modifyDDNSProvider = () => {
 }
 const addDdnsProvider = async (publicKey) => {
   ddnsProvider.value.accessKeySecret = encrypt(ddnsProvider.value.accessKeySecret, publicKey)
-  await axios.post('ddns/addDdnsProvider', ddnsProvider.value).then(res => {
+  await axios.post('ddns/provider/add', ddnsProvider.value).then(res => {
     if (res.data.code === 200) {
       message.success(res.data.message)
     } else {
