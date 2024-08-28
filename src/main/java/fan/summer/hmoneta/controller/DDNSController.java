@@ -54,10 +54,10 @@ public class DDNSController {
     }
 
     @PostMapping("/provider/add")
-    public ApiRestResponse<Object> addDDNSProvider(String providerNAme, String accessKeyId, String accessKeySecret) throws Exception {
+    public ApiRestResponse<Object> addDDNSProvider(String providerName, String accessKeyId, String accessKeySecret) throws Exception {
         String decryptAccessKeySecret = Arrays.toString(EncryptionUtil.decrypt(rsaKey.get("privateKey"), accessKeySecret));
         DDNSInfo ddnsInfo = new DDNSInfo();
-        ddnsInfo.setProviderName(providerNAme);
+        ddnsInfo.setProviderName(providerName);
         ddnsInfo.setAccessKeyId(accessKeyId);
         ddnsInfo.setAccessKeySecret(decryptAccessKeySecret);
         ddnsService.modifyDdnsProvider(ddnsInfo);
