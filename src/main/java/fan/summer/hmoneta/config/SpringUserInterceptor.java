@@ -29,8 +29,9 @@ public class SpringUserInterceptor implements WebMvcConfigurer {
         registry.addInterceptor(logInterceptor);
         registry.addInterceptor(userInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/register")
-                .excludePathPatterns("/agent")
-                .excludePathPatterns("/login");
+                .excludePathPatterns("/hm/register")
+                .excludePathPatterns("/hm/agent")
+                .excludePathPatterns("/hm/login")
+                .excludePathPatterns("/hm/publicKey");
     }
 }
