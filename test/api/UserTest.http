@@ -1,0 +1,28 @@
+### 请求之前执行的脚本
+< {%
+    client.global.clearAll()
+%}
+GET http://localhost:8080/hm/publicKey
+
+> {%
+    client.global.set("public_key", response.body.data);
+%}
+
+
+
+###
+< {%
+    const publicKey = client.global.get("public_key")
+    const encryptedPassword = hm.encryptPassword("test", publicKey)
+
+
+%}
+POST http://localhost:8080/hm/login
+Content-Type: application/json
+
+{
+    "username": "test",
+    "password": "{{encryptedPassword}}"
+}
+
+
