@@ -7,6 +7,7 @@ import fan.summer.hmoneta.database.repository.ddns.DDNSInfoRepository;
 import fan.summer.hmoneta.service.ddns.provider.DDNSProvider;
 import fan.summer.hmoneta.service.ddns.provider.Tencent;
 import fan.summer.hmoneta.webEntity.resp.ddns.ProviderInfoResp;
+import fan.summer.hmoneta.webEntity.resp.ddns.ProviderSelectorInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,13 +49,13 @@ public class DDNSService {
         }
     }
 
-    public List<String> queryAllDDNSProviderNames() {
-        List<String> names = new ArrayList<>();
+    public List<ProviderSelectorInfo> getProviderSelectorInfo() {
+        List<ProviderSelectorInfo> selectors = new ArrayList<>();
         DDNSProviders[] values = DDNSProviders.values();
         for (DDNSProviders value : values) {
-            names.add(value.getName());
+            selectors.add(new ProviderSelectorInfo(value.getName(), value.getLabel()));
         }
-        return names;
+        return selectors;
     }
 
     public void modifyDdnsProvider(DDNSInfo ddnsInfo) {
