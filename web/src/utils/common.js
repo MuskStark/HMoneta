@@ -43,3 +43,7 @@ export function encrypt(str, base64PublicKey){
     encryptor.setPublicKey(base64PublicKey);
     return encryptor.encrypt(str);
 }
+
+export function responseIsSuccess(response){
+    return response.data.status
+}
