@@ -5,7 +5,7 @@
         mode="inline"
         :style="{ height: '100%', borderRight: 0 }"
     >
-      <a-sub-menu key="ip" >
+      <a-sub-menu key="ip">
         <template #title>
           <span>
             地址池管理
@@ -14,12 +14,12 @@
 
         <a-menu-item key="/ip">
           <router-link to="/ip">
-            <GlobalOutlined /> &nbsp; 地址池信息
+            <GlobalOutlined/> &nbsp; 地址池信息
           </router-link>
         </a-menu-item>
 
       </a-sub-menu>
-      <a-sub-menu key="server" >
+      <a-sub-menu key="server">
         <template #title>
           <span>
             服务器管理
@@ -28,12 +28,12 @@
 
         <a-menu-item key="/server">
           <router-link to="/server">
-            <DesktopOutlined /> &nbsp; 新增服务器
+            <DesktopOutlined/> &nbsp; 新增服务器
           </router-link>
         </a-menu-item>
 
       </a-sub-menu>
-      <a-sub-menu key="setting" >
+      <a-sub-menu key="setting">
         <template #title>
           <span>
             系统设置
@@ -42,12 +42,12 @@
 
         <a-menu-item key="/user">
           <router-link to="/user">
-            <UserOutlined /> &nbsp; 用户管理
+            <UserOutlined/> &nbsp; 用户管理
           </router-link>
         </a-menu-item>
 
       </a-sub-menu>
-      <a-sub-menu key="network" >
+      <a-sub-menu key="network">
         <template #title>
           <span>
             网络服务
@@ -55,7 +55,7 @@
         </template>
         <a-menu-item key="/dns">
           <router-link to="/dns">
-            <UserOutlined /> &nbsp; DNS供应商管理
+            &nbsp; DNS供应商管理
           </router-link>
         </a-menu-item>
       </a-sub-menu>
@@ -64,40 +64,26 @@
 
 </template>
 
-<script>
+<script setup>
 import {defineComponent, ref, watch} from 'vue';
 import {DesktopOutlined, SettingOutlined, GlobalOutlined} from "@ant-design/icons-vue";
 import router from "@/router";
 import store from "@/store";
 
-export default defineComponent({
-  name: "sideBar-view",
-  components: {
-    DesktopOutlined,
-    SettingOutlined
-  },
-  setup() {
-    const displayMenu = () => {
-      if (store.state.User.roleId === 1 || store.state.User.roleId === 2) {
-        return true;
-      }else {
-        return false;
-      }
-    }
-    // 使菜单两边选中的功能保持一致
-    const selectedKeys = ref([]);
-    watch(() => router.currentRoute.value.path, (newValue) => {
-      selectedKeys.value = [];
-      selectedKeys.value.push(newValue);
-    }, {immediate: true});
+const displayMenu = () => {
+  if (store.state.User.roleId === 1 || store.state.User.roleId === 2) {
+    return true;
+  } else {
+    return false;
+  }
+}
+// 使菜单两边选中的功能保持一致
+const selectedKeys = ref([]);
+watch(() => router.currentRoute.value.path, (newValue) => {
+  selectedKeys.value = [];
+  selectedKeys.value.push(newValue);
+}, {immediate: true});
 
-
-    return {
-      selectedKeys,
-      displayMenu
-    };
-  },
-});
 </script>
 
 <style scoped>
