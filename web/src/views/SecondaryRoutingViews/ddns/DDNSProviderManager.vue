@@ -2,23 +2,27 @@
 import {onMounted, onUnmounted, ref,} from "vue";
 import axios from "axios";
 import {message} from "ant-design-vue";
-import {encrypt} from "@/utils/common.js";
+import {encrypt, responseIsSuccess} from "@/utils/common.js";
 
 const providerList = ref([])
+const providerTable = ref([])
 const queryDDNSProvider = () => {
-  axios.get('ddns/provider/list').then((response) => {
-    const json = response.data;
-    if (json.code === 200) {
-      const tmp = {
-        value: json.data,
-        label: json.data,
-      }
-      providerList.value.push(tmp)
+  axios.get('ddns/provider/query').then((response) => {
+    if (responseIsSuccess(response)) {
+      providerTable.value = response.data.data;
     } else {
       message.success(response.data.message)
     }
-
-  })
+  });
+}
+const getProviderSelectList = () => {
+  axios.get('ddns/provider/selector').then((response) => {
+    if(responseIsSuccess(response)){
+      providerList.value = response.data.data
+    }else {
+      message.error(response.data.message)
+    }
+  });
 }
 // DDNS供应商维护
 const ddnsProvider = ref({
@@ -29,11 +33,11 @@ const ddnsProvider = ref({
 // DDNS 供应商系统查询
 const publicKey = ref();
 const getPublicKey = () => {
-  axios.get('ddns/publicKey').then(res => {
-    if (res.data.code === 200) {
-      publicKey.value = res.data.data
+  axios.get('ddns/publicKey').then(response => {
+    if (responseIsSuccess(response)) {
+      publicKey.value = response.data.data
     } else {
-      message.error(res.data.message)
+      message.error(response.data.message)
     }
   })
 }
@@ -48,22 +52,35 @@ const modifyDDNSProvider = () => {
 }
 const addDdnsProvider = async (publicKey) => {
   ddnsProvider.value.accessKeySecret = encrypt(ddnsProvider.value.accessKeySecret, publicKey)
-  await axios.post('ddns/provider/add', ddnsProvider.value).then(res => {
-    if (res.data.code === 200) {
-      message.success(res.data.message)
+  await axios.post('ddns/provider/add', ddnsProvider.value).then(response => {
+    if (responseIsSuccess(response)) {
+      message.success(response.data.message)
     } else {
-      message.error(res.data.message)
+      message.error(response.data.message)
     }
   })
 }
+// Table
+const columns = [
+  {
+    title: 'DNS供应商名称',
+    dataIndex: 'providerName',
+    key: 'providerName',
+  },
+  {
+    title: '授权ID',
+    dataIndex: 'accessKeyId',
+    key: 'accessKeyId',
+  }]
 onMounted(() => {
   queryDDNSProvider()
+  getProviderSelectList()
   getPublicKey()
 })
 </script>
 
 <template>
-  <a-button @click="modifyDDNSProvider">测试按钮</a-button>
+  <a-button class="provider-btn" @click="modifyDDNSProvider">新增/修改DDNS供应商</a-button>
   <a-modal v-model:open="open" :title="title" @ok="handleOk">
     <a-form
         :model="ddnsProvider"
@@ -95,8 +112,13 @@ onMounted(() => {
       </a-form-item>
     </a-form>
   </a-modal>
+  <a-table :columns="columns" :dataSource="providerTable"/>
 </template>
 
 <style scoped>
-
+.provider-btn{
+  margin-right: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
 </style>
