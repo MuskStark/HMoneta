@@ -1,10 +1,12 @@
 package fan.summer.hmoneta.controller;
 
+import fan.summer.hmoneta.common.enums.DDNSProviders;
 import fan.summer.hmoneta.database.entity.ddns.DDNSInfo;
 import fan.summer.hmoneta.service.ddns.DDNSService;
 import fan.summer.hmoneta.util.EncryptionUtil;
 import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
 import fan.summer.hmoneta.webEntity.resp.ddns.ProviderInfoResp;
+import fan.summer.hmoneta.webEntity.resp.ddns.ProviderSelectorInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,14 +45,18 @@ public class DDNSController {
         return ApiRestResponse.success(rsaKey.get("publicKey"));
     }
 
-    @GetMapping("/provider/list")
-    public ApiRestResponse<List<String>> getProviders() {
-        return ApiRestResponse.success(ddnsService.queryAllDDNSProviderNames());
+    @GetMapping("/provider/selector")
+    public ApiRestResponse<List<ProviderSelectorInfo>> getProviders() {
+        return ApiRestResponse.success(ddnsService.getProviderSelectorInfo());
     }
 
     @GetMapping("/provider/query")
     public ApiRestResponse<List<ProviderInfoResp>> queryAllDDNSProvider() {
-        return ApiRestResponse.success(ddnsService.queryAllDDNSProvider());
+        List<ProviderInfoResp> providerInfoResps = ddnsService.queryAllDDNSProvider();
+        for (ProviderInfoResp providerInfoResp : providerInfoResps) {
+            providerInfoResp.setProviderName(DDNSProviders.valueOf(providerInfoResp.getProviderName()).getLabel());
+        }
+        return ApiRestResponse.success(providerInfoResps);
     }
 
     @PostMapping("/provider/add")
