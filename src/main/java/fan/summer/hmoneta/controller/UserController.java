@@ -2,7 +2,7 @@ package fan.summer.hmoneta.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjUtil;
-import fan.summer.hmoneta.common.enums.BusinessExceptionEnum;
+import fan.summer.hmoneta.common.enums.error.BusinessExceptionEnum;
 import fan.summer.hmoneta.common.exception.BusinessException;
 import fan.summer.hmoneta.database.entity.user.User;
 import fan.summer.hmoneta.service.UserService;

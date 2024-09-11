@@ -1,7 +1,7 @@
 package fan.summer.hmoneta.common.exception;
 
 
-import fan.summer.hmoneta.common.enums.DataBaseErrorEnum;
+import fan.summer.hmoneta.common.enums.error.DataBaseErrorEnum;
 
 /**
  * 数据库异常

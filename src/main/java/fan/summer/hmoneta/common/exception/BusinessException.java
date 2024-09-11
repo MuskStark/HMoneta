@@ -1,7 +1,7 @@
 package fan.summer.hmoneta.common.exception;
 
 
-import fan.summer.hmoneta.common.enums.BusinessExceptionEnum;
+import fan.summer.hmoneta.common.enums.error.BusinessExceptionEnum;
 
 /**
  * @author Phoebej

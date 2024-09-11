@@ -1,4 +1,4 @@
-package fan.summer.hmoneta.common.enums;
+package fan.summer.hmoneta.common.enums.error;
 
 public enum WebControllerExceptionEnum {
     WEB_IP_POOL_REQ_EMPTY(1001,"IP池请求不能为空"),

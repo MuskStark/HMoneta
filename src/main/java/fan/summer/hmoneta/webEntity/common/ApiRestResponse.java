@@ -1,7 +1,7 @@
 package fan.summer.hmoneta.webEntity.common;
 
 
-import fan.summer.hmoneta.common.enums.ServiceErrorEnum;
+import fan.summer.hmoneta.common.enums.error.ServiceErrorEnum;
 
 /**
  * Api接口数据返回对象

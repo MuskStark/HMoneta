@@ -1,7 +1,6 @@
 package fan.summer.hmoneta.common.exception;
 
-import fan.summer.hmoneta.common.enums.BusinessExceptionEnum;
-import fan.summer.hmoneta.common.enums.WebControllerExceptionEnum;
+import fan.summer.hmoneta.common.enums.error.WebControllerExceptionEnum;
 
 /**
  * Controller 层异常

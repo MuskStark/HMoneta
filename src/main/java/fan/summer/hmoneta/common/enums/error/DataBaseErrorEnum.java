@@ -1,4 +1,4 @@
-package fan.summer.hmoneta.common.enums;
+package fan.summer.hmoneta.common.enums.error;
 
 /**
  * 数据库通用异常

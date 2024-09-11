@@ -1,7 +1,6 @@
 package fan.summer.hmoneta.service.ddns;
 
-import cn.hutool.core.bean.BeanUtil;
-import fan.summer.hmoneta.common.enums.DDNSProviders;
+import fan.summer.hmoneta.common.enums.DDNSProvidersSelectEnum;
 import fan.summer.hmoneta.database.entity.ddns.DDNSInfo;
 import fan.summer.hmoneta.database.repository.ddns.DDNSInfoRepository;
 import fan.summer.hmoneta.service.ddns.provider.DDNSProvider;
@@ -51,8 +50,8 @@ public class DDNSService {
 
     public List<ProviderSelectorInfo> getProviderSelectorInfo() {
         List<ProviderSelectorInfo> selectors = new ArrayList<>();
-        DDNSProviders[] values = DDNSProviders.values();
-        for (DDNSProviders value : values) {
+        DDNSProvidersSelectEnum[] values = DDNSProvidersSelectEnum.values();
+        for (DDNSProvidersSelectEnum value : values) {
             selectors.add(new ProviderSelectorInfo(value.getName(), value.getLabel()));
         }
         return selectors;
@@ -80,7 +79,7 @@ public class DDNSService {
         }
         DDNSInfo ddnsInfo = ddnsInfoRepository.findByProviderName(providerName);
         DDNSProvider provider = null;
-        switch (DDNSProviders.valueOf(providerName)){
+        switch (DDNSProvidersSelectEnum.valueOf(providerName)){
             case TencentCloud:
                 provider = new Tencent(ddnsInfo.getAccessKeyId(),ddnsInfo.getAccessKeySecret());
             break;
