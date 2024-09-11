@@ -4,11 +4,11 @@ spring:
   application:
     name: HMoneta
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://10.5.20.50:3306/home_lab_server?useUnicode=true&characterEncoding=UTF-8
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://10.5.20.103:5432/home_lab_server_test?useUnicode=true&characterEncoding=UTF-8
     hikari:
-      username: homelab
-      password: HomeLab215178^&%@
+      username: jack
+      password: labixiaoxin93712
   jpa:
     hibernate:
       ddl-auto: update
