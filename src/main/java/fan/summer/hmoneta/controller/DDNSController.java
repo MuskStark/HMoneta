@@ -1,6 +1,7 @@
 package fan.summer.hmoneta.controller;
 
-import fan.summer.hmoneta.common.enums.DDNSProviders;
+import fan.summer.hmoneta.common.enums.DDNSProvidersSelectEnum;
+import fan.summer.hmoneta.common.enums.error.DDNSServerErrorEnum;
 import fan.summer.hmoneta.database.entity.ddns.DDNSInfo;
 import fan.summer.hmoneta.service.ddns.DDNSService;
 import fan.summer.hmoneta.util.EncryptionUtil;
@@ -53,10 +54,15 @@ public class DDNSController {
     @GetMapping("/provider/query")
     public ApiRestResponse<List<ProviderInfoResp>> queryAllDDNSProvider() {
         List<ProviderInfoResp> providerInfoResps = ddnsService.queryAllDDNSProvider();
-        for (ProviderInfoResp providerInfoResp : providerInfoResps) {
-            providerInfoResp.setProviderName(DDNSProviders.valueOf(providerInfoResp.getProviderName()).getLabel());
+        // TODO: 空值判断
+        if(providerInfoResps == null || providerInfoResps.isEmpty()){
+            return ApiRestResponse.error(DDNSServerErrorEnum.PROVIDER_LIST_EMPTY.getCode(), DDNSServerErrorEnum.PROVIDER_LIST_EMPTY.getMessage());
+        }else {
+            for (ProviderInfoResp providerInfoResp : providerInfoResps) {
+                providerInfoResp.setProviderName(DDNSProvidersSelectEnum.valueOf(providerInfoResp.getProviderName()).getLabel());
+            }
+            return ApiRestResponse.success(providerInfoResps);
         }
-        return ApiRestResponse.success(providerInfoResps);
     }
 
     @PostMapping("/provider/add")
