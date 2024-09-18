@@ -11,7 +11,7 @@ const queryDDNSProvider = () => {
     if (responseIsSuccess(response)) {
       providerTable.value = response.data.data;
     } else {
-      message.success(response.data.message)
+      message.error(response.data.message)
     }
   });
 }
