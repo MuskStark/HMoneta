@@ -80,7 +80,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <a-button class="provider-btn" @click="modifyDDNSProvider">新增/修改DDNS供应商</a-button>
+  <a-button class="provider-btn" @click="modifyDDNSProvider">新增供应商</a-button>
   <a-modal v-model:open="open" :title="title" @ok="handleOk">
     <a-form
         :model="ddnsProvider"
@@ -113,6 +113,14 @@ onMounted(() => {
     </a-form>
   </a-modal>
   <a-table :columns="columns" :dataSource="providerTable"/>
+  <a-row :gutter="16">
+    <a-col v-for="(card, index) in providerTable" :key="index" :span="8">
+      <!-- TODO: 美化卡片 -->
+      <a-card :title="card.providerName" :bordered="false">
+        <p>授权ID: {{card.accessKeyId}}</p>
+      </a-card>
+      </a-col>
+  </a-row>
 </template>
 
 <style scoped>
