@@ -6,6 +6,7 @@ import fan.summer.hmoneta.database.entity.ddns.DDNSInfo;
 import fan.summer.hmoneta.service.ddns.DDNSService;
 import fan.summer.hmoneta.util.EncryptionUtil;
 import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
+import fan.summer.hmoneta.webEntity.req.ddns.DDNSProviderInfoReq;
 import fan.summer.hmoneta.webEntity.resp.ddns.ProviderInfoResp;
 import fan.summer.hmoneta.webEntity.resp.ddns.ProviderSelectorInfo;
 import org.slf4j.Logger;
@@ -13,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -66,12 +67,12 @@ public class DDNSController {
     }
 
     @PostMapping("/provider/add")
-    public ApiRestResponse<Object> addDDNSProvider(String providerName, String accessKeyId, String accessKeySecret) throws Exception {
-        String decryptAccessKeySecret = Arrays.toString(EncryptionUtil.decrypt(rsaKey.get("privateKey"), accessKeySecret));
+    public ApiRestResponse<Object> addDDNSProvider(@RequestBody DDNSProviderInfoReq providerInfoReq) throws Exception {
         DDNSInfo ddnsInfo = new DDNSInfo();
-        ddnsInfo.setProviderName(providerName);
-        ddnsInfo.setAccessKeyId(accessKeyId);
-        ddnsInfo.setAccessKeySecret(decryptAccessKeySecret);
+        ddnsInfo.setProviderName(providerInfoReq.getProviderName());
+        ddnsInfo.setAccessKeyId(providerInfoReq.getAccessKeyId());
+        String accessKey = new String(EncryptionUtil.decrypt(rsaKey.get("privateKey"), providerInfoReq.getAccessKeySecret()), StandardCharsets.UTF_8);
+        ddnsInfo.setAccessKeySecret(accessKey);
         ddnsService.modifyDdnsProvider(ddnsInfo);
         return ApiRestResponse.success();
 
