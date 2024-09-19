@@ -1,9 +1,6 @@
 package fan.summer.hmoneta.database.entity.ddns;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,6 +17,7 @@ import lombok.Setter;
 @Setter
 public class DDNSInfo {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ddnsId;
     @Column(name = "access_key_id", nullable = false)
     private String accessKeyId;
