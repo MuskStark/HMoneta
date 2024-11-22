@@ -68,7 +68,7 @@ public class Tencent extends DDNSProvider {
         }
     }
     @Override
-    protected void modifyDdns(Map<String, Object> dnsCheckResult, String domain, String subDomain, String ip) {
+    protected boolean modifyDdns(Map<String, Object> dnsCheckResult, String domain, String subDomain, String ip) {
         try {
             logInfo("-----------------开始修改DNS信息-----------------");
             logInfo("域名：" + domain);
@@ -101,8 +101,10 @@ public class Tencent extends DDNSProvider {
                 }
             }
             logInfo("-----------------完成DNS信息修改-----------------");
+            return true;
         }catch (TencentCloudSDKException e){
             logError("修改DNS信息失败", e);
+            return false;
         }
     }
 }

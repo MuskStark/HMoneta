@@ -25,17 +25,18 @@ public abstract class DDNSProvider {
      * @param subDomain 子域名，例如www，代表www.example.com
      * @param ip 新的IP地址，用于更新域名解析
      */
-    public final void DDNSOperation(String domain, String subDomain, String ip) {
+    public final boolean DDNSOperation(String domain, String subDomain, String ip) {
         logStart();
         Map<String, Object> result = dnsCheck(domain, subDomain);
-        modifyDdns(result, domain, subDomain, ip);
+        boolean status = modifyDdns(result, domain, subDomain, ip);
         logEnd();
+        return status;
 
     }
 
     protected abstract Map<String,Object> dnsCheck(String domain, String subDomain);
 
-    protected abstract void modifyDdns(Map<String, Object> dnsCheckResult, String domain, String subDomain, String ip);
+    protected abstract boolean modifyDdns(Map<String, Object> dnsCheckResult, String domain, String subDomain, String ip);
 
     // 日志记录方法
     private void logStart() {

@@ -92,6 +92,9 @@ public class DDNSService {
         default:
             throw new RuntimeException("不支持的DDNS服务商");
         }
-        provider.DDNSOperation(domain, subDomain, ip);
+        // TODO:将更新状态记录至数据库
+        boolean status = provider.DDNSOperation(domain, subDomain, ip);
+
+
     }
 }
