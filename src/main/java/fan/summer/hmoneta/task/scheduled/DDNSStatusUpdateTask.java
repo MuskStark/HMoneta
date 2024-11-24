@@ -30,7 +30,7 @@ public class DDNSStatusUpdateTask {
         this.ipChecker = ipChecker;
     }
 
-    @Scheduled(cron = "* */10 * * * ?")
+    @Scheduled(cron = "1 */10 * * * ?")
     public void updateDDNSStatus() {
         LOG.info("----------------启动DDNS更新任务----------------");
         List<DDNSUpdateRecorderEntity> ddnsUpdateRecorderEntities = ddnsService.queryAllDDNSUpdateRecorder();
