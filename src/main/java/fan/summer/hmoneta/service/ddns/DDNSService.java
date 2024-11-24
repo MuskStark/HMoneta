@@ -2,7 +2,9 @@ package fan.summer.hmoneta.service.ddns;
 
 import fan.summer.hmoneta.common.enums.DDNSProvidersSelectEnum;
 import fan.summer.hmoneta.database.entity.ddns.DDNSInfo;
+import fan.summer.hmoneta.database.entity.ddns.DDNSUpdateRecorderEntity;
 import fan.summer.hmoneta.database.repository.ddns.DDNSInfoRepository;
+import fan.summer.hmoneta.database.repository.ddns.DDNSUpdateRecorderRepository;
 import fan.summer.hmoneta.service.ddns.provider.DDNSProvider;
 import fan.summer.hmoneta.service.ddns.provider.Tencent;
 import fan.summer.hmoneta.webEntity.resp.ddns.ProviderInfoResp;
@@ -25,11 +27,13 @@ public class DDNSService {
 
     private final PublicIpChecker publicIpChecker;
     private final DDNSInfoRepository ddnsInfoRepository;
+    private final DDNSUpdateRecorderRepository ddnsUpdateRecorderRepository;
 
     @Autowired
-    public DDNSService(PublicIpChecker publicIpChecker, DDNSInfoRepository ddnsInfoRepository){
+    public DDNSService(PublicIpChecker publicIpChecker, DDNSInfoRepository ddnsInfoRepository, DDNSUpdateRecorderRepository ddnsUpdateRecorderRepository){
         this.publicIpChecker = publicIpChecker;
         this.ddnsInfoRepository = ddnsInfoRepository;
+        this.ddnsUpdateRecorderRepository = ddnsUpdateRecorderRepository;
     }
 
     public List<ProviderInfoResp> queryAllDDNSProvider() {
@@ -69,7 +73,7 @@ public class DDNSService {
     }
 
 
-    public void createDdns(String providerName, String domain, String subDomain) {
+    public boolean createDdns(String providerName, String domain, String subDomain) {
         if (providerName == null || providerName.isEmpty()){
             throw new RuntimeException("DDNS服务商不能为空");
         }
@@ -94,7 +98,37 @@ public class DDNSService {
         }
         // TODO:将更新状态记录至数据库
         boolean status = provider.DDNSOperation(domain, subDomain, ip);
+        if(status){
+            DDNSUpdateRecorderEntity byDomain = ddnsUpdateRecorderRepository.findByDomainAndSubDomain(domain, subDomain);
+            if(byDomain == null){
+                DDNSUpdateRecorderEntity recorderEntity = new DDNSUpdateRecorderEntity();
+                recorderEntity.setDomain(domain);
+                recorderEntity.setSubDomain(subDomain);
+                recorderEntity.setProviderName(providerName);
+                recorderEntity.setIp(ip);
+                recorderEntity.setStatus(true);
+                ddnsUpdateRecorderRepository.save(recorderEntity);
+            }else {
+                if(!byDomain.getIp().equals(ip)){
+                    byDomain.setIp(ip);
+                    if(!byDomain.getProviderName().equals(providerName)){
+                        byDomain.setProviderName(providerName);
+                    }
+                    byDomain.setStatus(true);
+                    ddnsUpdateRecorderRepository.save(byDomain);
+                }else {
+                    if(!byDomain.getStatus()){
+                        byDomain.setStatus(true);
+                        ddnsUpdateRecorderRepository.save(byDomain);
+                    }
+                }
+            }
 
+        }
+        return status;
+    }
 
+    public List<DDNSUpdateRecorderEntity> queryAllDDNSUpdateRecorder() {
+        return ddnsUpdateRecorderRepository.findAll();
     }
 }
