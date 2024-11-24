@@ -59,60 +59,64 @@ public class AgentScanTask {
     protected void agentListener() {
         LOG.info("----------------启动Agent扫描任务----------------");
         List<ServerInfoDetail> allServerInfo = infoManagerService.findAllServerInfo();
-        allServerInfo.forEach( serverInfoDetail -> {
-            LOG.info("待扫描服务器名称{}", serverInfoDetail.getServerName());
-            try {
-                boolean isContain = allServerId.contains(serverInfoDetail.getId());
-                LOG.info("是否已记录该服务器Agent信息：{}",isContain);
-                // 已记录该服务器Agent信息
-                if (isContain){
-                    AgentInfo agentInfo = service.findAgentByServerId(serverInfoDetail.getId());
-                    // Agent验活
-                    Map<String, Boolean> agentStatus = checkAgentStatus(agentInfo.getServerIp());
-                    LOG.info("目标服务器Agent是否存活：{}",agentStatus.get("isAlive"));
-                    if(agentStatus.get("isAlive")){
-                        // 检查报告是否严重超时
-                        AgentReport report = service.findAgentReportByServerId(serverInfoDetail.getId());
-                        LOG.info("系统报告是否超期：{}",report.getTimeStamp()- System.currentTimeMillis() > reportDelay);
-                        if(report.getTimeStamp()- System.currentTimeMillis() > reportDelay) {
-                            agentInfo.setIssueConfig(service.issueConfig(agentInfo));
-                        }
-                        if(!agentStatus.get("configStatus")){
-                            agentInfo.setIssueConfig(service.issueConfig(agentInfo));
-                        }
-                    }else {
-                        // 检测Agent地址信息是否与服务器信息一直
-                        LOG.info("Agent地址信息是否正确：{}",agentInfo.getServerIp().equals(serverInfoDetail.getServerIpAddr()));
-                        if (!agentInfo.getServerIp().equals(serverInfoDetail.getServerIpAddr())) {
-                            agentInfo.setServerIp(serverInfoDetail.getServerIpAddr());
-                            agentInfo.setIssueConfig(service.issueConfig(agentInfo));
-                        }
+        if(!allServerInfo.isEmpty()) {
+            allServerInfo.forEach(serverInfoDetail -> {
+                LOG.info(">>>>>待扫描服务器名称{}", serverInfoDetail.getServerName());
+                try {
+                    boolean isContain = allServerId.contains(serverInfoDetail.getId());
+                    LOG.info(">>>>>是否已记录该服务器Agent信息：{}", isContain);
+                    // 已记录该服务器Agent信息
+                    if (isContain) {
+                        AgentInfo agentInfo = service.findAgentByServerId(serverInfoDetail.getId());
+                        // Agent验活
+                        Map<String, Boolean> agentStatus = checkAgentStatus(agentInfo.getServerIp());
+                        LOG.info(">>>>>目标服务器Agent是否存活：{}", agentStatus.get("isAlive"));
+                        if (agentStatus.get("isAlive")) {
+                            // 检查报告是否严重超时
+                            AgentReport report = service.findAgentReportByServerId(serverInfoDetail.getId());
+                            LOG.info(">>>>>系统报告是否超期：{}", report.getTimeStamp() - System.currentTimeMillis() > reportDelay);
+                            if (report.getTimeStamp() - System.currentTimeMillis() > reportDelay) {
+                                agentInfo.setIssueConfig(service.issueConfig(agentInfo));
+                            }
+                            if (!agentStatus.get("configStatus")) {
+                                agentInfo.setIssueConfig(service.issueConfig(agentInfo));
+                            }
+                        } else {
+                            // 检测Agent地址信息是否与服务器信息一直
+                            LOG.info(">>>>>Agent地址信息是否正确：{}", agentInfo.getServerIp().equals(serverInfoDetail.getServerIpAddr()));
+                            if (!agentInfo.getServerIp().equals(serverInfoDetail.getServerIpAddr())) {
+                                agentInfo.setServerIp(serverInfoDetail.getServerIpAddr());
+                                agentInfo.setIssueConfig(service.issueConfig(agentInfo));
+                            }
 
+                        }
+                        service.save(agentInfo);
+                    } else {
+                        LOG.info(">>>>>Agent信息不存在，开始创建Agent信息");
+                        AgentInfo info = new AgentInfo();
+                        info.setAgentId(SnowFlakeUtil.getSnowFlakeNextId());
+                        info.setServerId(serverInfoDetail.getId());
+                        info.setServerIp(serverInfoDetail.getServerIpAddr());
+                        info.setAlive(service.isInstallAgentClient(info.getServerIp()));
+                        if (info.getAlive()) {
+                            service.issueConfig(info);
+                            info.setIssueConfig(true);
+                        } else {
+                            info.setIssueConfig(false);
+                        }
+                        service.save(info);
+                        allServerId.add(serverInfoDetail.getId());
                     }
-                    service.save(agentInfo);
-                }else {
-                    LOG.info("Agent信息不存在，开始创建Agent信息");
-                    AgentInfo info = new AgentInfo();
-                    info.setAgentId(SnowFlakeUtil.getSnowFlakeNextId());
-                    info.setServerId(serverInfoDetail.getId());
-                    info.setServerIp(serverInfoDetail.getServerIpAddr());
-                    info.setAlive(service.isInstallAgentClient(info.getServerIp()));
-                    if(info.getAlive()){
-                        service.issueConfig(info);
-                        info.setIssueConfig(true);
-                    }else {
-                        info.setIssueConfig(false);
-                    }
-                    service.save(info);
-                    allServerId.add(serverInfoDetail.getId());
+                } catch (Exception e) {
+                    LOG.error(">>>>>AgentListener error:{}", Objects.requireNonNull(e.getMessage()));
                 }
-                LOG.info("----------------完成Agent扫描任务----------------");
-            }catch (Exception e){
-                LOG.error("AgentListener error:{}", Objects.requireNonNull(e.getMessage()));
-                LOG.info("----------------完成Agent扫描任务----------------");
-            }
 
-        });
+            });
+        }else {
+            LOG.info(">>>>>未查询到任何服务器信息，停止Agent扫描!");
+
+        }
+        LOG.info("----------------完成Agent扫描任务----------------");
     }
 
     private Map<String, Boolean> checkAgentStatus(String serverUri){
