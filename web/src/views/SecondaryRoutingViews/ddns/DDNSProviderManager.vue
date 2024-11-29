@@ -9,7 +9,7 @@ const providerTable = ref([])
 const queryDDNSProvider = () => {
   axios.get('ddns/provider/query').then((response) => {
     if (responseIsSuccess(response)) {
-      providerTable.value = response.data.data;
+      dnsCardList.value = response.data.data;
     } else {
       message.error(response.data.message)
     }
@@ -55,23 +55,14 @@ const addDdnsProvider = async (publicKey) => {
   await axios.post('ddns/provider/add', ddnsProvider.value).then(response => {
     if (responseIsSuccess(response)) {
       message.success(response.data.message)
+      queryDDNSProvider()
     } else {
       message.error(response.data.message)
     }
   })
 }
-// Table
-const columns = [
-  {
-    title: 'DNS供应商名称',
-    dataIndex: 'providerName',
-    key: 'providerName',
-  },
-  {
-    title: '授权ID',
-    dataIndex: 'accessKeyId',
-    key: 'accessKeyId',
-  }]
+// card渲染相关代码
+const dnsCardList = ref([])
 onMounted(() => {
   queryDDNSProvider()
   getProviderSelectList()
@@ -112,15 +103,13 @@ onMounted(() => {
       </a-form-item>
     </a-form>
   </a-modal>
-  <a-table :columns="columns" :dataSource="providerTable"/>
-  <a-row :gutter="16">
-    <a-col v-for="(card, index) in providerTable" :key="index" :span="8">
-      <!-- TODO: 美化卡片 -->
-      <a-card :title="card.providerName" :bordered="false">
-        <p>授权ID: {{card.accessKeyId}}</p>
-      </a-card>
-      </a-col>
-  </a-row>
+  <a-flex>
+    <a-card v-for="(card, index) in dnsCardList" :key="index">
+      <a-card-meta :title="card.providerName">
+        <template #description>{{card.accessKeyId}}</template>
+      </a-card-meta>
+    </a-card>
+  </a-flex>
 </template>
 
 <style scoped>
