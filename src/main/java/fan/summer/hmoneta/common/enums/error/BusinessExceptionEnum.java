@@ -30,6 +30,7 @@ public enum BusinessExceptionEnum {
     SM_SERVER_IP_FORMAT_ERROR(3004,"IP地址格式错误"),
     SM_SERVER_IP_MATCH_ERROR(3004,"IP地址不属于该IP池"),
     SM_SERVER_DELETE_ERROR(3005,"服务器信息删除失败"),
+    WEB_MENUS_NOT_FIND_FATHER_NODE(4001,"未找到父菜单")
     ;
 
     BusinessExceptionEnum(int code, String message) {
