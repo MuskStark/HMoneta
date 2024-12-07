@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.0</version>
+        <version>3.4.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>fan.summer.hmoneta</groupId>
@@ -45,7 +45,7 @@
             <artifactId>tencentcloud-sdk-java</artifactId>
             <!-- go to https://search.maven.org/search?q=tencentcloud-sdk-java and get the latest version. -->
             <!-- 请到https://search.maven.org/search?q=tencentcloud-sdk-java查询所有版本，最新版本如下 -->
-            <version>3.1.1072</version>
+            <version>3.1.1157</version>
         </dependency>
 
         <dependency>
