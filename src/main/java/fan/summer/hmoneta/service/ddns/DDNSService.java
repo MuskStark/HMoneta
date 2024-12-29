@@ -131,4 +131,7 @@ public class DDNSService {
     public List<DDNSUpdateRecorderEntity> queryAllDDNSUpdateRecorder() {
         return ddnsUpdateRecorderRepository.findAll();
     }
+    public List<DDNSUpdateRecorderEntity> queryAllDDNSUpdateRecorderByProviderName(String providerName){
+        return ddnsUpdateRecorderRepository.findAllByProviderName(providerName);
+    }
 }

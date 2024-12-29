@@ -13,6 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ProviderInfoResp {
+    private String label;
     private String providerName;
     private String accessKeyId;
 
