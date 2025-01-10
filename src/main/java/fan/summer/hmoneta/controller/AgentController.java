@@ -35,8 +35,11 @@ public class AgentController {
     public ApiRestResponse<Object> receiveAgentStatus(@RequestBody SystemInfoEntity info) {
         if(ObjUtil.isNotEmpty(info)) {
             agentService.receiveAgentReport(info);
+            return ApiRestResponse.success();
+        }else {
+            return ApiRestResponse.error(800,"上报信息为空");
         }
-        return ApiRestResponse.success();
+
     }
 
 }
