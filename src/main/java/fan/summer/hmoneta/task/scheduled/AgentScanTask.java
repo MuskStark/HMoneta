@@ -72,15 +72,18 @@ public class AgentScanTask {
                         Map<String, Boolean> agentStatus = checkAgentStatus(agentInfo.getServerIp());
                         LOG.info(">>>>>目标服务器Agent是否存活：{}", agentStatus.get("isAlive"));
                         if (agentStatus.get("isAlive")) {
-                            // 检查报告是否严重超时
-                            AgentReport report = service.findAgentReportByServerId(serverInfoDetail.getId());
-                            LOG.info(">>>>>系统报告是否超期：{}", report.getTimeStamp() - System.currentTimeMillis() > reportDelay);
-                            if (report.getTimeStamp() - System.currentTimeMillis() > reportDelay) {
-                                agentInfo.setIssueConfig(service.issueConfig(agentInfo));
-                            }
                             if (!agentStatus.get("configStatus")) {
                                 agentInfo.setIssueConfig(service.issueConfig(agentInfo));
+                            }else {
+                                // 检查报告是否严重超时
+                                AgentReport report = service.findAgentReportByServerId(serverInfoDetail.getId());
+                                LOG.info(">>>>>系统报告是否超期：{}", report.getTimeStamp() - System.currentTimeMillis() > reportDelay);
+                                if (report.getTimeStamp() - System.currentTimeMillis() > reportDelay) {
+                                    agentInfo.setIssueConfig(service.issueConfig(agentInfo));
+                                }
                             }
+
+
                         } else {
                             // 检测Agent地址信息是否与服务器信息一直
                             LOG.info(">>>>>Agent地址信息是否正确：{}", agentInfo.getServerIp().equals(serverInfoDetail.getServerIpAddr()));
@@ -120,16 +123,26 @@ public class AgentScanTask {
     }
 
     private Map<String, Boolean> checkAgentStatus(String serverUri){
+        Map<String, Boolean> result = new HashMap<>();
         // 请求头，设置Content-Type为application/json
         RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        String reportUrl = "http://" + serverUri +":" + agentPort + "/agent/api/is_alive";
-        String reportConfigUri = "http://" + serverUri +":" + agentPort + "/agent/api/report-config";
+        String reportUrl = "http://" + serverUri +":" + agentPort + "/agent/api/status";
+        String reportConfigUri = "http://" + serverUri +":" + agentPort + "/agent/api/config-status";
+        // 获取Agent状态
         ResponseEntity<String> forEntity = restTemplate.getForEntity(reportUrl, String.class);
-        ResponseEntity<ConfigEntity> config = restTemplate.getForEntity(reportConfigUri, ConfigEntity.class);
-        Map<String, Boolean> result = new HashMap<>();
+        boolean isAlive = forEntity.getStatusCode().is2xxSuccessful();
         result.put("isAlive",forEntity.getStatusCode().is2xxSuccessful());
-        result.put("configStatus", !ObjUtil.isEmpty(config.getBody()));
+        if(isAlive) {
+            // 获取Agent配置状态
+            // TODO:请求方法不正确
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            ResponseEntity<ConfigEntity> config = restTemplate.getForEntity(reportConfigUri, ConfigEntity.class);
+            Long agentId = Objects.requireNonNull(config.getBody()).getAgentId();
+            result.put("configStatus", !ObjUtil.isEmpty(agentId));
+        }else {
+            result.put("configStatus", false);
+        }
         return result;
     }
 }
