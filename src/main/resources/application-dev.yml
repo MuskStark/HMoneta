@@ -25,7 +25,7 @@ logging:
 hmoneta:
   version: @project.version@
   master:
-    report-url: http://127.0.0.1
+    report-url: http://10.5.20.205
   agent:
     port: 477
     report-delay: 60000
