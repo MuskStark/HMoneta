@@ -28,6 +28,7 @@ public class PublicIpChecker {
      *
      * @return 当前设备的公网IP地址字符串，如果无法获取则返回null。
      */
+    //TODO:存在受代理影响问题
     public String getPublicIp() {
         String ip = null;
         try (HttpClient client = HttpClient.newHttpClient()) {
