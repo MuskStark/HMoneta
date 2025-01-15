@@ -92,33 +92,49 @@ const openDDNSInsert = ref(false)
 const DDNSInsertModalData = ref({
   providerName: '',
   domain: '',
-  subdomain: '',
+  subDomain: '',
 })
 const onInsert = (card) => {
   openDDNSInsert.value = true
   DDNSInsertModalData.value.providerName = card.providerName
 }
 const submitInsert = () => {
-  console.log(DDNSInsertModalData.value)
+  axios.post("/ddns/record/modify", DDNSInsertModalData.value).then((resp)=>{
+    if(responseIsSuccess(resp)){
+      message.success(resp.data.message)
+    }else {
+      message.error(resp.data.message)
+    }
+
+  })
 }
 // card元素中table相关属性及函数
 const cardTableColumns = [
   {
     title: '主域名',
     dataIndex: 'domain',
-    key:'domain'
+    key:'domain',
+    algin:'center'
   },
   {
     title: '二级域名',
     dataIndex: 'subDomain',
+    algin:'center'
   },
   {
     title: '解析地址',
     dataIndex: 'ip',
+    algin:'center'
   },
   {
     title: '解析状态',
     dataIndex: 'status',
+    algin:'center'
+  },
+  {
+    title: '操作',
+    dataIndex: 'operation',
+    algin:'center'
   },
 
 
@@ -189,7 +205,7 @@ onMounted(async () => {
         <a-input v-model:value="DDNSInsertModalData.domain" placeholder="请输入域名"></a-input>
       </a-form-item>
       <a-form-item label="子域名">
-        <a-input v-model:value="DDNSInsertModalData.subdomain" placeholder="请输入子域名"></a-input>
+        <a-input v-model:value="DDNSInsertModalData.subDomain" placeholder="请输入子域名"></a-input>
       </a-form-item>
     </a-form>
   </a-modal>
@@ -210,6 +226,13 @@ onMounted(async () => {
                 <a-tag :bordered="false" color="error">同步失败</a-tag>
               </template>
             </template>
+            <template v-if="column.dataIndex === 'operation'">
+              <a-flex gap="small">
+                <a-button type="primary">修改</a-button>
+                <a-button danger>删除</a-button>
+              </a-flex>
+
+            </template>
           </template>
         </a-table>
     </a-card>
@@ -222,4 +245,5 @@ onMounted(async () => {
   margin-top: 10px;
   margin-bottom: 10px;
 }
+
 </style>
