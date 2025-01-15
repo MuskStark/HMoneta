@@ -30,7 +30,10 @@ public enum BusinessExceptionEnum {
     SM_SERVER_IP_FORMAT_ERROR(3004,"IP地址格式错误"),
     SM_SERVER_IP_MATCH_ERROR(3004,"IP地址不属于该IP池"),
     SM_SERVER_DELETE_ERROR(3005,"服务器信息删除失败"),
-    WEB_MENUS_NOT_FIND_FATHER_NODE(4001,"未找到父菜单")
+    WEB_MENUS_NOT_FIND_FATHER_NODE(4001,"未找到父菜单"),
+    DDNS_PROVIDER_LIST_EMPTY(5001, "未录入DDNS供应商"),
+    DDNS_RECORDER_EMPTY_ERROR(5002,"DDNS记录为空"),
+    DDNS_RECORDER_EXISTS_ERROR(5003,"DDNS记录已存在")
     ;
 
     BusinessExceptionEnum(int code, String message) {
