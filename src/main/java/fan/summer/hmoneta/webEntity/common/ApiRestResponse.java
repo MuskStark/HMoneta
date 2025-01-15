@@ -1,6 +1,7 @@
 package fan.summer.hmoneta.webEntity.common;
 
 
+import fan.summer.hmoneta.common.enums.error.BusinessExceptionEnum;
 import fan.summer.hmoneta.common.enums.error.ServiceErrorEnum;
 
 /**
@@ -72,6 +73,12 @@ public class ApiRestResponse<T> {
      * @param <T>
      */
     public static <T> ApiRestResponse<T> error(ServiceErrorEnum es){
+        ApiRestResponse<T> apiRestResponse = new ApiRestResponse<>(es.getCode(), es.getMessage());
+        apiRestResponse.setStatus(false);
+        return apiRestResponse;
+    }
+
+    public static <T> ApiRestResponse<T> error(BusinessExceptionEnum es){
         ApiRestResponse<T> apiRestResponse = new ApiRestResponse<>(es.getCode(), es.getMessage());
         apiRestResponse.setStatus(false);
         return apiRestResponse;
