@@ -89,23 +89,25 @@ public class DDNSService {
         DDNSRecorderEntity bySubDomainAndDomain = ddnsRecorderRepository.findBySubDomainAndDomain(entity.getSubDomain(), entity.getDomain());
         if (ObjUtil.isEmpty(bySubDomainAndDomain)) {
             ddnsRecorderRepository.save(entity);
+            createDdns(entity.getDomain(), entity.getSubDomain());
         }else {
             throw new BusinessException(BusinessExceptionEnum.DDNS_RECORDER_EXISTS_ERROR);
         }
     }
 
 
-    public boolean createDdns(String providerName, String domain, String subDomain) {
-        if (providerName == null || providerName.isEmpty()){
-            throw new RuntimeException("DDNS服务商不能为空");
+    public boolean createDdns(String domain, String subDomain) {
+        DDNSRecorderEntity recorder = ddnsRecorderRepository.findBySubDomainAndDomain(subDomain, domain);
+        if (ObjUtil.isEmpty(recorder)){
+            throw new RuntimeException(subDomain+"."+domain+"域名无DDNS记录");
         }
         String ip = publicIpChecker.getPublicIp();
         if (ip == null || ip.isEmpty()){
             throw new RuntimeException("获取公网IP失败");
         }
-        DDNSInfo ddnsInfo = ddnsInfoRepository.findByProviderName(providerName);
-        DDNSProvider provider = null;
-        switch (DDNSProvidersSelectEnum.valueOf(providerName)){
+        DDNSInfo ddnsInfo = ddnsInfoRepository.findByProviderName(recorder.getProviderName());
+        DDNSProvider provider;
+        switch (DDNSProvidersSelectEnum.valueOf(recorder.getProviderName())){
             case TencentCloud:
                 provider = new Tencent(ddnsInfo.getAccessKeyId(),ddnsInfo.getAccessKeySecret());
             break;
@@ -124,17 +126,18 @@ public class DDNSService {
             DDNSUpdateRecorderEntity byDomain = ddnsUpdateRecorderRepository.findByDomainAndSubDomain(domain, subDomain);
             if(byDomain == null){
                 DDNSUpdateRecorderEntity recorderEntity = new DDNSUpdateRecorderEntity();
+                recorderEntity.setRecorderId(recorder.getId());
                 recorderEntity.setDomain(domain);
                 recorderEntity.setSubDomain(subDomain);
-                recorderEntity.setProviderName(providerName);
+                recorderEntity.setProviderName(recorderEntity.getProviderName());
                 recorderEntity.setIp(ip);
                 recorderEntity.setStatus(true);
                 ddnsUpdateRecorderRepository.save(recorderEntity);
             }else {
                 if(!byDomain.getIp().equals(ip)){
                     byDomain.setIp(ip);
-                    if(!byDomain.getProviderName().equals(providerName)){
-                        byDomain.setProviderName(providerName);
+                    if(!byDomain.getProviderName().equals(recorder.getProviderName())){
+                        byDomain.setProviderName(recorder.getProviderName());
                     }
                     byDomain.setStatus(true);
                     ddnsUpdateRecorderRepository.save(byDomain);
