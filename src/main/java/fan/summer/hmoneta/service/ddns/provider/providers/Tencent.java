@@ -1,4 +1,4 @@
-package fan.summer.hmoneta.service.ddns.provider;
+package fan.summer.hmoneta.service.ddns.provider.providers;
 
 import cn.hutool.core.util.ObjUtil;
 import com.tencentcloudapi.common.Credential;
@@ -7,6 +7,7 @@ import com.tencentcloudapi.common.profile.ClientProfile;
 import com.tencentcloudapi.common.profile.HttpProfile;
 import com.tencentcloudapi.dnspod.v20210323.DnspodClient;
 import com.tencentcloudapi.dnspod.v20210323.models.*;
+import fan.summer.hmoneta.service.ddns.provider.DDNSProvider;
 import lombok.Setter;
 
 import java.util.Map;
@@ -30,7 +31,8 @@ public class Tencent extends DDNSProvider {
         this.accessKeySecret = accessKeySecret;
     }
 
-    public Tencent(){}
+    public Tencent() {
+    }
 
     private DnspodClient getCredential() {
         Credential cred = new Credential(accessKeyId, accessKeySecret);
@@ -38,12 +40,12 @@ public class Tencent extends DDNSProvider {
     }
 
     @Override
-    protected Map<String,Object> dnsCheck(String domain, String subDomain){
+    protected Map<String, Object> dnsCheck(String domain, String subDomain) {
         try {
             logInfo("-----------------开始检查DNS信息-----------------");
             logInfo("域名：" + domain);
             logInfo("子域名：" + subDomain);
-            Map<String ,Object> result = null;
+            Map<String, Object> result = null;
             DnspodClient client = getCredential();
             HttpProfile httpProfile = new HttpProfile();
             httpProfile.setEndpoint("dnspod.tencentcloudapi.com");
@@ -52,21 +54,21 @@ public class Tencent extends DDNSProvider {
             DescribeRecordListRequest dnsReq = new DescribeRecordListRequest();
             dnsReq.setDomain(domain);
             DescribeRecordListResponse dnsResp = client.DescribeRecordList(dnsReq);
-            for (RecordListItem record : dnsResp.getRecordList()) {
+            for (RecordListItem record : dnsResp.getRecordList())
                 if (record.getName().equals(subDomain) && record.getType().equals("A")) {
                     String oldIp = record.getValue();
                     Long recordId = record.getRecordId();
                     result = Map.of("oldIp", oldIp, "recordId", recordId);
                 }
-            }
             logInfo("DNS信息：" + result.toString());
             logInfo("-----------------完成DNS信息检查-----------------");
             return result;
-        }catch (TencentCloudSDKException e){
+        } catch (TencentCloudSDKException e) {
             logError("检查DNS信息失败", e);
             return null;
         }
     }
+
     @Override
     protected boolean modifyDdns(Map<String, Object> dnsCheckResult, String domain, String subDomain, String ip) {
         try {
@@ -84,7 +86,7 @@ public class Tencent extends DDNSProvider {
                 createReq.setRecordLine("默认");
                 createReq.setValue(ip);
                 CreateRecordResponse resp = client.CreateRecord(createReq);
-            }else {
+            } else {
                 logInfo("存在DNS信息，开始修改DNS信息");
                 String oldIp = dnsCheckResult.get("oldIp").toString();
                 Long recordId = Long.parseLong(dnsCheckResult.get("recordId").toString());
@@ -102,7 +104,7 @@ public class Tencent extends DDNSProvider {
             }
             logInfo("-----------------完成DNS信息修改-----------------");
             return true;
-        }catch (TencentCloudSDKException e){
+        } catch (TencentCloudSDKException e) {
             logError("修改DNS信息失败", e);
             return false;
         }
