@@ -24,7 +24,6 @@ public class ProviderFactory {
     }
 
     public DDNSProvider generatorProvider(String providerName) {
-
         if (DDNSProvidersSelectEnum.valueOf(providerName) == DDNSProvidersSelectEnum.TencentCloud) {
             DDNSProviderEntity providerEntity = providerService.getProviderEntity(providerName);
             return new Tencent(providerEntity.getAccessKeyId(), providerEntity.getAccessKeySecret());
