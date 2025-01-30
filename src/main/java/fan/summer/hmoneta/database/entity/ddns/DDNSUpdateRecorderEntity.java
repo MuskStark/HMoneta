@@ -17,7 +17,7 @@ public class DDNSUpdateRecorderEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @Column(name = "recorger_id", nullable = false)
+    @Column(name = "recorder_id", nullable = false)
     private Long recorderId;
     @Column(name = "sub_domain", length = 100, nullable = false)
     private String subDomain;
