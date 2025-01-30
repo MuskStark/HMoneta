@@ -8,9 +8,15 @@ import com.tencentcloudapi.common.profile.HttpProfile;
 import com.tencentcloudapi.dnspod.v20210323.DnspodClient;
 import com.tencentcloudapi.dnspod.v20210323.models.*;
 import fan.summer.hmoneta.service.ddns.provider.DDNSProvider;
+import fan.summer.hmoneta.util.DynamicStreamProcessingUtil;
 import lombok.Setter;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 腾讯云DDNS实现
@@ -45,7 +51,7 @@ public class Tencent extends DDNSProvider {
             logInfo("-----------------开始检查DNS信息-----------------");
             logInfo("域名：" + domain);
             logInfo("子域名：" + subDomain);
-            Map<String, Object> result = null;
+            Map<String, Object> result = new HashMap<>();
             DnspodClient client = getCredential();
             HttpProfile httpProfile = new HttpProfile();
             httpProfile.setEndpoint("dnspod.tencentcloudapi.com");
@@ -54,13 +60,15 @@ public class Tencent extends DDNSProvider {
             DescribeRecordListRequest dnsReq = new DescribeRecordListRequest();
             dnsReq.setDomain(domain);
             DescribeRecordListResponse dnsResp = client.DescribeRecordList(dnsReq);
-            for (RecordListItem record : dnsResp.getRecordList())
-                if (record.getName().equals(subDomain) && record.getType().equals("A")) {
-                    String oldIp = record.getValue();
-                    Long recordId = record.getRecordId();
-                    result = Map.of("oldIp", oldIp, "recordId", recordId);
-                }
-            logInfo("DNS信息：" + result.toString());
+            Stream<RecordListItem> recordListItemStream = DynamicStreamProcessingUtil.processWithConditionalParallel(Arrays.asList(dnsResp.getRecordList()));
+            Map<String, List<RecordListItem>> collect = recordListItemStream.collect(Collectors.groupingBy(RecordListItem::getName));
+            if (collect.containsKey(subDomain)) {
+                List<RecordListItem> recordListItems = collect.get(subDomain);
+                for (RecordListItem record : recordListItems)
+                    if (record.getType().equals("A"))
+                        result = Map.of("oldIp", record.getValue(), "recordId", record.getRecordId());
+            }
+            logInfo("DNS信息：" + result);
             logInfo("-----------------完成DNS信息检查-----------------");
             return result;
         } catch (TencentCloudSDKException e) {
