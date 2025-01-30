@@ -8,6 +8,7 @@ import fan.summer.hmoneta.database.entity.ddns.DDNSProviderEntity;
 import fan.summer.hmoneta.database.repository.ddns.DDNSProviderRepository;
 import fan.summer.hmoneta.webEntity.resp.ddns.ProviderInfoResp;
 import fan.summer.hmoneta.webEntity.resp.ddns.ProviderSelectorInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ import java.util.List;
  * @version 1.00
  * @Date 2025/1/25
  */
+@Slf4j
 @Service
 public class ProviderService {
 
@@ -97,7 +99,15 @@ public class ProviderService {
      * @throws BusinessException if no provider entity is found for the specified name,
      *                           with the error code {@link BusinessExceptionEnum#DDNS_PROVIDER_LIST_EMPTY}.
      */
-    public DDNSProviderEntity getProviderEntity(String providerName) throws BusinessException {
+    public DDNSProviderEntity getProviderBaseInfo(String providerName) throws BusinessException {
+        log.info("开始检查{}是否存在", providerName);
+        try {
+            DDNSProvidersSelectEnum.valueOf(providerName);
+        } catch (IllegalArgumentException e) {
+            log.error("{}-{}", providerName, BusinessExceptionEnum.DDNS_PROVIDER_NOT_SUPPORT.getMessage());
+            throw new BusinessException(BusinessExceptionEnum.DDNS_PROVIDER_NOT_SUPPORT);
+        }
+
         DDNSProviderEntity byProviderName = providerRepository.findByProviderName(providerName);
         if (ObjUtil.isEmpty(byProviderName))
             throw new BusinessException(BusinessExceptionEnum.DDNS_PROVIDER_LIST_EMPTY);
