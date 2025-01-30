@@ -15,8 +15,6 @@ import fan.summer.hmoneta.webEntity.req.ddns.DDNSRecorderReq;
 import fan.summer.hmoneta.webEntity.resp.ddns.DDNSUpdateRecorderResp;
 import fan.summer.hmoneta.webEntity.resp.ddns.ProviderInfoResp;
 import fan.summer.hmoneta.webEntity.resp.ddns.ProviderSelectorInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 类的详细说明
+ * 提供DDNS相关APi服务
  *
  * @author phoebej
  * @version 1.00
@@ -35,20 +33,17 @@ import java.util.Map;
 @RequestMapping("/hm/ddns")
 public class DDNSController {
 
-    private final Logger LOG = LoggerFactory.getLogger(this.getClass());
-    private DDNSService ddnsService;
+    private final DDNSService ddnsService;
     private final ProviderService providerService;
-    private final Map<String, String> rsaKey = EncryptionUtil.generateKeyPair();
+    private final Map<String, String> rsaKey;
 
     @Autowired
     public DDNSController(DDNSService ddnsService, ProviderService providerService) throws Exception {
-        try {
-            this.ddnsService = ddnsService;
-            this.providerService = providerService;
-        } catch (Exception e) {
-            LOG.error("初始化失败生成RSA密钥对失败:{}", e.getMessage());
-        }
+        this.ddnsService = ddnsService;
+        this.providerService = providerService;
+        this.rsaKey = EncryptionUtil.generateKeyPair();
     }
+
 
     @GetMapping("/publicKey")
     public ApiRestResponse<String> getPublicKey() {
