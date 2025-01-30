@@ -85,9 +85,9 @@ const addDdnsProvider = async (publicKey) => {
 
 // card渲染相关代码
 const dnsCardList = ref([])
-const handleCardClick = (card) => {
-  let resultMap = queryDNSRecordInfo(card.providerName);
-}
+// const handleCardClick = (card) => {
+//   let resultMap = queryDNSRecordInfo(card.providerName);
+// }
 const openDDNSInsert = ref(false)
 const DDNSInsertModalData = ref({
   providerName: '',
@@ -102,8 +102,10 @@ const submitInsert = () => {
   axios.post("/ddns/record/modify", DDNSInsertModalData.value).then((resp)=>{
     if(responseIsSuccess(resp)){
       message.success(resp.data.message)
+      openDDNSInsert.value = false
     }else {
       message.error(resp.data.message)
+      openDDNSInsert.value = false
     }
 
   })
@@ -149,6 +151,9 @@ const queryCardDataSource = async (card) =>{
       message.warn(json.message)
     }
   })
+}
+const changeRecordInfo = (record)=>{
+  console.log(record)
 }
 onMounted(async () => {
   await queryDDNSProvider()
@@ -210,7 +215,7 @@ onMounted(async () => {
     </a-form>
   </a-modal>
   <a-flex>
-    <a-card v-for="(card, index) in dnsCardList" :key="index" :title="card.label" @click="handleCardClick(card)">
+    <a-card v-for="(card, index) in dnsCardList" :key="index" :title="card.label">
       <template #extra><a-button type="text" @click="onInsert(card)">新增DNS记录</a-button></template>
         <a-table
             bordered
@@ -228,7 +233,7 @@ onMounted(async () => {
             </template>
             <template v-if="column.dataIndex === 'operation'">
               <a-flex gap="small">
-                <a-button type="primary">修改</a-button>
+                <a-button type="primary" @click="changeRecordInfo(record)">修改</a-button>
                 <a-button danger>删除</a-button>
               </a-flex>
 
