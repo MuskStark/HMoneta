@@ -64,7 +64,6 @@ public class DDNSService {
         String ip = publicIpChecker.getPublicIp();
         if (ip == null || ip.isEmpty()) throw new RuntimeException("获取公网IP失败");
         DDNSProvider provider = providerFactory.generatorProvider(DDNSProvidersSelectEnum.valueOf(recorder.getProviderName()));
-        // TODO:将更新状态记录至数据库
         boolean status = provider.DDNSOperation(domain, subDomain, ip);
         if (status) {
             DDNSUpdateRecorderEntity byDomain = ddnsUpdateRecorderRepository.findByDomainAndSubDomain(domain, subDomain);
