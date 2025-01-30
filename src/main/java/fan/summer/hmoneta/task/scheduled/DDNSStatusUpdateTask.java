@@ -1,10 +1,11 @@
 package fan.summer.hmoneta.task.scheduled;
 
+import cn.hutool.core.util.ObjUtil;
+import fan.summer.hmoneta.database.entity.ddns.DDNSRecorderEntity;
 import fan.summer.hmoneta.database.entity.ddns.DDNSUpdateRecorderEntity;
 import fan.summer.hmoneta.service.ddns.DDNSService;
 import fan.summer.hmoneta.service.ddns.PublicIpChecker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -18,9 +19,10 @@ import java.util.List;
  * @version 1.00
  * @Date 2024/11/22
  */
+@Slf4j
 @Component
 public class DDNSStatusUpdateTask {
-    private static final Logger LOG = LoggerFactory.getLogger(DDNSStatusUpdateTask.class);
+
     private final DDNSService ddnsService;
     private final PublicIpChecker ipChecker;
 
@@ -32,35 +34,32 @@ public class DDNSStatusUpdateTask {
 
     @Scheduled(cron = "1 */10 * * * ?")
     public void updateDDNSStatus() {
-        LOG.info("----------------启动DDNS更新任务----------------");
-        List<DDNSUpdateRecorderEntity> ddnsUpdateRecorderEntities = ddnsService.queryAllDDNSUpdateRecorder();
-        if(!ddnsUpdateRecorderEntities.isEmpty()) {
-            LOG.info(">>>开始获取最新公网IP");
+        log.info("----------------启动DDNS更新任务----------------");
+        List<DDNSRecorderEntity> ddnsRecorderEntities = ddnsService.queryAllDDNSRecorder();
+        if (!ddnsRecorderEntities.isEmpty()) {
+            log.info(">>>开始获取最新公网IP");
             String publicIp = ipChecker.getPublicIp();
             if (publicIp != null) {
-                LOG.info(">>>最新公网ip为：{}", publicIp);
-                ddnsUpdateRecorderEntities.forEach(iterm -> accept(iterm, publicIp));
-            } else {
-                LOG.error("!!!!!!无法获取公网Ip!!!!!!!");
-            }
-        }else {
-            LOG.info(">>>无DDNS记录,无需更新");
-        }
-        LOG.info("----------------DDNS更新任务结束----------------");
-    }
-
-    private void accept(DDNSUpdateRecorderEntity iterm, String publicIp) {
-        LOG.info(">>>开始检查{}DNS记录", String.format("%s.%s", iterm.getSubDomain(), iterm.getDomain()));
-            if (!iterm.getIp().equals(publicIp)) {
-                LOG.info(">>>IP已变更，开始更新最新DNS记录");
-                boolean status = ddnsService.createDdns(iterm.getProviderName(), iterm.getDomain(), iterm.getSubDomain());
-                if(status){
-                    LOG.info(">>>已完成DNS记录变更");
-                }else {
-                    LOG.error(">>>DNS记录变更失败");
-                }
-            }else {
-                LOG.info(">>>IP未变更，无需更新");
-            }
+                log.info(">>>最新公网ip为：{}", publicIp);
+                ddnsRecorderEntities.forEach(iterm -> {
+                    boolean status = false;
+                    log.info(">>>开始检查{}DNS记录", String.format("%s.%s", iterm.getSubDomain(), iterm.getDomain()));
+                    // 当前系统记录的DNS记录
+                    DDNSUpdateRecorderEntity ddnsUpdateRecorder = ddnsService.queryDDNSUpdateRecorderByDomain(iterm.getDomain(), iterm.getSubDomain());
+                    if (ObjUtil.isNotEmpty(ddnsUpdateRecorder)) {
+                        log.info("服务端解析记录为:{}", ddnsUpdateRecorder.getId());
+                        log.info("服务端解析记录与实际贡丸IP对比结果:{}", ddnsUpdateRecorder.getIp().equals(publicIp));
+                        if (ddnsUpdateRecorder.getIp().equals(publicIp)) status = true;
+                        else status = ddnsService.createDdns(iterm.getDomain(), iterm.getSubDomain());
+                    } else {
+                        log.info("服务器端不存在该{}域名解析记录", iterm.getDomain() + iterm.getSubDomain());
+                        status = ddnsService.createDdns(iterm.getDomain(), iterm.getSubDomain());
+                    }
+                    if (status) log.info(">>>已完成DNS记录变更");
+                    else log.error(">>>DNS记录变更失败");
+                });
+            } else log.error("!!!!!!无法获取公网Ip!!!!!!!");
+        } else log.info(">>>无DDNS记录,无需更新");
+        log.info("----------------DDNS更新任务结束----------------");
     }
 }
