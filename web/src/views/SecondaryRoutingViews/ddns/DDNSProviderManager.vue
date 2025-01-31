@@ -111,18 +111,28 @@ const DDNSInsertModalData = ref({
   domain: '',
   subDomain: '',
 })
+const confirmLoading = ref(false)
 const onInsert = (card) => {
   openDDNSInsert.value = true
   DDNSInsertModalData.value.providerName = card.providerName
 }
 const submitInsert = () => {
+  confirmLoading.value = true
   axios.post("/ddns/record/modify", DDNSInsertModalData.value).then((resp) => {
     if (responseIsSuccess(resp)) {
       message.success(resp.data.message)
+      confirmLoading.value = false
       openDDNSInsert.value = false
+      for (const card of dnsCardList.value) {
+        queryCardDataSource(card)
+      }
     } else {
       message.error(resp.data.message)
+      confirmLoading.value = false
       openDDNSInsert.value = false
+      for (const card of dnsCardList.value) {
+        queryCardDataSource(card)
+      }
     }
 
   })
@@ -186,7 +196,7 @@ onMounted(async () => {
 
 <template>
   <a-button class="provider-btn" @click="modifyDDNSProvider">新增供应商</a-button>
-  <!--  TODO:增加确认loading,新增后刷新界面-->
+  <!--  新增供应商组件 -->
   <a-drawer
       :title="title"
       :open="open"
@@ -228,10 +238,14 @@ onMounted(async () => {
       </a-form-item>
     </a-form>
   </a-drawer>
+  <!--  新增DDNS记录组件 -->
   <a-modal
       v-model:open="openDDNSInsert"
       :title="DDNSInsertModalData.providerName"
+      :ok-text="新增"
+      :cancel-text="取消"
       @ok="submitInsert"
+      :confirm-loading="confirmLoading"
   >
     <a-form
         :model="DDNSInsertModalData"
