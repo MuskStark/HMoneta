@@ -1,6 +1,7 @@
 package fan.summer.hmoneta.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import fan.summer.hmoneta.common.enums.DDNSProvidersSelectEnum;
 import fan.summer.hmoneta.common.enums.error.BusinessExceptionEnum;
 import fan.summer.hmoneta.database.entity.ddns.DDNSProviderEntity;
@@ -70,6 +71,9 @@ public class DDNSController {
 
     @PostMapping("/provider/add")
     public ApiRestResponse<Object> addDDNSProvider(@RequestBody DDNSProviderInfoReq providerInfoReq) throws Exception {
+        // TODO:空值验证
+        if (ObjectUtil.isEmpty(providerInfoReq.getProviderName()) || ObjectUtil.isEmpty(providerInfoReq.getAccessKeyId()) || ObjectUtil.isEmpty(providerInfoReq.getAccessKeySecret()))
+            return ApiRestResponse.error(BusinessExceptionEnum.REQ_ERROR_DDNS_PROVIDER_LEY_VALUE_EMPTY);
         DDNSProviderEntity ddnsProviderEntity = new DDNSProviderEntity();
         ddnsProviderEntity.setProviderName(providerInfoReq.getProviderName());
         ddnsProviderEntity.setAccessKeyId(providerInfoReq.getAccessKeyId());
