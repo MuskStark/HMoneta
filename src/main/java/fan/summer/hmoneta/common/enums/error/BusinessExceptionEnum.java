@@ -38,7 +38,8 @@ public enum BusinessExceptionEnum {
     DDNS_PROVIDER_LIST_EMPTY(5001, "未录入DDNS供应商"),
     DDNS_PROVIDER_NOT_SUPPORT(5004, "尚未支持该供应商"),
     DDNS_RECORDER_EMPTY_ERROR(5002, "DDNS记录为空"),
-    DDNS_RECORDER_EXISTS_ERROR(5003, "DDNS记录已存在");
+    DDNS_RECORDER_EXISTS_ERROR(5003, "DDNS记录已存在"),
+    REQ_ERROR_DDNS_PROVIDER_LEY_VALUE_EMPTY(8010, "DDNS供应商关键信息为空");
 
     BusinessExceptionEnum(int code, String message) {
         this.code = code;
