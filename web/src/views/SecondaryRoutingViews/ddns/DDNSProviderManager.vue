@@ -1,5 +1,5 @@
 <script setup>
-import {computed, onMounted, onUnmounted, ref,} from "vue";
+import {onMounted, ref,} from "vue";
 import axios from "axios";
 import {message} from "ant-design-vue";
 import {encrypt, responseIsSuccess} from "@/utils/common.js";
@@ -17,30 +17,30 @@ const queryDDNSProvider = async () => {
 }
 //查询DNS信息
 const DnsRecordInfo = ref({})
-const queryDNSRecordInfo = async (providerName="all") =>{
+const queryDNSRecordInfo = async (providerName = "all") => {
   const response = await axios.get('ddns/record', {
     params: {
       providerName: providerName
     }
   })
-  if(responseIsSuccess(response)){
-    if(providerName === 'all'){
+  if (responseIsSuccess(response)) {
+    if (providerName === 'all') {
       return response.data.data
 
-    }else {
+    } else {
       return {providerName: response.data.data}
     }
-  }else {
+  } else {
     message.error(response.data.message)
 
-    }
+  }
 }
 
 const getProviderSelectList = () => {
   axios.get('ddns/provider/selector').then((response) => {
-    if(responseIsSuccess(response)){
+    if (responseIsSuccess(response)) {
       providerList.value = response.data.data
-    }else {
+    } else {
       message.error(response.data.message)
     }
   });
@@ -53,32 +53,49 @@ const ddnsProvider = ref({
 })
 // DDNS 供应商系统查询
 const publicKey = ref();
-const getPublicKey = () => {
-  axios.get('ddns/publicKey').then(response => {
-    if (responseIsSuccess(response)) {
-      publicKey.value = response.data.data
-    } else {
-      message.error(response.data.message)
-    }
-  })
-}
 const open = ref(false)
+const title = ref('DDNS供应商维护')
+const modifyLoading = ref(false)
+
+const
+    getPublicKey = () => {
+      axios.get('ddns/publicKey').then(response => {
+        if (responseIsSuccess(response)) {
+          publicKey.value = response.data.data
+        } else {
+          message.error(response.data.message)
+        }
+      })
+    }
 const handleOk = () => {
   addDdnsProvider(publicKey.value)
   open.value = false
 }
-const title = ref('DDNS供应商维护')
+const closeProviderDraw = () => {
+  open.value = false
+}
 const modifyDDNSProvider = () => {
   open.value = true
 }
 const addDdnsProvider = async (publicKey) => {
   ddnsProvider.value.accessKeySecret = encrypt(ddnsProvider.value.accessKeySecret, publicKey)
+  modifyLoading.value = true
   await axios.post('ddns/provider/add', ddnsProvider.value).then(response => {
     if (responseIsSuccess(response)) {
       message.success(response.data.message)
+      modifyLoading.value = false
+      ddnsProvider.value.providerName = null
+      ddnsProvider.value.accessKeyId = null
+      ddnsProvider.value.accessKeySecret = null
+      closeProviderDraw()
       queryDDNSProvider()
     } else {
       message.error(response.data.message)
+      ddnsProvider.value.providerName = null
+      ddnsProvider.value.accessKeyId = null
+      ddnsProvider.value.accessKeySecret = null
+      closeProviderDraw()
+      modifyLoading.value = false
     }
   })
 }
@@ -99,11 +116,11 @@ const onInsert = (card) => {
   DDNSInsertModalData.value.providerName = card.providerName
 }
 const submitInsert = () => {
-  axios.post("/ddns/record/modify", DDNSInsertModalData.value).then((resp)=>{
-    if(responseIsSuccess(resp)){
+  axios.post("/ddns/record/modify", DDNSInsertModalData.value).then((resp) => {
+    if (responseIsSuccess(resp)) {
       message.success(resp.data.message)
       openDDNSInsert.value = false
-    }else {
+    } else {
       message.error(resp.data.message)
       openDDNSInsert.value = false
     }
@@ -115,44 +132,44 @@ const cardTableColumns = [
   {
     title: '主域名',
     dataIndex: 'domain',
-    key:'domain',
-    algin:'center'
+    key: 'domain',
+    algin: 'center'
   },
   {
     title: '二级域名',
     dataIndex: 'subDomain',
-    algin:'center'
+    algin: 'center'
   },
   {
     title: '解析地址',
     dataIndex: 'ip',
-    algin:'center'
+    algin: 'center'
   },
   {
     title: '解析状态',
     dataIndex: 'status',
-    algin:'center'
+    algin: 'center'
   },
   {
     title: '操作',
     dataIndex: 'operation',
-    algin:'center'
+    algin: 'center'
   },
 
 
 ]
 
-const queryCardDataSource = async (card) =>{
+const queryCardDataSource = async (card) => {
   await axios.get("ddns/record", {params: {providerName: card.providerName}}).then((response) => {
     const json = response.data
-    if(json.code === 200){
+    if (json.code === 200) {
       card.dataSource = json.data
-    }else {
+    } else {
       message.warn(json.message)
     }
   })
 }
-const changeRecordInfo = (record)=>{
+const changeRecordInfo = (record) => {
   console.log(record)
 }
 onMounted(async () => {
@@ -169,7 +186,18 @@ onMounted(async () => {
 
 <template>
   <a-button class="provider-btn" @click="modifyDDNSProvider">新增供应商</a-button>
-  <a-modal v-model:open="open" :title="title" @ok="handleOk">
+  <!--  TODO:增加确认loading,新增后刷新界面-->
+  <a-drawer
+      :title="title"
+      :open="open"
+      @close="closeProviderDraw"
+  >
+    <template #extra>
+      <a-flex gap="middle">
+        <a-button type="primary" @click="handleOk" :loading="modifyLoading">提交</a-button>
+        <a-button type="ghost" @click="closeProviderDraw">取消</a-button>
+      </a-flex>
+    </template>
     <a-form
         :model="ddnsProvider"
         name="basic"
@@ -199,8 +227,12 @@ onMounted(async () => {
         <a-input v-model:value="ddnsProvider.accessKeySecret"/>
       </a-form-item>
     </a-form>
-  </a-modal>
-  <a-modal v-model:open="openDDNSInsert" :title="DDNSInsertModalData.providerName" @ok="submitInsert">
+  </a-drawer>
+  <a-modal
+      v-model:open="openDDNSInsert"
+      :title="DDNSInsertModalData.providerName"
+      @ok="submitInsert"
+  >
     <a-form
         :model="DDNSInsertModalData"
         name="basic"
@@ -216,36 +248,38 @@ onMounted(async () => {
   </a-modal>
   <a-flex>
     <a-card v-for="(card, index) in dnsCardList" :key="index" :title="card.label">
-      <template #extra><a-button type="text" @click="onInsert(card)">新增DNS记录</a-button></template>
-        <a-table
-            bordered
-            :dataSource="card.dataSource"
-            :columns="cardTableColumns"
-        >
-          <template #bodyCell="{ column, record }">
-            <template v-if="column.dataIndex === 'status'">
-              <template v-if="record.status === 1">
-                <a-tag :bordered="false" color="success">同步成功</a-tag>
-              </template>
-              <template v-else>
-                <a-tag :bordered="false" color="error">同步失败</a-tag>
-              </template>
+      <template #extra>
+        <a-button type="text" @click="onInsert(card)">新增DNS记录</a-button>
+      </template>
+      <a-table
+          bordered
+          :dataSource="card.dataSource"
+          :columns="cardTableColumns"
+      >
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'status'">
+            <template v-if="record.status === 1">
+              <a-tag :bordered="false" color="success">同步成功</a-tag>
             </template>
-            <template v-if="column.dataIndex === 'operation'">
-              <a-flex gap="small">
-                <a-button type="primary" @click="changeRecordInfo(record)">修改</a-button>
-                <a-button danger>删除</a-button>
-              </a-flex>
-
+            <template v-else>
+              <a-tag :bordered="false" color="error">同步失败</a-tag>
             </template>
           </template>
-        </a-table>
+          <template v-if="column.dataIndex === 'operation'">
+            <a-flex gap="small">
+              <a-button type="primary" @click="changeRecordInfo(record)">修改</a-button>
+              <a-button danger>删除</a-button>
+            </a-flex>
+
+          </template>
+        </template>
+      </a-table>
     </a-card>
   </a-flex>
 </template>
 
 <style scoped>
-.provider-btn{
+.provider-btn {
   margin-right: 10px;
   margin-top: 10px;
   margin-bottom: 10px;
