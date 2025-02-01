@@ -1,5 +1,6 @@
 package fan.summer.hmoneta.service.ddns;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjUtil;
 import fan.summer.hmoneta.common.enums.DDNSProvidersSelectEnum;
 import fan.summer.hmoneta.common.enums.error.BusinessExceptionEnum;
@@ -11,6 +12,7 @@ import fan.summer.hmoneta.database.repository.ddns.DDNSUpdateRecorderRepository;
 import fan.summer.hmoneta.service.ddns.provider.DDNSProvider;
 import fan.summer.hmoneta.service.ddns.provider.ProviderFactory;
 import fan.summer.hmoneta.service.ddns.provider.ProviderService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,14 +51,67 @@ public class DDNSService {
         this.providerService = providerService;
     }
 
+    /*
+    DDNSRecorder相关方法
+     */
+    public List<DDNSRecorderEntity> queryAllDDNSRecorder() {
+        return ddnsRecorderRepository.findAll();
+    }
+
+    @Transactional
     public void modifyDdnsRecorder(DDNSRecorderEntity entity) {
         if (ObjUtil.isEmpty(entity)) throw new BusinessException(BusinessExceptionEnum.DDNS_RECORDER_EMPTY_ERROR);
-        DDNSRecorderEntity bySubDomainAndDomain = ddnsRecorderRepository.findBySubDomainAndDomain(entity.getSubDomain(), entity.getDomain());
-        if (ObjUtil.isEmpty(bySubDomainAndDomain)) {
+        if (!ObjUtil.isEmpty(ddnsRecorderRepository.findBySubDomainAndDomain(entity.getSubDomain(), entity.getDomain())))
+            throw new BusinessException(BusinessExceptionEnum.DDNS_RECORDER_EXISTS_ERROR);
+        if (ddnsRecorderRepository.findById(entity.getId()).isPresent()) {
+            // 修改
+            DDNSRecorderEntity oldDdnsRecorderEntity = ddnsRecorderRepository.findById(entity.getId()).get();
+            // 移除原UpdateRecorder
+            deleteUpdateRecorderInfoByRecorderId(oldDdnsRecorderEntity.getId());
+            // 移除供应商解析记录
+            deleteDdns(oldDdnsRecorderEntity.getDomain(), oldDdnsRecorderEntity.getSubDomain());
+            DDNSRecorderEntity newDdnsRecorderEntity = BeanUtil.copyProperties(oldDdnsRecorderEntity, DDNSRecorderEntity.class);
+            newDdnsRecorderEntity.setDomain(entity.getDomain());
+            newDdnsRecorderEntity.setSubDomain(entity.getSubDomain());
+            newDdnsRecorderEntity.setProviderName(entity.getProviderName());
+            ddnsRecorderRepository.save(newDdnsRecorderEntity);
+            createDdns(newDdnsRecorderEntity.getDomain(), newDdnsRecorderEntity.getSubDomain());
+        } else {
+            // 新增
             ddnsRecorderRepository.save(entity);
             createDdns(entity.getDomain(), entity.getSubDomain());
-        } else throw new BusinessException(BusinessExceptionEnum.DDNS_RECORDER_EXISTS_ERROR);
+        }
     }
+
+    public void deleteRecorder() {
+
+    }
+
+    /*
+    DDNSUpdateRecorder相关服务
+     */
+
+    public List<DDNSUpdateRecorderEntity> queryAllDDNSUpdateRecorder() {
+        return ddnsUpdateRecorderRepository.findAll();
+    }
+
+    public List<DDNSUpdateRecorderEntity> queryAllDDNSUpdateRecorderByProviderName(String providerName) {
+        return ddnsUpdateRecorderRepository.findAllByProviderName(providerName);
+    }
+
+    public DDNSUpdateRecorderEntity queryDDNSUpdateRecorderByDomain(String domain, String subDomain) {
+        return ddnsUpdateRecorderRepository.findByDomainAndSubDomain(domain, subDomain);
+    }
+
+    private void deleteUpdateRecorderInfoByRecorderId(Long recorderId) throws BusinessException {
+        if (ddnsUpdateRecorderRepository.findByRecorderId(recorderId).isPresent())
+            ddnsUpdateRecorderRepository.deleteByRecorderId(recorderId);
+        else throw new BusinessException(BusinessExceptionEnum.DDNS_RECORDER_UPDATE_NULL_RECORDER_ID_ERROR);
+    }
+
+    /*
+    其他方法
+     */
 
     public boolean createDdns(String domain, String subDomain) {
         DDNSRecorderEntity recorder = ddnsRecorderRepository.findBySubDomainAndDomain(subDomain, domain);
@@ -91,20 +146,13 @@ public class DDNSService {
         return status;
     }
 
-    public List<DDNSRecorderEntity> queryAllDDNSRecorder() {
-        return ddnsRecorderRepository.findAll();
+    public void deleteDdns(String domain, String subDomain) {
+        DDNSRecorderEntity recorder = ddnsRecorderRepository.findBySubDomainAndDomain(subDomain, domain);
+        if (ObjUtil.isEmpty(recorder)) throw new RuntimeException(subDomain + "." + domain + "域名无DDNS记录");
+        DDNSProvider provider = providerFactory.generatorProvider(DDNSProvidersSelectEnum.valueOf(recorder.getProviderName()));
+
+
     }
 
-    public List<DDNSUpdateRecorderEntity> queryAllDDNSUpdateRecorder() {
-        return ddnsUpdateRecorderRepository.findAll();
-    }
-
-    public List<DDNSUpdateRecorderEntity> queryAllDDNSUpdateRecorderByProviderName(String providerName) {
-        return ddnsUpdateRecorderRepository.findAllByProviderName(providerName);
-    }
-
-    public DDNSUpdateRecorderEntity queryDDNSUpdateRecorderByDomain(String domain, String subDomain) {
-        return ddnsUpdateRecorderRepository.findByDomainAndSubDomain(domain, subDomain);
-    }
 
 }
