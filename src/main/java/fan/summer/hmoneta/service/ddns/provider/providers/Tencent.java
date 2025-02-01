@@ -117,4 +117,29 @@ public class Tencent extends DDNSProvider {
             return false;
         }
     }
+
+    @Override
+    protected boolean deleteDdns(String domain, String subDomain) {
+        boolean status = false;
+        try {
+            logInfo("-----------------开始移除DNS信息-----------------");
+            logInfo("域名：" + domain);
+            logInfo("子域名：" + subDomain);
+            Map<String, Object> dnsCheck = dnsCheck(domain, subDomain);
+            if (ObjUtil.isEmpty(dnsCheck)) logError("未检查到供应商存在要删除的DNS记录", null);
+            else {
+                DnspodClient client = getCredential();
+                DeleteRecordRequest req = new DeleteRecordRequest();
+                req.setRecordId((Long) dnsCheck.get("recordId"));
+                client.DeleteRecord(req);
+                status = true;
+            }
+        } catch (TencentCloudSDKException e) {
+            logError("删除DNS记录失败", e);
+        } finally {
+            logInfo("-----------------移除DNS信息结束-----------------");
+        }
+        return status;
+    }
+
 }

@@ -21,9 +21,9 @@ public abstract class DDNSProvider {
      * 该方法通过检查当前域名解析情况，并根据新的IP地址进行解析更新
      * 采用最终类修饰，确保该方法不会被子类覆盖
      *
-     * @param domain 域名，例如example.com
+     * @param domain    域名，例如example.com
      * @param subDomain 子域名，例如www，代表www.example.com
-     * @param ip 新的IP地址，用于更新域名解析
+     * @param ip        新的IP地址，用于更新域名解析
      */
     public final boolean DDNSOperation(String domain, String subDomain, String ip) {
         logStart();
@@ -34,7 +34,7 @@ public abstract class DDNSProvider {
 
     }
 
-    protected abstract Map<String,Object> dnsCheck(String domain, String subDomain);
+    protected abstract Map<String, Object> dnsCheck(String domain, String subDomain);
 
     protected abstract boolean modifyDdns(Map<String, Object> dnsCheckResult, String domain, String subDomain, String ip);
 
@@ -62,4 +62,5 @@ public abstract class DDNSProvider {
         logger.error("[{}] {}", this.getClass().getSimpleName(), message, throwable);
     }
 
+    protected abstract boolean deleteDdns(String domain, String subDomain);
 }
