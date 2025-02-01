@@ -242,8 +242,8 @@ onMounted(async () => {
   <a-modal
       v-model:open="openDDNSInsert"
       :title="DDNSInsertModalData.providerName"
-      :ok-text="新增"
-      :cancel-text="取消"
+      ok-text="新增"
+      cancel-text="取消"
       @ok="submitInsert"
       :confirm-loading="confirmLoading"
   >
