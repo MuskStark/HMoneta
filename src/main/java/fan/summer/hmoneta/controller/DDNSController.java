@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -93,6 +94,12 @@ public class DDNSController {
     @GetMapping("/record")
     public ApiRestResponse<List<DDNSUpdateRecorderResp>> queryRecordInfoByProviderName(@RequestParam("providerName") String providerName) {
         List<DDNSUpdateRecorderEntity> ddnsUpdateRecorderEntities = ddnsService.queryAllDDNSUpdateRecorderByProviderName(providerName);
-        return ApiRestResponse.success(BeanUtil.copyToList(ddnsUpdateRecorderEntities, DDNSUpdateRecorderResp.class));
+        List<DDNSUpdateRecorderResp> respList = new ArrayList<>();
+        ddnsUpdateRecorderEntities.forEach(iterm -> {
+            DDNSUpdateRecorderResp copyProperties = BeanUtil.copyProperties(iterm, DDNSUpdateRecorderResp.class);
+            copyProperties.setRecorderId(iterm.getRecorderId().toString());
+            respList.add(copyProperties);
+        });
+        return ApiRestResponse.success(respList);
     }
 }
