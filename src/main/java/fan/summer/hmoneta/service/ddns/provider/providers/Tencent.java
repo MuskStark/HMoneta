@@ -119,7 +119,7 @@ public class Tencent extends DDNSProvider {
     }
 
     @Override
-    protected boolean deleteDdns(String domain, String subDomain) {
+    public boolean deleteDdns(String domain, String subDomain) {
         boolean status = false;
         try {
             logInfo("-----------------开始移除DNS信息-----------------");
@@ -130,6 +130,7 @@ public class Tencent extends DDNSProvider {
             else {
                 DnspodClient client = getCredential();
                 DeleteRecordRequest req = new DeleteRecordRequest();
+                req.setDomain(domain);
                 req.setRecordId((Long) dnsCheck.get("recordId"));
                 client.DeleteRecord(req);
                 status = true;
