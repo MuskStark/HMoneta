@@ -62,5 +62,5 @@ public abstract class DDNSProvider {
         logger.error("[{}] {}", this.getClass().getSimpleName(), message, throwable);
     }
 
-    protected abstract boolean deleteDdns(String domain, String subDomain);
+    public abstract boolean deleteDdns(String domain, String subDomain);
 }
