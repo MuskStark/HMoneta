@@ -87,6 +87,7 @@ public class DDNSController {
     @PostMapping("/record/modify")
     public ApiRestResponse<Object> modifyDDNSProvider(@RequestBody DDNSRecorderReq req) {
         DDNSRecorderEntity ddnsRecorderEntity = BeanUtil.copyProperties(req, DDNSRecorderEntity.class);
+        if (ObjectUtil.isNotEmpty(req.getRecorderId())) ddnsRecorderEntity.setId(req.getRecorderId());
         ddnsService.modifyDdnsRecorder(ddnsRecorderEntity);
         return ApiRestResponse.success();
     }
