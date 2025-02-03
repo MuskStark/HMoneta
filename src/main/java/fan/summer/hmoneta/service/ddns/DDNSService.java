@@ -150,8 +150,7 @@ public class DDNSService {
         DDNSRecorderEntity recorder = ddnsRecorderRepository.findBySubDomainAndDomain(subDomain, domain);
         if (ObjUtil.isEmpty(recorder)) throw new RuntimeException(subDomain + "." + domain + "域名无DDNS记录");
         DDNSProvider provider = providerFactory.generatorProvider(DDNSProvidersSelectEnum.valueOf(recorder.getProviderName()));
-
-
+        provider.deleteDdns(domain, subDomain);
     }
 
 
