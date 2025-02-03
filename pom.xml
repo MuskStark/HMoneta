@@ -10,7 +10,7 @@
     </parent>
     <groupId>fan.summer.hmoneta</groupId>
     <artifactId>HMoneta</artifactId>
-    <version>0.0.1-SNAPSHOT-V2</version>
+    <version>0.0.1-alpha.1</version>
     <name>HMoneta</name>
     <description>HMoneta</description>
     <properties>
