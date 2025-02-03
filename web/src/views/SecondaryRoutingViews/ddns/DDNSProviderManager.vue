@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref,} from "vue";
+import {onMounted, reactive, ref,} from "vue";
 import axios from "axios";
 import {message} from "ant-design-vue";
 import {encrypt, responseIsSuccess} from "@/utils/common.js";
@@ -179,8 +179,31 @@ const queryCardDataSource = async (card) => {
     }
   })
 }
+// 修改DDNS记录
+const reqData = reactive({
+  subDomain: null,
+  domain: null,
+  providerName: null,
+  recorderId: null
+})
+const recorderModifySwitch = ref(false)
+const closeRecorderModifyDraw = () => {
+  recorderModifySwitch.value = false
+}
 const changeRecordInfo = (record) => {
-  console.log(record)
+  reqData.subDomain = record.subDomain
+  reqData.domain = record.domain
+  reqData.providerName = record.providerName
+  reqData.recorderId = record.recorderId
+  recorderModifySwitch.value = true
+}
+const submitRecorderModify = () => {
+  axios.post("ddns/record/modify", reqData).then((resp) => {
+    const json = resp.data;
+    if (json.data === 200) {
+
+    }
+  })
 }
 onMounted(async () => {
   await queryDDNSProvider()
@@ -290,6 +313,28 @@ onMounted(async () => {
       </a-table>
     </a-card>
   </a-flex>
+  <!--  修改DDNS记录组件-->
+  <a-drawer
+      title="DNS记录修改"
+      :open="recorderModifySwitch"
+      @close="closeRecorderModifyDraw"
+  >
+    <template #extra>
+      <a-button type="primary" @click="submitRecorderModify">提交</a-button>
+    </template>
+    <a-form>
+      <a-form-item label="供应商名称">
+        <a-input disabled v-model:value="reqData.providerName"/>
+      </a-form-item>
+      <a-form-item label="主域名">
+        <a-input disabled v-model:value="reqData.domain"/>
+      </a-form-item>
+      <a-form-item label="二级域名">
+        <a-input v-model:value="reqData.subDomain"/>
+      </a-form-item>
+    </a-form>
+
+  </a-drawer>
 </template>
 
 <style scoped>
