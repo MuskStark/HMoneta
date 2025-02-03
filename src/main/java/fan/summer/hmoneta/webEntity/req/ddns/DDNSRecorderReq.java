@@ -14,4 +14,5 @@ public class DDNSRecorderReq {
     private String subDomain;
     private String domain;
     private String providerName;
+    private Long recorderId;
 }
