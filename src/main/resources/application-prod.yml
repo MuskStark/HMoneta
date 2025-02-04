@@ -4,15 +4,27 @@ spring:
   application:
     name: HMoneta
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.1.102:3306/home_lab_server?useUnicode=true&characterEncoding=UTF-8
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://xx.xx.xx.xx:5432/databaseName
+    username: username
+    password: password
+
     hikari:
-      username: homelab
-      password: HomeLab215178^&%@&#$gu
+      minimum-idle: 10
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      connection-timeout: 30000
+      max-lifetime: 1800000
+      pool-name: HikariPool-HMoneta
+      auto-commit: true
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
   task:
     scheduling:
       pool:
@@ -25,7 +37,9 @@ logging:
 hmoneta:
   version: @project.version@
   master:
-    report-url: http://localhost:8080/hm/master
+    report-url: serviceIp
   agent:
     port: 477
     report-delay: 60000
+
+
