@@ -36,3 +36,5 @@ build/
 /.mvn/
 /src/main/resources/rebel.xml
 /log/
+!/src/main/resources/application-self.yml
+/src/main/resources/application-self.yml
