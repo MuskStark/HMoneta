@@ -64,7 +64,11 @@ public class DDNSService {
         if (ObjUtil.isEmpty(entity)) throw new BusinessException(BusinessExceptionEnum.DDNS_RECORDER_EMPTY_ERROR);
         if (!ObjUtil.isEmpty(ddnsRecorderRepository.findBySubDomainAndDomain(entity.getSubDomain(), entity.getDomain())))
             throw new BusinessException(BusinessExceptionEnum.DDNS_RECORDER_EXISTS_ERROR);
-        if (ddnsRecorderRepository.findById(entity.getId()).isPresent()) {
+        if (ObjUtil.isEmpty(entity.getId())) {
+            // 新增
+            ddnsRecorderRepository.save(entity);
+            createDdns(entity.getDomain(), entity.getSubDomain());
+        } else if (ddnsRecorderRepository.findById(entity.getId()).isPresent()) {
             // 修改
             DDNSRecorderEntity oldDdnsRecorderEntity = ddnsRecorderRepository.findById(entity.getId()).get();
             // 移除原UpdateRecorder
@@ -77,10 +81,6 @@ public class DDNSService {
             newDdnsRecorderEntity.setProviderName(entity.getProviderName());
             ddnsRecorderRepository.save(newDdnsRecorderEntity);
             createDdns(newDdnsRecorderEntity.getDomain(), newDdnsRecorderEntity.getSubDomain());
-        } else {
-            // 新增
-            ddnsRecorderRepository.save(entity);
-            createDdns(entity.getDomain(), entity.getSubDomain());
         }
     }
 
