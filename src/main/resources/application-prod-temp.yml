@@ -37,7 +37,7 @@ logging:
 hmoneta:
   version: @project.version@
   master:
-    report-url: serviceIp
+    report-url: serviceIp:port/hm/master
   agent:
     port: 477
     report-delay: 60000
