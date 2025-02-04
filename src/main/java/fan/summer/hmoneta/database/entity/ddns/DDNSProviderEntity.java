@@ -15,7 +15,7 @@ import lombok.Setter;
 @Table(name = "ddns_info")
 @Getter
 @Setter
-public class DDNSInfo {
+public class DDNSProviderEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ddnsId;

@@ -1,19 +1,23 @@
 package fan.summer.hmoneta.service.ddns;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjUtil;
 import fan.summer.hmoneta.common.enums.DDNSProvidersSelectEnum;
-import fan.summer.hmoneta.database.entity.ddns.DDNSInfo;
+import fan.summer.hmoneta.common.enums.error.BusinessExceptionEnum;
+import fan.summer.hmoneta.common.exception.BusinessException;
+import fan.summer.hmoneta.database.entity.ddns.DDNSRecorderEntity;
 import fan.summer.hmoneta.database.entity.ddns.DDNSUpdateRecorderEntity;
-import fan.summer.hmoneta.database.repository.ddns.DDNSInfoRepository;
+import fan.summer.hmoneta.database.repository.ddns.DDNSRecorderRepository;
 import fan.summer.hmoneta.database.repository.ddns.DDNSUpdateRecorderRepository;
 import fan.summer.hmoneta.service.ddns.provider.DDNSProvider;
-import fan.summer.hmoneta.service.ddns.provider.Tencent;
-import fan.summer.hmoneta.webEntity.resp.ddns.ProviderInfoResp;
-import fan.summer.hmoneta.webEntity.resp.ddns.ProviderSelectorInfo;
+import fan.summer.hmoneta.service.ddns.provider.ProviderFactory;
+import fan.summer.hmoneta.service.ddns.provider.ProviderService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 提供DDNS服务
@@ -26,112 +30,137 @@ import java.util.List;
 public class DDNSService {
 
     private final PublicIpChecker publicIpChecker;
-    private final DDNSInfoRepository ddnsInfoRepository;
+    private final ProviderFactory providerFactory;
+
     private final DDNSUpdateRecorderRepository ddnsUpdateRecorderRepository;
+    private final DDNSRecorderRepository ddnsRecorderRepository;
+
+    private final ProviderService providerService;
 
     @Autowired
-    public DDNSService(PublicIpChecker publicIpChecker, DDNSInfoRepository ddnsInfoRepository, DDNSUpdateRecorderRepository ddnsUpdateRecorderRepository){
+    public DDNSService(PublicIpChecker publicIpChecker,
+                       ProviderFactory providerFactory,
+                       DDNSUpdateRecorderRepository ddnsUpdateRecorderRepository,
+                       DDNSRecorderRepository recorderRepository,
+                       ProviderService providerService) {
         this.publicIpChecker = publicIpChecker;
-        this.ddnsInfoRepository = ddnsInfoRepository;
+        this.providerFactory = providerFactory;
+
         this.ddnsUpdateRecorderRepository = ddnsUpdateRecorderRepository;
+        this.ddnsRecorderRepository = recorderRepository;
+
+        this.providerService = providerService;
     }
 
-    public List<ProviderInfoResp> queryAllDDNSProvider() {
-        List<DDNSInfo> allProviders = ddnsInfoRepository.findAll();
-        if (allProviders.isEmpty()){
-            return null;
-        }else{
-            List<ProviderInfoResp> providerInfos = new ArrayList<>();
-            for (DDNSInfo ddnsInfo : allProviders){
-                ProviderInfoResp providerInfoResp = new ProviderInfoResp();
-                providerInfoResp.setProviderName(ddnsInfo.getProviderName());
-                providerInfoResp.setAccessKeyId(ddnsInfo.getAccessKeyId());
-                providerInfos.add(providerInfoResp);
-            }
-            return providerInfos;
+    /*
+    DDNSRecorder相关方法
+     */
+    public List<DDNSRecorderEntity> queryAllDDNSRecorder() {
+        return ddnsRecorderRepository.findAll();
+    }
+
+    @Transactional
+    public void modifyDdnsRecorder(DDNSRecorderEntity entity) {
+        if (ObjUtil.isEmpty(entity)) throw new BusinessException(BusinessExceptionEnum.DDNS_RECORDER_EMPTY_ERROR);
+        if (!ObjUtil.isEmpty(ddnsRecorderRepository.findBySubDomainAndDomain(entity.getSubDomain(), entity.getDomain())))
+            throw new BusinessException(BusinessExceptionEnum.DDNS_RECORDER_EXISTS_ERROR);
+        if (ddnsRecorderRepository.findById(entity.getId()).isPresent()) {
+            // 修改
+            DDNSRecorderEntity oldDdnsRecorderEntity = ddnsRecorderRepository.findById(entity.getId()).get();
+            // 移除原UpdateRecorder
+            deleteUpdateRecorderInfoByRecorderId(oldDdnsRecorderEntity.getId());
+            // 移除供应商解析记录
+            deleteDdns(oldDdnsRecorderEntity.getDomain(), oldDdnsRecorderEntity.getSubDomain());
+            DDNSRecorderEntity newDdnsRecorderEntity = BeanUtil.copyProperties(oldDdnsRecorderEntity, DDNSRecorderEntity.class);
+            newDdnsRecorderEntity.setDomain(entity.getDomain());
+            newDdnsRecorderEntity.setSubDomain(entity.getSubDomain());
+            newDdnsRecorderEntity.setProviderName(entity.getProviderName());
+            ddnsRecorderRepository.save(newDdnsRecorderEntity);
+            createDdns(newDdnsRecorderEntity.getDomain(), newDdnsRecorderEntity.getSubDomain());
+        } else {
+            // 新增
+            ddnsRecorderRepository.save(entity);
+            createDdns(entity.getDomain(), entity.getSubDomain());
         }
     }
 
-    public List<ProviderSelectorInfo> getProviderSelectorInfo() {
-        List<ProviderSelectorInfo> selectors = new ArrayList<>();
-        DDNSProvidersSelectEnum[] values = DDNSProvidersSelectEnum.values();
-        for (DDNSProvidersSelectEnum value : values) {
-            selectors.add(new ProviderSelectorInfo(value.getName(), value.getLabel()));
-        }
-        return selectors;
+    @Transactional
+    public void deleteRecorder(Long recorderId) {
+        if (ObjUtil.isEmpty(recorderId)) throw new BusinessException(BusinessExceptionEnum.DDNS_RECORDER_EMPTY_ERROR);
+        Optional<DDNSRecorderEntity> byId = ddnsRecorderRepository.findById(recorderId);
+        if (byId.isEmpty())
+            throw new BusinessException(BusinessExceptionEnum.DDNS_RECORDER_EMPTY_ERROR);
+        DDNSRecorderEntity ddnsRecorderEntity = byId.get();
+        deleteDdns(ddnsRecorderEntity.getDomain(), ddnsRecorderEntity.getSubDomain());
+        ddnsRecorderRepository.deleteById(recorderId);
+        ddnsUpdateRecorderRepository.deleteByRecorderId(recorderId);
     }
 
-    public void modifyDdnsProvider(DDNSInfo ddnsInfo) {
-        if (ddnsInfo == null){
-            throw new RuntimeException("DDNS供应商信息不能为空");
-        }
-        DDNSInfo byProviderName = ddnsInfoRepository.findByProviderName(ddnsInfo.getProviderName());
-        if (byProviderName != null){
-            ddnsInfo.setDdnsId(byProviderName.getDdnsId());
-        }
-        ddnsInfoRepository.save(ddnsInfo);
+    /*
+    DDNSUpdateRecorder相关服务
+     */
+
+    public List<DDNSUpdateRecorderEntity> queryAllDDNSUpdateRecorder() {
+        return ddnsUpdateRecorderRepository.findAll();
     }
 
+    public List<DDNSUpdateRecorderEntity> queryAllDDNSUpdateRecorderByProviderName(String providerName) {
+        return ddnsUpdateRecorderRepository.findAllByProviderName(providerName);
+    }
 
-    public boolean createDdns(String providerName, String domain, String subDomain) {
-        if (providerName == null || providerName.isEmpty()){
-            throw new RuntimeException("DDNS服务商不能为空");
-        }
+    public DDNSUpdateRecorderEntity queryDDNSUpdateRecorderByDomain(String domain, String subDomain) {
+        return ddnsUpdateRecorderRepository.findByDomainAndSubDomain(domain, subDomain);
+    }
+
+    private void deleteUpdateRecorderInfoByRecorderId(Long recorderId) throws BusinessException {
+        if (ddnsUpdateRecorderRepository.findByRecorderId(recorderId).isPresent())
+            ddnsUpdateRecorderRepository.deleteByRecorderId(recorderId);
+        else throw new BusinessException(BusinessExceptionEnum.DDNS_RECORDER_UPDATE_NULL_RECORDER_ID_ERROR);
+    }
+
+    /*
+    其他方法
+     */
+
+    public boolean createDdns(String domain, String subDomain) {
+        DDNSRecorderEntity recorder = ddnsRecorderRepository.findBySubDomainAndDomain(subDomain, domain);
+        if (ObjUtil.isEmpty(recorder)) throw new RuntimeException(subDomain + "." + domain + "域名无DDNS记录");
         String ip = publicIpChecker.getPublicIp();
-        if (ip == null || ip.isEmpty()){
-            throw new RuntimeException("获取公网IP失败");
-        }
-        DDNSInfo ddnsInfo = ddnsInfoRepository.findByProviderName(providerName);
-        DDNSProvider provider = null;
-        switch (DDNSProvidersSelectEnum.valueOf(providerName)){
-            case TencentCloud:
-                provider = new Tencent(ddnsInfo.getAccessKeyId(),ddnsInfo.getAccessKeySecret());
-            break;
-//        case "aliyun":
-//            provider = new Aliyun();
-//            break;
-//        case "dnspod":
-//            provider = new Dnspod();
-//            break;
-        default:
-            throw new RuntimeException("不支持的DDNS服务商");
-        }
-        // TODO:将更新状态记录至数据库
+        if (ip == null || ip.isEmpty()) throw new RuntimeException("获取公网IP失败");
+        DDNSProvider provider = providerFactory.generatorProvider(DDNSProvidersSelectEnum.valueOf(recorder.getProviderName()));
         boolean status = provider.DDNSOperation(domain, subDomain, ip);
-        if(status){
+        if (status) {
             DDNSUpdateRecorderEntity byDomain = ddnsUpdateRecorderRepository.findByDomainAndSubDomain(domain, subDomain);
-            if(byDomain == null){
+            if (byDomain == null) {
                 DDNSUpdateRecorderEntity recorderEntity = new DDNSUpdateRecorderEntity();
+                recorderEntity.setRecorderId(recorder.getId());
                 recorderEntity.setDomain(domain);
                 recorderEntity.setSubDomain(subDomain);
-                recorderEntity.setProviderName(providerName);
+                recorderEntity.setProviderName(recorder.getProviderName());
                 recorderEntity.setIp(ip);
                 recorderEntity.setStatus(true);
                 ddnsUpdateRecorderRepository.save(recorderEntity);
-            }else {
-                if(!byDomain.getIp().equals(ip)){
-                    byDomain.setIp(ip);
-                    if(!byDomain.getProviderName().equals(providerName)){
-                        byDomain.setProviderName(providerName);
-                    }
-                    byDomain.setStatus(true);
-                    ddnsUpdateRecorderRepository.save(byDomain);
-                }else {
-                    if(!byDomain.getStatus()){
-                        byDomain.setStatus(true);
-                        ddnsUpdateRecorderRepository.save(byDomain);
-                    }
-                }
+            } else if (!byDomain.getIp().equals(ip)) {
+                byDomain.setIp(ip);
+                if (!byDomain.getProviderName().equals(recorder.getProviderName()))
+                    byDomain.setProviderName(recorder.getProviderName());
+                byDomain.setStatus(true);
+                ddnsUpdateRecorderRepository.save(byDomain);
+            } else if (!byDomain.getStatus()) {
+                byDomain.setStatus(true);
+                ddnsUpdateRecorderRepository.save(byDomain);
             }
 
         }
         return status;
     }
 
-    public List<DDNSUpdateRecorderEntity> queryAllDDNSUpdateRecorder() {
-        return ddnsUpdateRecorderRepository.findAll();
+    public void deleteDdns(String domain, String subDomain) {
+        DDNSRecorderEntity recorder = ddnsRecorderRepository.findBySubDomainAndDomain(subDomain, domain);
+        if (ObjUtil.isEmpty(recorder)) throw new RuntimeException(subDomain + "." + domain + "域名无DDNS记录");
+        DDNSProvider provider = providerFactory.generatorProvider(DDNSProvidersSelectEnum.valueOf(recorder.getProviderName()));
+        provider.deleteDdns(domain, subDomain);
     }
-    public List<DDNSUpdateRecorderEntity> queryAllDDNSUpdateRecorderByProviderName(String providerName){
-        return ddnsUpdateRecorderRepository.findAllByProviderName(providerName);
-    }
+
+
 }

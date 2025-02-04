@@ -14,7 +14,7 @@ class DDNSServiceTest {
 
     @Test
     protected void testService(){
-        ddnsService.createDdns("tencent", "summer.fan", "test");
+        ddnsService.createDdns("summer.fan", "test");
     }
 
 }
