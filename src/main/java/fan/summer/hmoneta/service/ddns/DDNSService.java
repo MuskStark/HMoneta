@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 提供DDNS服务
@@ -83,8 +84,16 @@ public class DDNSService {
         }
     }
 
-    public void deleteRecorder() {
-
+    @Transactional
+    public void deleteRecorder(Long recorderId) {
+        if (ObjUtil.isEmpty(recorderId)) throw new BusinessException(BusinessExceptionEnum.DDNS_RECORDER_EMPTY_ERROR);
+        Optional<DDNSRecorderEntity> byId = ddnsRecorderRepository.findById(recorderId);
+        if (byId.isEmpty())
+            throw new BusinessException(BusinessExceptionEnum.DDNS_RECORDER_EMPTY_ERROR);
+        DDNSRecorderEntity ddnsRecorderEntity = byId.get();
+        deleteDdns(ddnsRecorderEntity.getDomain(), ddnsRecorderEntity.getSubDomain());
+        ddnsRecorderRepository.deleteById(recorderId);
+        ddnsUpdateRecorderRepository.deleteByRecorderId(recorderId);
     }
 
     /*
