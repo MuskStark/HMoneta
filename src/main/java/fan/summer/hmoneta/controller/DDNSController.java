@@ -92,6 +92,14 @@ public class DDNSController {
         return ApiRestResponse.success();
     }
 
+    @GetMapping("/record/delete")
+    public ApiRestResponse<Object> deleteDDNSRecorder(@RequestParam Long recorderId) {
+        if (ObjectUtil.isEmpty(recorderId)) return ApiRestResponse.error(8000, "未传入DNS解析记录Id");
+        ddnsService.deleteRecorder(recorderId);
+        return ApiRestResponse.success();
+
+    }
+
     @GetMapping("/record")
     public ApiRestResponse<List<DDNSUpdateRecorderResp>> queryRecordInfoByProviderName(@RequestParam("providerName") String providerName) {
         List<DDNSUpdateRecorderEntity> ddnsUpdateRecorderEntities = ddnsService.queryAllDDNSUpdateRecorderByProviderName(providerName);
