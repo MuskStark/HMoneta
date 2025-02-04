@@ -200,9 +200,39 @@ const changeRecordInfo = (record) => {
 const submitRecorderModify = () => {
   axios.post("ddns/record/modify", reqData).then((resp) => {
     const json = resp.data;
-    if (json.data === 200) {
-
+    if (json.code === 200) {
+      message.success(json.message)
+      for (const card of dnsCardList.value) {
+        queryCardDataSource(card)
+      }
+    } else {
+      message.error(json.message)
+      for (const card of dnsCardList.value) {
+        queryCardDataSource(card)
+      }
     }
+  })
+}
+// 删除DDNS记录
+const submitRecorderDelete = (record) => {
+  axios.get("ddns/record/delete", {
+    params: {
+      recorderId: record.recorderId
+    }
+  }).then((resp) => {
+    const json = resp.data;
+    if (json.code === 200) {
+      message.success(json.message)
+      for (const card of dnsCardList.value) {
+        queryCardDataSource(card)
+      }
+    } else {
+      message.error(json.message)
+      for (const card of dnsCardList.value) {
+        queryCardDataSource(card)
+      }
+    }
+
   })
 }
 onMounted(async () => {
@@ -304,8 +334,15 @@ onMounted(async () => {
           </template>
           <template v-if="column.dataIndex === 'operation'">
             <a-flex gap="small">
-              <a-button type="primary" @click="changeRecordInfo(record)">修改</a-button>
-              <a-button danger>删除</a-button>
+              <a-button type="text" @click="changeRecordInfo(record)">修改</a-button>
+              <a-popconfirm
+                  title="是否移除该DNS解析记录"
+                  ok-text="删除"
+                  cancel-text="取消"
+                  @confirm="submitRecorderDelete(record)"
+              >
+                <a href="#">删除</a>
+              </a-popconfirm>
             </a-flex>
 
           </template>
