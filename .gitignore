@@ -38,3 +38,4 @@ build/
 /log/
 !/src/main/resources/application-self.yml
 /src/main/resources/application-self.yml
+/web/.env.prodaction
