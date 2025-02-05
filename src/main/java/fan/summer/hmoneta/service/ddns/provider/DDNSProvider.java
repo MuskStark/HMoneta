@@ -17,26 +17,33 @@ public abstract class DDNSProvider {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**
-     * 执行DDNS操作，用于动态域名解析
-     * 该方法通过检查当前域名解析情况，并根据新的IP地址进行解析更新
-     * 采用最终类修饰，确保该方法不会被子类覆盖
+     * 用于检查指定域名及子域名的DNS状态。
      *
-     * @param domain    域名，例如example.com
-     * @param subDomain 子域名，例如www，代表www.example.com
-     * @param ip        新的IP地址，用于更新域名解析
+     * @param domain    主域名字符串，例如："example.com"。
+     * @param subDomain 子域名字符串，例如："www"，用于构成 "www.example.com"。
+     * @return 返回一个映射集，包含关于DNS检查结果的键值对。
+     * 具体的键和值依赖于实现，可能包括解析状态、TTL、记录类型等信息。
      */
-    public final boolean DDNSOperation(String domain, String subDomain, String ip) {
-        logStart();
-        Map<String, Object> result = dnsCheck(domain, subDomain);
-        boolean status = modifyDdns(result, domain, subDomain, ip);
-        logEnd();
-        return status;
+    public abstract Map<String, Object> dnsCheck(String domain, String subDomain);
 
-    }
 
-    protected abstract Map<String, Object> dnsCheck(String domain, String subDomain);
+    /**
+     * 修改动态DNS（DDNS）服务中的DNS记录，将指定的IP地址与给定的域名及子域名关联。
+     *
+     * @param domain    主域名，DDNS更改所适用的域名（例如："example.com"）。
+     * @param subDomain 主域名下的子域名，需要更新的部分（例如："www" 用于 "www.example.com"）。
+     * @param ip        为指定的域名和子域名组合设置的新IP地址。
+     * @return 如果修改成功返回 {@code true}，否则返回 {@code false}。
+     */
+    public abstract boolean modifyDdns(String domain, String subDomain, String ip);
 
-    protected abstract boolean modifyDdns(Map<String, Object> dnsCheckResult, String domain, String subDomain, String ip);
+    /**
+     * 删除指定域名和子域名的动态DNS（DDNS）记录。
+     *
+     * @param domain    主域名，即要删除DDNS记录的域名部分，例如："example.com"。
+     * @param subDomain 子域名，指主域名下的特定子域名部分，例如："www" 对应于 "www.example.com"。
+     */
+    public abstract void deleteDdns(String domain, String subDomain);
 
     // 日志记录方法
     private void logStart() {
@@ -62,5 +69,4 @@ public abstract class DDNSProvider {
         logger.error("[{}] {}", this.getClass().getSimpleName(), message, throwable);
     }
 
-    public abstract boolean deleteDdns(String domain, String subDomain);
 }

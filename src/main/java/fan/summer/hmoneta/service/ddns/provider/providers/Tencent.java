@@ -46,7 +46,7 @@ public class Tencent extends DDNSProvider {
     }
 
     @Override
-    protected Map<String, Object> dnsCheck(String domain, String subDomain) {
+    public Map<String, Object> dnsCheck(String domain, String subDomain) {
         try {
             logInfo("-----------------开始检查DNS信息-----------------");
             logInfo("域名：" + domain);
@@ -78,13 +78,14 @@ public class Tencent extends DDNSProvider {
     }
 
     @Override
-    protected boolean modifyDdns(Map<String, Object> dnsCheckResult, String domain, String subDomain, String ip) {
+    public boolean modifyDdns(String domain, String subDomain, String ip) {
         try {
             logInfo("-----------------开始修改DNS信息-----------------");
             logInfo("域名：" + domain);
             logInfo("子域名：" + subDomain);
             logInfo("目标Ip：" + ip);
             DnspodClient client = getCredential();
+            Map<String, Object> dnsCheckResult = dnsCheck(domain, subDomain);
             if (ObjUtil.isEmpty(dnsCheckResult)) {
                 logInfo("不存在DNS信息，开始创建DNS信息");
                 CreateRecordRequest createReq = new CreateRecordRequest();
@@ -119,7 +120,7 @@ public class Tencent extends DDNSProvider {
     }
 
     @Override
-    public boolean deleteDdns(String domain, String subDomain) {
+    public void deleteDdns(String domain, String subDomain) {
         boolean status = false;
         try {
             logInfo("-----------------开始移除DNS信息-----------------");
@@ -140,7 +141,6 @@ public class Tencent extends DDNSProvider {
         } finally {
             logInfo("-----------------移除DNS信息结束-----------------");
         }
-        return status;
     }
 
 }
