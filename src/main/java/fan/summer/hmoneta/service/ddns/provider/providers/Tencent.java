@@ -64,9 +64,12 @@ public class Tencent extends DDNSProvider {
             Map<String, List<RecordListItem>> collect = recordListItemStream.collect(Collectors.groupingBy(RecordListItem::getName));
             if (collect.containsKey(subDomain)) {
                 List<RecordListItem> recordListItems = collect.get(subDomain);
-                for (RecordListItem record : recordListItems)
-                    if (record.getType().equals("A"))
+                for (RecordListItem record : recordListItems) {
+                    // TODO:更改成Map{"type":"","oldVale":"","recordId":""}
+                    if (record.getType().equals("A")) {
                         result = Map.of("oldIp", record.getValue(), "recordId", record.getRecordId());
+                    }
+                }
             }
             logInfo("DNS信息：" + result);
             logInfo("-----------------完成DNS信息检查-----------------");
@@ -78,36 +81,37 @@ public class Tencent extends DDNSProvider {
     }
 
     @Override
-    public boolean modifyDdns(String domain, String subDomain, String ip) {
+    public boolean modifyDdns(String domain, String subDomain, String value, String recordType) {
         try {
             logInfo("-----------------开始修改DNS信息-----------------");
             logInfo("域名：" + domain);
             logInfo("子域名：" + subDomain);
-            logInfo("目标Ip：" + ip);
+            logInfo("目标值：" + value);
             DnspodClient client = getCredential();
+            // TODO:返回值将变更为Map{"type":"","oldVale":"","recordId":""}， 根据变更修改 else
             Map<String, Object> dnsCheckResult = dnsCheck(domain, subDomain);
             if (ObjUtil.isEmpty(dnsCheckResult)) {
                 logInfo("不存在DNS信息，开始创建DNS信息");
                 CreateRecordRequest createReq = new CreateRecordRequest();
                 createReq.setDomain(domain);
                 createReq.setSubDomain(subDomain);
-                createReq.setRecordType("A");
+                createReq.setRecordType(recordType);
                 createReq.setRecordLine("默认");
-                createReq.setValue(ip);
+                createReq.setValue(value);
                 CreateRecordResponse resp = client.CreateRecord(createReq);
             } else {
                 logInfo("存在DNS信息，开始修改DNS信息");
                 String oldIp = dnsCheckResult.get("oldIp").toString();
                 Long recordId = Long.parseLong(dnsCheckResult.get("recordId").toString());
                 // 如果不一致则修改
-                if (!oldIp.equals(ip)) {
+                if (!oldIp.equals(value)) {
                     ModifyRecordRequest req = new ModifyRecordRequest();
                     req.setRecordId(recordId);
                     req.setDomain(domain);
                     req.setSubDomain(subDomain);
-                    req.setRecordType("A");
+                    req.setRecordType(recordType);
                     req.setRecordLine("默认");
-                    req.setValue(ip);
+                    req.setValue(value);
                     ModifyRecordResponse resp = client.ModifyRecord(req);
                 }
             }
@@ -127,8 +131,9 @@ public class Tencent extends DDNSProvider {
             logInfo("域名：" + domain);
             logInfo("子域名：" + subDomain);
             Map<String, Object> dnsCheck = dnsCheck(domain, subDomain);
-            if (ObjUtil.isEmpty(dnsCheck)) logError("未检查到供应商存在要删除的DNS记录", null);
-            else {
+            if (ObjUtil.isEmpty(dnsCheck)) {
+                logError("未检查到供应商存在要删除的DNS记录", null);
+            } else {
                 DnspodClient client = getCredential();
                 DeleteRecordRequest req = new DeleteRecordRequest();
                 req.setDomain(domain);

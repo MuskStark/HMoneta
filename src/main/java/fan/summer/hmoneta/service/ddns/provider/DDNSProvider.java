@@ -35,7 +35,7 @@ public abstract class DDNSProvider {
      * @param ip        为指定的域名和子域名组合设置的新IP地址。
      * @return 如果修改成功返回 {@code true}，否则返回 {@code false}。
      */
-    public abstract boolean modifyDdns(String domain, String subDomain, String ip);
+    public abstract boolean modifyDdns(String domain, String subDomain, String value, String recordType);
 
     /**
      * 删除指定域名和子域名的动态DNS（DDNS）记录。
