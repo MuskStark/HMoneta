@@ -1,0 +1,30 @@
+package fan.summer.hmoneta.controller;
+
+import fan.summer.hmoneta.service.acme.AcmeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * 类的详细说明
+ *
+ * @author phoebej
+ * @version 1.00
+ * @Date 2025/2/24
+ */
+@RestController
+@RequestMapping("/hm/acme/test")
+public class AcmeController {
+    private final AcmeService acmeService;
+
+    @Autowired
+    public AcmeController(AcmeService acmeService) {
+        this.acmeService = acmeService;
+    }
+
+    @GetMapping("/test")
+    public void test() {
+        acmeService.useDnsChallengeGetCertification("test7.summer.fan", null);
+    }
+}
