@@ -26,6 +26,6 @@ public class AcmeController {
 
     @GetMapping("/test")
     public ApiRestResponse<Long> test() {
-        return ApiRestResponse.success(acmeService.applyCertificate("test7.summer.fan", null));
+        return ApiRestResponse.success(acmeService.applyCertificate("test7.summer.fan", "TencentCloud"));
     }
 }
