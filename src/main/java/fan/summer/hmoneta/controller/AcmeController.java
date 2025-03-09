@@ -1,6 +1,7 @@
 package fan.summer.hmoneta.controller;
 
 import fan.summer.hmoneta.service.acme.AcmeService;
+import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @Date 2025/2/24
  */
 @RestController
-@RequestMapping("/hm/acme/test")
+@RequestMapping("/hm/acme")
 public class AcmeController {
     private final AcmeService acmeService;
 
@@ -24,7 +25,7 @@ public class AcmeController {
     }
 
     @GetMapping("/test")
-    public void test() {
-        acmeService.useDnsChallengeGetCertification("test7.summer.fan", null);
+    public ApiRestResponse<Long> test() {
+        return ApiRestResponse.success(acmeService.applyCertificate("test7.summer.fan", null));
     }
 }
