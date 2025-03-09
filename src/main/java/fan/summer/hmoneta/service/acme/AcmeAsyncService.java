@@ -15,8 +15,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.security.KeyPair;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,6 +33,10 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Slf4j
 public class AcmeAsyncService {
+
+    final int maxAttempts = 10;  // 最大尝试次数
+    final long sleepTime = 30;
+    final String a = "_acme-challenge";
 
     @Value("${hmoneta.acme.uri}")
     private String acmeUri;
@@ -76,16 +84,14 @@ public class AcmeAsyncService {
                 String mainDomain = domain.substring(domain.indexOf('.') + 1);
                 boolean status = ddnsProvider.modifyDdns(mainDomain, subDomain, digest, "TXT");
                 log.info("DNS修改状态:{}", status);
-                if (status) {
-                    // 等待DNS生效
-                    
+                if (status & waitForDnsPropagation(domain, digest)) {
                     try {
                         log.info("开启挑战");
                         challenge.trigger();
                         log.info("挑战结果验证");
                         while (!EnumSet.of(Status.VALID, Status.INVALID).contains(authorization.getStatus())) {
                             try {
-                                TimeUnit.MILLISECONDS.sleep(3000);
+                                TimeUnit.MILLISECONDS.sleep(5000);
                                 log.info("再次验证");
                                 authorization.fetch();
                             } catch (InterruptedException ignored) {
@@ -103,7 +109,7 @@ public class AcmeAsyncService {
                                 log.info("获取证书");
                                 order.execute(keyPair);
                                 while (!EnumSet.of(Status.VALID, Status.INVALID).contains(order.getStatus())) {
-                                    TimeUnit.MILLISECONDS.sleep(3000);
+                                    TimeUnit.MILLISECONDS.sleep(5000);
                                     log.info("继续验证证书签发状态");
                                     order.fetch();
                                 }
@@ -129,4 +135,36 @@ public class AcmeAsyncService {
             throw new RuntimeException(e);
         }
     }
+
+    private boolean waitForDnsPropagation(String domain, String expectedTxtRecord) {
+        try {
+            // 使用nslookup命令查询TXT记录
+            ProcessBuilder processBuilder = new ProcessBuilder("nslookup", "-type=TXT", domain, "8.8.8.8");
+            for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+                Process process = processBuilder.start();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                List<String> output = new ArrayList<>();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.add(line);
+                }
+                int exitCode = process.waitFor();
+                if (exitCode == 0) {
+                    for (String out : output) {
+                        if (out.contains(expectedTxtRecord)) {
+                            log.info("找到匹配的TXT记录: {}", expectedTxtRecord);
+                            return true;
+                        }
+                    }
+                } else {
+                    log.error("nslookup命令执行失败，退出码: {}", exitCode);
+                }
+                TimeUnit.SECONDS.sleep(sleepTime);
+            }
+        } catch (Exception e) {
+            log.error("验证TXT DNS记录失败: {}", e.getMessage());
+        }
+        return false;
+    }
+
 }
