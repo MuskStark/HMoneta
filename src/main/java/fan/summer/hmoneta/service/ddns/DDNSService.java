@@ -81,7 +81,7 @@ public class DDNSService {
             // 移除原UpdateRecorder
             deleteUpdateRecorderInfoByRecorderId(oldDdnsRecorderEntity.getId());
             // 移除供应商解析记录
-            deleteDdns(oldDdnsRecorderEntity.getDomain(), oldDdnsRecorderEntity.getSubDomain());
+            deleteDdns(oldDdnsRecorderEntity.getDomain(), oldDdnsRecorderEntity.getSubDomain(), "A");
             DDNSRecorderEntity newDdnsRecorderEntity = BeanUtil.copyProperties(oldDdnsRecorderEntity, DDNSRecorderEntity.class);
             newDdnsRecorderEntity.setDomain(entity.getDomain());
             newDdnsRecorderEntity.setSubDomain(entity.getSubDomain());
@@ -101,7 +101,7 @@ public class DDNSService {
             throw new BusinessException(BusinessExceptionEnum.DDNS_RECORDER_EMPTY_ERROR);
         }
         DDNSRecorderEntity ddnsRecorderEntity = byId.get();
-        deleteDdns(ddnsRecorderEntity.getDomain(), ddnsRecorderEntity.getSubDomain());
+        deleteDdns(ddnsRecorderEntity.getDomain(), ddnsRecorderEntity.getSubDomain(),"A");
         ddnsRecorderRepository.deleteById(recorderId);
         ddnsUpdateRecorderRepository.deleteByRecorderId(recorderId);
     }
@@ -172,13 +172,13 @@ public class DDNSService {
         return status;
     }
 
-    public void deleteDdns(String domain, String subDomain) {
+    public void deleteDdns(String domain, String subDomain, String recordType) {
         DDNSRecorderEntity recorder = ddnsRecorderRepository.findBySubDomainAndDomain(subDomain, domain);
         if (ObjUtil.isEmpty(recorder)) {
             throw new RuntimeException(subDomain + "." + domain + "域名无DDNS记录");
         }
         DDNSProvider provider = providerFactory.generatorProvider(DDNSProvidersSelectEnum.valueOf(recorder.getProviderName()));
-        provider.deleteDdns(domain, subDomain);
+        provider.deleteDdns(domain, subDomain, recordType);
     }
 
 

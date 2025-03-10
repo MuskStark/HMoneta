@@ -1,9 +1,10 @@
 package fan.summer.hmoneta.service.ddns.provider;
 
+import fan.summer.hmoneta.service.ddns.provider.info.DNSRecordInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
+import java.util.List;
 
 /**
  * 所有DDNS服务商的父类，均需重新实现modifyDdns
@@ -24,7 +25,7 @@ public abstract class DDNSProvider {
      * @return 返回一个映射集，包含关于DNS检查结果的键值对。
      * 具体的键和值依赖于实现，可能包括解析状态、TTL、记录类型等信息。
      */
-    public abstract Map<String, Object> dnsCheck(String domain, String subDomain);
+    public abstract List<DNSRecordInfo> dnsCheck(String domain, String subDomain);
 
 
     /**
@@ -43,7 +44,7 @@ public abstract class DDNSProvider {
      * @param domain    主域名，即要删除DDNS记录的域名部分，例如："example.com"。
      * @param subDomain 子域名，指主域名下的特定子域名部分，例如："www" 对应于 "www.example.com"。
      */
-    public abstract void deleteDdns(String domain, String subDomain);
+    public abstract void deleteDdns(String domain, String subDomain, String recordType);
 
     // 日志记录方法
     private void logStart() {
