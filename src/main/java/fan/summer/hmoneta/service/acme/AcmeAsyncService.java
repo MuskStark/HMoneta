@@ -14,11 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.xbill.DNS.*;
+import org.xbill.DNS.Record;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+
 import java.security.KeyPair;
-import java.util.ArrayList;
+import java.security.cert.X509Certificate;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -35,8 +36,6 @@ import java.util.concurrent.TimeUnit;
 public class AcmeAsyncService {
 
     final int maxAttempts = 10;  // 最大尝试次数
-    final long sleepTime = 30;
-    final String a = "_acme-challenge";
 
     @Value("${hmoneta.acme.uri}")
     private String acmeUri;
@@ -82,9 +81,9 @@ public class AcmeAsyncService {
                 DDNSProvider ddnsProvider = providerFactory.generatorProvider(DDNSProvidersSelectEnum.valueOf(providerName));
                 String subDomain = domain.substring(0, domain.indexOf('.'));
                 String mainDomain = domain.substring(domain.indexOf('.') + 1);
-                boolean status = ddnsProvider.modifyDdns(mainDomain, subDomain, digest, "TXT");
+                boolean status = ddnsProvider.modifyDdns(mainDomain, "_acme-challenge." + subDomain, digest, "TXT");
                 log.info("DNS修改状态:{}", status);
-                if (status & waitForDnsPropagation(domain, digest)) {
+                if (status & waitForDnsPropagation("_acme-challenge." + domain, digest)) {
                     try {
                         log.info("开启挑战");
                         challenge.trigger();
@@ -104,10 +103,12 @@ public class AcmeAsyncService {
                         log.info("挑战结果:{}", authorization.getStatus());
                         if (authorization.getStatus() == Status.VALID) {
                             log.info("验证通过");
+                            removeTxtDnsInfo(ddnsProvider, mainDomain, subDomain);
                             // 获取证书
                             try {
                                 log.info("获取证书");
-                                order.execute(keyPair);
+                                KeyPair cerKeyPair = KeyPairUtils.createKeyPair(2048);
+                                order.execute(cerKeyPair);
                                 while (!EnumSet.of(Status.VALID, Status.INVALID).contains(order.getStatus())) {
                                     TimeUnit.MILLISECONDS.sleep(5000);
                                     log.info("继续验证证书签发状态");
@@ -115,7 +116,9 @@ public class AcmeAsyncService {
                                 }
                                 if (order.getStatus() == Status.VALID) {
                                     log.info("订单确认完成，开始下载证书");
-                                    Certificate certificate = order.getCertificate();
+                                    Certificate cert = order.getCertificate();
+                                    X509Certificate certificate = cert.getCertificate();
+                                    List<X509Certificate> chain = cert.getCertificateChain();
                                 } else {
                                     log.error("订单确认失败");
                                 }
@@ -123,11 +126,17 @@ public class AcmeAsyncService {
                                 throw new RuntimeException(e);
                             }
                         } else {
+                            removeTxtDnsInfo(ddnsProvider, mainDomain, subDomain);
                             log.error("验证未通过");
                         }
-
                     } catch (AcmeException e) {
+                        removeTxtDnsInfo(ddnsProvider, mainDomain, subDomain);
                         throw new RuntimeException(e);
+                    }
+                }else {
+                    log.error("未通过DNS记录验证");
+                    if(status){
+                        removeTxtDnsInfo(ddnsProvider, mainDomain, subDomain);
                     }
                 }
             }, () -> log.error("未正常获取到Dns01Challenge对象"));
@@ -137,34 +146,49 @@ public class AcmeAsyncService {
     }
 
     private boolean waitForDnsPropagation(String domain, String expectedTxtRecord) {
+        log.info("开始验证域名{}的TXT解析是否生效", domain);
         try {
-            // 使用nslookup命令查询TXT记录
-            ProcessBuilder processBuilder = new ProcessBuilder("nslookup", "-type=TXT", domain, "8.8.8.8");
-            for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-                Process process = processBuilder.start();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                List<String> output = new ArrayList<>();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    output.add(line);
-                }
-                int exitCode = process.waitFor();
-                if (exitCode == 0) {
-                    for (String out : output) {
-                        if (out.contains(expectedTxtRecord)) {
-                            log.info("找到匹配的TXT记录: {}", expectedTxtRecord);
-                            return true;
+            Lookup lookup = new Lookup(domain, Type.TXT);
+            for (int attempt = 1; maxAttempts >= attempt; attempt++) {
+                lookup.run();
+                if (lookup.getResult() == Lookup.SUCCESSFUL) {
+                    log.info("DNS记录查询成功，开始验证");
+                    Record[] answers = lookup.getAnswers();
+                    for (Record record : answers) {
+                        if(record instanceof TXTRecord txtRecord) {
+                            for (String txt : txtRecord.getStrings()) {
+                                if (txt.equals(expectedTxtRecord)) {
+                                    log.info("通过解析验证，DNS记录正确，开始下一步");
+                                    return true;
+                                }
+                            }
                         }
                     }
+                    log.info("未匹配上指定的DNS记录，5秒后重新尝试。第{}次尝试", attempt);
+                    TimeUnit.MILLISECONDS.sleep(5000);
                 } else {
-                    log.error("nslookup命令执行失败，退出码: {}", exitCode);
+                    log.info("DNS记录查询未成功，5秒后重新尝试。第{}次尝试", attempt);
+                    TimeUnit.MILLISECONDS.sleep(5000);
+                    if(attempt == maxAttempts) {
+                        return false;}
                 }
-                TimeUnit.SECONDS.sleep(sleepTime);
             }
-        } catch (Exception e) {
-            log.error("验证TXT DNS记录失败: {}", e.getMessage());
+        } catch (TextParseException | InterruptedException e) {
+            log.error(e.toString());
+            return false;
         }
         return false;
+    }
+
+    private void removeTxtDnsInfo(DDNSProvider ddnsProvider, String domain, String subDomain){
+        log.info("开始清理用于验证的DNS记录");
+        try {
+            ddnsProvider.deleteDdns(domain, "_acme-challenge." + subDomain, "TXT");
+        }catch (Exception e){
+            log.error(e.toString());
+        }finally {
+            log.info("结束清理");
+        }
     }
 
 }
