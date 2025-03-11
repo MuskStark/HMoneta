@@ -1,6 +1,7 @@
 package fan.summer.hmoneta.task.scheduled;
 
 import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.RandomUtil;
 import fan.summer.hmoneta.database.entity.ipPool.IpPoolUsedDetail;
 import fan.summer.hmoneta.database.entity.serverInfo.ServerInfoDetail;
 import fan.summer.hmoneta.service.IpResourceManagerService;
@@ -8,6 +9,7 @@ import fan.summer.hmoneta.service.ServerInfoManagerService;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +41,7 @@ public class ServerStatusUpdateTask {
     @Scheduled(cron = "0 0/5 * * * ?")
     @Transactional
     protected void updateServerStatus() {
+        MDC.put("LOG_ID", System.currentTimeMillis() + RandomUtil.randomString(3));
         LOG.info(">>>>>>>开始服务器状态服务>>>>>>>>>");
         List<ServerInfoDetail> serverInfoDetails = serversManagerService.findAllServerInfo();
         if(serverInfoDetails.isEmpty()){

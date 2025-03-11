@@ -1,11 +1,13 @@
 package fan.summer.hmoneta.task.scheduled;
 
 import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.RandomUtil;
 import fan.summer.hmoneta.database.entity.ddns.DDNSRecorderEntity;
 import fan.summer.hmoneta.database.entity.ddns.DDNSUpdateRecorderEntity;
 import fan.summer.hmoneta.service.ddns.DDNSService;
 import fan.summer.hmoneta.service.ddns.PublicIpChecker;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -34,6 +36,7 @@ public class DDNSStatusUpdateTask {
 
     @Scheduled(cron = "1 */10 * * * ?")
     public void updateDDNSStatus() {
+        MDC.put("LOG_ID", System.currentTimeMillis() + RandomUtil.randomString(3));
         log.info("----------------启动DDNS更新任务----------------");
         List<DDNSRecorderEntity> ddnsRecorderEntities = ddnsService.queryAllDDNSRecorder();
         if (!ddnsRecorderEntities.isEmpty()) {
