@@ -40,3 +40,4 @@ build/
 /src/main/resources/application-self.yml
 /web/.env.prodaction
 /qodana.yaml
+/certs/
