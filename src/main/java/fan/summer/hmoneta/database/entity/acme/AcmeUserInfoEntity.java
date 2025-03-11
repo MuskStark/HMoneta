@@ -2,12 +2,15 @@ package fan.summer.hmoneta.database.entity.acme;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-import java.security.*;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 
 /**
  * Acme账号信息
@@ -26,14 +29,17 @@ public class AcmeUserInfoEntity {
 
     @Lob
     @Column(columnDefinition = "bytea", nullable = false)
+    @JdbcTypeCode(SqlTypes.BINARY) // 强制 Hibernate 使用二进制类型
     private byte[] publicKey;
 
     @Lob
     @Column(columnDefinition = "bytea", nullable = false)
+    @JdbcTypeCode(SqlTypes.BINARY) // 强制 Hibernate 使用二进制类型
     private byte[] privateKey;
 
     /**
      * 根据KeyPair存入
+     *
      * @param keyPair 待存入的KeyPair
      */
     public void saveKeyPair(KeyPair keyPair) {
