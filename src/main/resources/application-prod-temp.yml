@@ -41,5 +41,7 @@ hmoneta:
   agent:
     port: 477
     report-delay: 60000
+  acme:
+    uri: https://acme-staging-v02.api.letsencrypt.org/directory # 需替换letsencrypt生产环境地址
 
 
