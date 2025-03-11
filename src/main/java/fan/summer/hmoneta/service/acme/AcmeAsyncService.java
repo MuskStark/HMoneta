@@ -18,8 +18,12 @@ import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
 
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.Base64;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -119,10 +123,11 @@ public class AcmeAsyncService {
                                     Certificate cert = order.getCertificate();
                                     X509Certificate certificate = cert.getCertificate();
                                     List<X509Certificate> chain = cert.getCertificateChain();
+                                    saveCertificateFiles(cerKeyPair, cert, domain, info.getTaskId());
                                 } else {
                                     log.error("订单确认失败");
                                 }
-                            } catch (AcmeException | InterruptedException e) {
+                            } catch (AcmeException | InterruptedException | CertificateEncodingException | IOException e) {
                                 throw new RuntimeException(e);
                             }
                         } else {
@@ -164,11 +169,11 @@ public class AcmeAsyncService {
                             }
                         }
                     }
-                    log.info("未匹配上指定的DNS记录，5秒后重新尝试。第{}次尝试", attempt);
-                    TimeUnit.MILLISECONDS.sleep(5000);
+                    log.info("未匹配上指定的DNS记录，10秒后重新尝试。第{}次尝试", attempt);
+                    TimeUnit.MILLISECONDS.sleep(10000);
                 } else {
-                    log.info("DNS记录查询未成功，5秒后重新尝试。第{}次尝试", attempt);
-                    TimeUnit.MILLISECONDS.sleep(5000);
+                    log.info("DNS记录查询未成功，10秒后重新尝试。第{}次尝试", attempt);
+                    TimeUnit.MILLISECONDS.sleep(10000);
                     if(attempt == maxAttempts) {
                         return false;}
                 }
@@ -189,6 +194,89 @@ public class AcmeAsyncService {
         }finally {
             log.info("结束清理");
         }
+    }
+
+    private void saveCertificateFiles(KeyPair keyPair, Certificate cert, String domain, Long taskId) throws IOException, CertificateEncodingException {
+        log.info("开始保存证书文件，域名: {}, 任务ID: {}", domain, taskId);
+
+        // 创建证书存储目录
+        String certPath = "certs/" + domain + "/" + taskId;
+        File certDir = new File(certPath);
+        if (!certDir.exists() && !certDir.mkdirs()) {
+            throw new IOException("无法创建证书目录: " + certPath);
+        }
+
+        // 保存私钥 (KEY文件)
+        try (FileWriter fw = new FileWriter(new File(certDir, domain + ".key"))) {
+            KeyPairUtils.writeKeyPair(keyPair, fw);
+            log.info("私钥文件已保存: {}", domain + ".key");
+        }
+
+        X509Certificate certificate = cert.getCertificate();
+        List<X509Certificate> chain = cert.getCertificateChain();
+
+        // 保存证书 (CRT文件)
+        try (FileOutputStream fos = new FileOutputStream(new File(certDir, domain + ".crt"))) {
+            writeCertificate(certificate, fos);
+            log.info("证书文件已保存: {}", domain + ".crt");
+        }
+
+        // 保存完整证书链 (PEM文件)
+        try (FileOutputStream fos = new FileOutputStream(new File(certDir, domain + ".pem"))) {
+            writeCertificate(certificate, fos);
+
+            // 添加中间证书
+            for (int i = 1; i < chain.size(); i++) {
+                fos.write('\n');
+                writeCertificate(chain.get(i), fos);
+            }
+            log.info("完整证书链文件已保存: {}", domain + ".pem");
+        }
+
+        // 保存完整证书链和私钥 (FULLCHAIN文件) - 修复后的版本
+        File fullchainFile = new File(certDir, domain + ".fullchain.pem");
+
+        // 先将私钥写入字符串
+        StringWriter keyWriter = new StringWriter();
+        KeyPairUtils.writeKeyPair(keyPair, keyWriter);
+        String privateKeyPem = keyWriter.toString();
+
+        // 使用单个输出流写入所有内容
+        try (FileOutputStream fos = new FileOutputStream(fullchainFile)) {
+            // 写入私钥
+            fos.write(privateKeyPem.getBytes(StandardCharsets.UTF_8));
+            fos.write('\n');
+
+            // 写入证书
+            writeCertificate(certificate, fos);
+
+            // 写入证书链
+            for (int i = 1; i < chain.size(); i++) {
+                fos.write('\n');
+                writeCertificate(chain.get(i), fos);
+            }
+            log.info("完整证书链和私钥文件已保存: {}", domain + ".fullchain.pem");
+        }
+
+        log.info("所有证书文件保存完成");
+    }
+
+    private void writeCertificate(X509Certificate certificate, OutputStream out) throws IOException, CertificateEncodingException {
+        byte[] encoded = certificate.getEncoded();
+        String encoded64 = Base64.getEncoder().encodeToString(encoded);
+
+        // 按照PEM格式写入
+        PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, StandardCharsets.US_ASCII), false);
+        writer.println("-----BEGIN CERTIFICATE-----");
+
+        // 每64个字符一行
+        for (int i = 0; i < encoded64.length(); i += 64) {
+            writer.println(encoded64.substring(i, Math.min(i + 64, encoded64.length())));
+        }
+
+        writer.println("-----END CERTIFICATE-----");
+        writer.flush();
+        // 注意：这里不关闭writer，因为我们使用的是外部传入的OutputStream
     }
 
 }
