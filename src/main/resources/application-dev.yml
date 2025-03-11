@@ -25,6 +25,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        jdbc:
+          lob:
+            non_contextual_creation: true
+
   task:
     scheduling:
       pool:
