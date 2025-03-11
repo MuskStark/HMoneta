@@ -1,6 +1,7 @@
 package fan.summer.hmoneta.service.acme;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RandomUtil;
 import fan.summer.hmoneta.common.enums.DDNSProvidersSelectEnum;
 import fan.summer.hmoneta.database.entity.acme.AcmeChallengeInfoEntity;
 import fan.summer.hmoneta.database.entity.acme.AcmeUserInfoEntity;
@@ -14,13 +15,13 @@ import org.shredzone.acme4j.*;
 import org.shredzone.acme4j.challenge.Dns01Challenge;
 import org.shredzone.acme4j.exception.AcmeException;
 import org.shredzone.acme4j.util.KeyPairUtils;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
-
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -31,7 +32,6 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -65,14 +65,16 @@ public class AcmeAsyncService {
 
     @Async
     protected void useDnsChallengeGetCertification(String domain, String providerName, AcmeChallengeInfoEntity info) {
+        MDC.put("LOG_ID", System.currentTimeMillis() + RandomUtil.randomString(3));
         log.info("[ACME-Task:{}]开始为{}申请证书", info.getTaskId(), domain);
         try {
             KeyPair keyPair;
             Session session = new Session(acmeUri);
             List<AcmeUserInfoEntity> byUserEmail = acmeUserInfoRepository.findByUserEmail("gitmain@outlook.sg");
-            if(ObjectUtil.isNotEmpty(byUserEmail)){
+            if (ObjectUtil.isNotEmpty(byUserEmail)) {
+                log.info("[ACME-Task:{}]>>>>>>>>无需创建ACME账号", info.getTaskId());
                 keyPair = byUserEmail.getFirst().generateKeyPair();
-            }else {
+            } else {
                 log.info("[ACME-Task:{}]>>>>>>>>创建ACME账号", info.getTaskId());
                 keyPair = KeyPairUtils.createKeyPair(2048);
                 Account account = new AccountBuilder()
@@ -80,15 +82,15 @@ public class AcmeAsyncService {
                         .agreeToTermsOfService()
                         .useKeyPair(keyPair)
                         .create(session);
-                if(ObjectUtil.isNotEmpty(account)){
+                if (ObjectUtil.isNotEmpty(account)) {
                     log.info("[ACME-Task:{}]>>>>>>>>成功创建ACME账号", info.getTaskId());
                     AcmeUserInfoEntity acmeUserInfoEntity = new AcmeUserInfoEntity();
                     acmeUserInfoEntity.setUserId(SnowFlakeUtil.getSnowFlakeNextId());
                     acmeUserInfoEntity.setUserEmail("gitmain@outlook.sg");
                     acmeUserInfoEntity.saveKeyPair(keyPair);
                     acmeUserInfoRepository.save(acmeUserInfoEntity);
-                }else {
-                    throw new RuntimeException("[ACME-Task:"+ info.getTaskId() +"]创建账户失败");
+                } else {
+                    throw new RuntimeException("[ACME-Task:" + info.getTaskId() + "]创建账户失败");
                 }
             }
             log.info("[ACME-Task:{}]1.登录ACME提供商", info.getTaskId());
@@ -103,8 +105,8 @@ public class AcmeAsyncService {
             log.info("[ACME-Task:{}]发起DNS-01挑战", info.getTaskId());
             authorization.findChallenge(Dns01Challenge.class).ifPresentOrElse(challenge -> {
                 String digest = challenge.getDigest();
-                log.info("[ACME-Task:{}]获取到DNS挑战内容:{}",info.getTaskId(), digest);
-                log.info("[ACME-Task:{}]修改DNS",info.getTaskId());
+                log.info("[ACME-Task:{}]获取到DNS挑战内容:{}", info.getTaskId(), digest);
+                log.info("[ACME-Task:{}]修改DNS", info.getTaskId());
                 DDNSProvider ddnsProvider = providerFactory.generatorProvider(DDNSProvidersSelectEnum.valueOf(providerName));
                 String subDomain = domain.substring(0, domain.indexOf('.'));
                 String mainDomain = domain.substring(domain.indexOf('.') + 1);
@@ -150,7 +152,8 @@ public class AcmeAsyncService {
                                 } else {
                                     log.error("[ACME-Task:{}]订单确认失败", info.getTaskId());
                                 }
-                            } catch (AcmeException | InterruptedException | CertificateEncodingException | IOException e) {
+                            } catch (AcmeException | InterruptedException | CertificateEncodingException |
+                                     IOException e) {
                                 throw new RuntimeException(e);
                             }
                         } else {
@@ -161,15 +164,17 @@ public class AcmeAsyncService {
                         removeTxtDnsInfo(ddnsProvider, mainDomain, subDomain);
                         throw new RuntimeException(e);
                     }
-                }else {
+                } else {
                     log.error("[ACME-Task:{}]未通过DNS记录验证", info.getTaskId());
-                    if(status){
+                    if (status) {
                         removeTxtDnsInfo(ddnsProvider, mainDomain, subDomain);
                     }
                 }
             }, () -> log.error("[ACME-Task:{}]未正常获取到Dns01Challenge对象", info.getTaskId()));
         } catch (AcmeException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new RuntimeException(e);
+        } finally {
+            log.info("[ACME-Task:{}]结束证书申请服务", info.getTaskId());
         }
     }
 
@@ -183,7 +188,7 @@ public class AcmeAsyncService {
                     log.info("DNS记录查询成功，开始验证");
                     Record[] answers = lookup.getAnswers();
                     for (Record record : answers) {
-                        if(record instanceof TXTRecord txtRecord) {
+                        if (record instanceof TXTRecord txtRecord) {
                             for (String txt : txtRecord.getStrings()) {
                                 if (txt.equals(expectedTxtRecord)) {
                                     log.info("通过解析验证，DNS记录正确，开始下一步");
@@ -197,8 +202,9 @@ public class AcmeAsyncService {
                 } else {
                     log.info("DNS记录查询未成功，10秒后重新尝试。第{}次尝试", attempt);
                     TimeUnit.MILLISECONDS.sleep(10000);
-                    if(attempt == maxAttempts) {
-                        return false;}
+                    if (attempt == maxAttempts) {
+                        return false;
+                    }
                 }
             }
         } catch (TextParseException | InterruptedException e) {
@@ -208,13 +214,13 @@ public class AcmeAsyncService {
         return false;
     }
 
-    private void removeTxtDnsInfo(DDNSProvider ddnsProvider, String domain, String subDomain){
+    private void removeTxtDnsInfo(DDNSProvider ddnsProvider, String domain, String subDomain) {
         log.info("开始清理用于验证的DNS记录");
         try {
             ddnsProvider.deleteDdns(domain, "_acme-challenge." + subDomain, "TXT");
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(e.toString());
-        }finally {
+        } finally {
             log.info("结束清理");
         }
     }
