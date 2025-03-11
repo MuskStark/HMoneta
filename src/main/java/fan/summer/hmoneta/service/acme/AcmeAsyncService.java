@@ -63,6 +63,7 @@ public class AcmeAsyncService {
         this.acmeUserInfoRepository = acmeUserInfoRepository;
     }
 
+    // TODO:增加过程结果存入数据库
     @Async
     protected void useDnsChallengeGetCertification(String domain, String providerName, AcmeChallengeInfoEntity info) {
         MDC.put("LOG_ID", System.currentTimeMillis() + RandomUtil.randomString(3));
