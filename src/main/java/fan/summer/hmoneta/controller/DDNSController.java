@@ -61,11 +61,12 @@ public class DDNSController {
     public ApiRestResponse<List<ProviderInfoResp>> queryAllDDNSProvider() {
         List<ProviderInfoResp> providerInfoResps = providerService.queryAllDDNSProvider();
         // TODO: 空值判断
-        if (providerInfoResps == null || providerInfoResps.isEmpty())
+        if (providerInfoResps == null || providerInfoResps.isEmpty()) {
             return ApiRestResponse.error(BusinessExceptionEnum.DDNS_PROVIDER_LIST_EMPTY);
-        else {
-            for (ProviderInfoResp providerInfoResp : providerInfoResps)
+        } else {
+            for (ProviderInfoResp providerInfoResp : providerInfoResps) {
                 providerInfoResp.setLabel(DDNSProvidersSelectEnum.valueOf(providerInfoResp.getProviderName()).getLabel());
+            }
             return ApiRestResponse.success(providerInfoResps);
         }
     }
@@ -73,8 +74,9 @@ public class DDNSController {
     @PostMapping("/provider/add")
     public ApiRestResponse<Object> addDDNSProvider(@RequestBody DDNSProviderInfoReq providerInfoReq) throws Exception {
         // TODO:空值验证
-        if (ObjectUtil.isEmpty(providerInfoReq.getProviderName()) || ObjectUtil.isEmpty(providerInfoReq.getAccessKeyId()) || ObjectUtil.isEmpty(providerInfoReq.getAccessKeySecret()))
+        if (ObjectUtil.isEmpty(providerInfoReq.getProviderName()) || ObjectUtil.isEmpty(providerInfoReq.getAccessKeyId()) || ObjectUtil.isEmpty(providerInfoReq.getAccessKeySecret())) {
             return ApiRestResponse.error(BusinessExceptionEnum.REQ_ERROR_DDNS_PROVIDER_LEY_VALUE_EMPTY);
+        }
         DDNSProviderEntity ddnsProviderEntity = new DDNSProviderEntity();
         ddnsProviderEntity.setProviderName(providerInfoReq.getProviderName());
         ddnsProviderEntity.setAccessKeyId(providerInfoReq.getAccessKeyId());
@@ -87,17 +89,26 @@ public class DDNSController {
     @PostMapping("/record/modify")
     public ApiRestResponse<Object> modifyDDNSProvider(@RequestBody DDNSRecorderReq req) {
         DDNSRecorderEntity ddnsRecorderEntity = BeanUtil.copyProperties(req, DDNSRecorderEntity.class);
-        if (ObjectUtil.isNotEmpty(req.getRecorderId())) ddnsRecorderEntity.setId(req.getRecorderId());
+        if (ObjectUtil.isNotEmpty(req.getRecorderId())) {
+            ddnsRecorderEntity.setId(req.getRecorderId());
+        }
         ddnsService.modifyDdnsRecorder(ddnsRecorderEntity);
         return ApiRestResponse.success();
     }
 
     @GetMapping("/record/delete")
     public ApiRestResponse<Object> deleteDDNSRecorder(@RequestParam Long recorderId) {
-        if (ObjectUtil.isEmpty(recorderId)) return ApiRestResponse.error(8000, "未传入DNS解析记录Id");
+        if (ObjectUtil.isEmpty(recorderId)) {
+            return ApiRestResponse.error(8000, "未传入DNS解析记录Id");
+        }
         ddnsService.deleteRecorder(recorderId);
         return ApiRestResponse.success();
 
+    }
+    
+    @GetMapping("/record/all")
+    public ApiRestResponse<List<DDNSRecorderEntity>> queryAllDDNSRecorder() {
+        return ApiRestResponse.success(ddnsService.queryAllDDNSRecorder());
     }
 
     @GetMapping("/record")
