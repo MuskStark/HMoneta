@@ -2,6 +2,7 @@ package fan.summer.hmoneta.service.acme;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
+import fan.summer.hmoneta.common.context.LoginUserContext;
 import fan.summer.hmoneta.common.enums.DDNSProvidersSelectEnum;
 import fan.summer.hmoneta.database.entity.acme.AcmeChallengeInfoEntity;
 import fan.summer.hmoneta.database.entity.acme.AcmeUserInfoEntity;
@@ -67,19 +68,21 @@ public class AcmeAsyncService {
     @Async
     protected void useDnsChallengeGetCertification(String domain, String providerName, AcmeChallengeInfoEntity info) {
         MDC.put("LOG_ID", System.currentTimeMillis() + RandomUtil.randomString(3));
+        String email = LoginUserContext.getMember().getEmail();
         log.info("[ACME-Task:{}]开始为{}申请证书", info.getTaskId(), domain);
         try {
             KeyPair keyPair;
             Session session = new Session(acmeUri);
-            List<AcmeUserInfoEntity> byUserEmail = acmeUserInfoRepository.findByUserEmail("gitmain@outlook.sg");
+            List<AcmeUserInfoEntity> byUserEmail = acmeUserInfoRepository.findByUserEmail(email);
             if (ObjectUtil.isNotEmpty(byUserEmail)) {
                 log.info("[ACME-Task:{}]>>>>>>>>无需创建ACME账号", info.getTaskId());
                 keyPair = byUserEmail.getFirst().generateKeyPair();
             } else {
+                String accountEmail = "mailto:" + email;
                 log.info("[ACME-Task:{}]>>>>>>>>创建ACME账号", info.getTaskId());
                 keyPair = KeyPairUtils.createKeyPair(2048);
                 Account account = new AccountBuilder()
-                        .addContact("mailto:gitmain@outlook.sg")
+                        .addContact(accountEmail)
                         .agreeToTermsOfService()
                         .useKeyPair(keyPair)
                         .create(session);
@@ -87,7 +90,7 @@ public class AcmeAsyncService {
                     log.info("[ACME-Task:{}]>>>>>>>>成功创建ACME账号", info.getTaskId());
                     AcmeUserInfoEntity acmeUserInfoEntity = new AcmeUserInfoEntity();
                     acmeUserInfoEntity.setUserId(SnowFlakeUtil.getSnowFlakeNextId());
-                    acmeUserInfoEntity.setUserEmail("gitmain@outlook.sg");
+                    acmeUserInfoEntity.setUserEmail(email);
                     acmeUserInfoEntity.saveKeyPair(keyPair);
                     acmeUserInfoRepository.save(acmeUserInfoEntity);
                 } else {
