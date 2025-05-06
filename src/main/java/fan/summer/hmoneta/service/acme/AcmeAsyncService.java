@@ -31,9 +31,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Base64;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,6 +44,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Slf4j
 public class AcmeAsyncService {
+
+    private final Queue<String> logList = new LinkedList<>();
 
     final int maxAttempts = 10;  // 最大尝试次数
 
@@ -64,7 +64,11 @@ public class AcmeAsyncService {
         this.acmeUserInfoRepository = acmeUserInfoRepository;
     }
 
-    // TODO:增加过程结果存入数据库
+    public Queue<String> getLogInfo() {
+        return this.logList;
+    }
+
+
     @Async
     protected void useDnsChallengeGetCertification(String domain, String providerName, AcmeChallengeInfoEntity info) {
         MDC.put("LOG_ID", System.currentTimeMillis() + RandomUtil.randomString(3));
@@ -310,6 +314,14 @@ public class AcmeAsyncService {
         writer.println("-----END CERTIFICATE-----");
         writer.flush();
         // 注意：这里不关闭writer，因为我们使用的是外部传入的OutputStream
+    }
+
+    private void saveRunningLog(String logInfo) {
+        if (this.logList.size() == 50) {
+            this.logList.poll();
+        }
+        this.logList.add(logInfo);
+
     }
 
 }
