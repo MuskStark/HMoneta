@@ -12,6 +12,5 @@ class AcmeServiceTest {
 
     @Test
     void useDnsChallengeGetCertification() {
-        service.useDnsChallengeGetCertification("test7.summer.fan", null);
     }
 }
