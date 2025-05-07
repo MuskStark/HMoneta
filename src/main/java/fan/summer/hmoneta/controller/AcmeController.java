@@ -28,4 +28,8 @@ public class AcmeController {
     public ApiRestResponse<Long> test() {
         return ApiRestResponse.success(acmeService.applyCertificate("test7.summer.fan", "TencentCloud"));
     }
+    @GetMapping("/logInfo")
+    public ApiRestResponse<String> getLogInfo(){
+        return ApiRestResponse.success(acmeService.getLastInfo());
+    }
 }
