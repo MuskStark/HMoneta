@@ -64,7 +64,7 @@ public class AcmeAsyncService {
         this.acmeUserInfoRepository = acmeUserInfoRepository;
     }
 
-    public Queue<String> getLogInfo() {
+    protected Queue<String> getLogInfo() {
         return this.logList;
     }
 
@@ -73,17 +73,20 @@ public class AcmeAsyncService {
     protected void useDnsChallengeGetCertification(String domain, String providerName, AcmeChallengeInfoEntity info) {
         MDC.put("LOG_ID", System.currentTimeMillis() + RandomUtil.randomString(3));
         String email = LoginUserContext.getMember().getEmail();
-        log.info("[ACME-Task:{}]开始为{}申请证书", info.getTaskId(), domain);
+        saveRunningLog(String.format("[ACME-Task:%s]开始为%s申请证书",info.getTaskId(), domain),"info");
+//        log.info("[ACME-Task:{}]开始为{}申请证书", info.getTaskId(), domain);
         try {
             KeyPair keyPair;
             Session session = new Session(acmeUri);
             List<AcmeUserInfoEntity> byUserEmail = acmeUserInfoRepository.findByUserEmail(email);
             if (ObjectUtil.isNotEmpty(byUserEmail)) {
-                log.info("[ACME-Task:{}]>>>>>>>>无需创建ACME账号", info.getTaskId());
+                saveRunningLog(String.format("[ACME-Task:%s]>>>>>>>>无需创建ACME账号",info.getTaskId()), "info");
+//                log.info("[ACME-Task:{}]>>>>>>>>无需创建ACME账号", info.getTaskId());
                 keyPair = byUserEmail.getFirst().generateKeyPair();
             } else {
                 String accountEmail = "mailto:" + email;
-                log.info("[ACME-Task:{}]>>>>>>>>创建ACME账号", info.getTaskId());
+                saveRunningLog(String.format("[ACME-Task:%s]>>>>>>>>创建ACME账号", info.getTaskId()), "info");
+//                log.info("[ACME-Task:{}]>>>>>>>>创建ACME账号", info.getTaskId());
                 keyPair = KeyPairUtils.createKeyPair(2048);
                 Account account = new AccountBuilder()
                         .addContact(accountEmail)
@@ -91,7 +94,8 @@ public class AcmeAsyncService {
                         .useKeyPair(keyPair)
                         .create(session);
                 if (ObjectUtil.isNotEmpty(account)) {
-                    log.info("[ACME-Task:{}]>>>>>>>>成功创建ACME账号", info.getTaskId());
+                    saveRunningLog(String.format("[ACME-Task:%s]>>>>>>>>成功创建ACME账号",info.getTaskId()), "info");
+//                    log.info("[ACME-Task:{}]>>>>>>>>成功创建ACME账号", info.getTaskId());
                     AcmeUserInfoEntity acmeUserInfoEntity = new AcmeUserInfoEntity();
                     acmeUserInfoEntity.setUserId(SnowFlakeUtil.getSnowFlakeNextId());
                     acmeUserInfoEntity.setUserEmail(email);
@@ -101,64 +105,81 @@ public class AcmeAsyncService {
                     throw new RuntimeException("[ACME-Task:" + info.getTaskId() + "]创建账户失败");
                 }
             }
-            log.info("[ACME-Task:{}]1.登录ACME提供商", info.getTaskId());
+            saveRunningLog(String.format("[ACME-Task:%s]1.登录ACME提供商",info.getTaskId()),"info");
+//            log.info("[ACME-Task:{}]1.登录ACME提供商", info.getTaskId());
             // Login
-            log.info("[ACME-Task:{}]开始登录", info.getTaskId());
+            saveRunningLog(String.format("[ACME-Task:%s]开始登录",info.getTaskId()),"info");
+//            log.info("[ACME-Task:{}]开始登录", info.getTaskId());
             Login login = new AccountBuilder().onlyExisting().agreeToTermsOfService().useKeyPair(keyPair).createLogin(session);
             // 发起订单
-            log.info("[ACME-Task:{}]创建订单", info.getTaskId());
+            saveRunningLog(String.format("[ACME-Task:%s]创建订单", info.getTaskId()),"info");
+//            log.info("[ACME-Task:{}]创建订单", info.getTaskId());
             Order order = login.newOrder().domain(domain).create();
             Order bindOrder = login.bindOrder(order.getLocation());
             Authorization authorization = bindOrder.getAuthorizations().getFirst();
-            log.info("[ACME-Task:{}]发起DNS-01挑战", info.getTaskId());
+            saveRunningLog(String.format("[ACME-Task:%s]发起DNS-01挑战",info.getTaskId()),"info");
+//            log.info("[ACME-Task:{}]发起DNS-01挑战", info.getTaskId());
             authorization.findChallenge(Dns01Challenge.class).ifPresentOrElse(challenge -> {
                 String digest = challenge.getDigest();
-                log.info("[ACME-Task:{}]获取到DNS挑战内容:{}", info.getTaskId(), digest);
-                log.info("[ACME-Task:{}]修改DNS", info.getTaskId());
+                saveRunningLog(String.format("[ACME-Task:%s]获取到DNS挑战内容:%s", info.getTaskId(), digest),"info");
+//                log.info("[ACME-Task:{}]获取到DNS挑战内容:{}", info.getTaskId(), digest);
+                saveRunningLog(String.format("[ACME-Task:%s]修改DNS",info.getTaskId()),"info");
+//                log.info("[ACME-Task:{}]修改DNS", info.getTaskId());
                 DDNSProvider ddnsProvider = providerFactory.generatorProvider(DDNSProvidersSelectEnum.valueOf(providerName));
                 String subDomain = domain.substring(0, domain.indexOf('.'));
                 String mainDomain = domain.substring(domain.indexOf('.') + 1);
                 boolean status = ddnsProvider.modifyDdns(mainDomain, "_acme-challenge." + subDomain, digest, "TXT");
-                log.info("[ACME-Task:{}]DNS修改状态:{}", info.getTaskId(), status);
+                saveRunningLog(String.format("[ACME-Task:%s]DNS修改状态:%s", info.getTaskId(), status),"info");
+//                log.info("[ACME-Task:{}]DNS修改状态:{}", info.getTaskId(), status);
                 if (status & waitForDnsPropagation("_acme-challenge." + domain, digest)) {
                     try {
-                        log.info("[ACME-Task:{}]开启挑战", info.getTaskId());
+                        saveRunningLog(String.format("[ACME-Task:%s]开启挑战", info.getTaskId()),"info");
+//                        log.info("[ACME-Task:{}]开启挑战", info.getTaskId());
                         challenge.trigger();
-                        log.info("[ACME-Task:{}]挑战结果验证", info.getTaskId());
+                        saveRunningLog(String.format("[ACME-Task:%s]挑战结果验证", info.getTaskId()),"info");
+//                        log.info("[ACME-Task:{}]挑战结果验证", info.getTaskId());
                         while (!EnumSet.of(Status.VALID, Status.INVALID).contains(authorization.getStatus())) {
                             try {
                                 TimeUnit.MILLISECONDS.sleep(5000);
-                                log.info("[ACME-Task:{}]再次验证", info.getTaskId());
+                                saveRunningLog(String.format("[ACME-Task:%s]再次验证", info.getTaskId()),"info");
+//                                log.info("[ACME-Task:{}]再次验证", info.getTaskId());
                                 authorization.fetch();
                             } catch (InterruptedException ignored) {
-                                log.error("[ACME-Task:{}]线程意外中断:{}", info.getTaskId(), ignored.getMessage());
+                                saveRunningLog(String.format("[ACME-Task:%s]线程意外中断:%s", info.getTaskId(), ignored.getMessage()), "error");
+//                                log.error("[ACME-Task:{}]线程意外中断:{}", info.getTaskId(), ignored.getMessage());
                                 break;
                             } catch (AcmeException e) {
                                 throw new RuntimeException(e);
                             }
                         }
-                        log.info("[ACME-Task:{}]挑战结果:{}", info.getTaskId(), authorization.getStatus());
+                        saveRunningLog(String.format("[ACME-Task:%s]挑战结果:%s",info.getTaskId(), authorization.getStatus()), "info");
+//                        log.info("[ACME-Task:{}]挑战结果:{}", info.getTaskId(), authorization.getStatus());
                         if (authorization.getStatus() == Status.VALID) {
-                            log.info("[ACME-Task:{}]验证通过", info.getTaskId());
+                            saveRunningLog(String.format("[ACME-Task:%s]验证通过", info.getTaskId()), "info");
+//                            log.info("[ACME-Task:{}]验证通过", info.getTaskId());
                             removeTxtDnsInfo(ddnsProvider, mainDomain, subDomain);
                             // 获取证书
                             try {
-                                log.info("[ACME-Task:{}]获取证书", info.getTaskId());
+                                saveRunningLog(String.format("[ACME-Task:%s]获取证书", info.getTaskId()),"info");
+//                                log.info("[ACME-Task:{}]获取证书", info.getTaskId());
                                 KeyPair cerKeyPair = KeyPairUtils.createKeyPair(2048);
                                 order.execute(cerKeyPair);
                                 while (!EnumSet.of(Status.VALID, Status.INVALID).contains(order.getStatus())) {
                                     TimeUnit.MILLISECONDS.sleep(5000);
-                                    log.info("[ACME-Task:{}]继续验证证书签发状态", info.getTaskId());
+                                    saveRunningLog(String.format("[ACME-Task:%s]继续验证证书签发状态", info.getTaskId()),"info");
+//                                    log.info("[ACME-Task:{}]继续验证证书签发状态", info.getTaskId());
                                     order.fetch();
                                 }
                                 if (order.getStatus() == Status.VALID) {
-                                    log.info("[ACME-Task:{}]订单确认完成，开始下载证书", info.getTaskId());
+                                    saveRunningLog(String.format("[ACME-Task:%s]订单确认完成，开始下载证书", info.getTaskId()),"info");
+//                                    log.info("[ACME-Task:{}]订单确认完成，开始下载证书", info.getTaskId());
                                     Certificate cert = order.getCertificate();
                                     X509Certificate certificate = cert.getCertificate();
                                     List<X509Certificate> chain = cert.getCertificateChain();
                                     saveCertificateFiles(cerKeyPair, cert, domain, info.getTaskId());
                                 } else {
-                                    log.error("[ACME-Task:{}]订单确认失败", info.getTaskId());
+                                    saveRunningLog(String.format("[ACME-Task:%s]订单确认失败", info.getTaskId()),"error");
+//                                    log.error("[ACME-Task:{}]订单确认失败", info.getTaskId());
                                 }
                             } catch (AcmeException | InterruptedException | CertificateEncodingException |
                                      IOException e) {
@@ -166,23 +187,26 @@ public class AcmeAsyncService {
                             }
                         } else {
                             removeTxtDnsInfo(ddnsProvider, mainDomain, subDomain);
-                            log.error("[ACME-Task:{}]验证未通过", info.getTaskId());
+                            saveRunningLog(String.format("[ACME-Task:%s]验证未通过", info.getTaskId()),"error");
+//                            log.error("[ACME-Task:{}]验证未通过", info.getTaskId());
                         }
                     } catch (AcmeException e) {
                         removeTxtDnsInfo(ddnsProvider, mainDomain, subDomain);
                         throw new RuntimeException(e);
                     }
                 } else {
-                    log.error("[ACME-Task:{}]未通过DNS记录验证", info.getTaskId());
+                    saveRunningLog(String.format("[ACME-Task:%s]未通过DNS记录验证", info.getTaskId()),"error");
+//                    log.error("[ACME-Task:{}]未通过DNS记录验证", info.getTaskId());
                     if (status) {
                         removeTxtDnsInfo(ddnsProvider, mainDomain, subDomain);
                     }
                 }
-            }, () -> log.error("[ACME-Task:{}]未正常获取到Dns01Challenge对象", info.getTaskId()));
+            }, () -> saveRunningLog(String.format("[ACME-Task:%s]未正常获取到Dns01Challenge对象", info.getTaskId()), "error"));
         } catch (AcmeException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new RuntimeException(e);
         } finally {
-            log.info("[ACME-Task:{}]结束证书申请服务", info.getTaskId());
+            saveRunningLog(String.format("[ACME-Task:%s]结束证书申请服务", info.getTaskId()), "info");
+//            log.info("[ACME-Task:{}]结束证书申请服务", info.getTaskId());
         }
     }
 
@@ -234,7 +258,8 @@ public class AcmeAsyncService {
     }
 
     private void saveCertificateFiles(KeyPair keyPair, Certificate cert, String domain, Long taskId) throws IOException, CertificateEncodingException {
-        log.info("开始保存证书文件，域名: {}, 任务ID: {}", domain, taskId);
+        saveRunningLog(String.format("开始保存证书文件，域名: %s, 任务ID: %s", domain,taskId ), "info");
+//        log.info("开始保存证书文件，域名: {}, 任务ID: {}", domain, taskId);
 
         // 创建证书存储目录
         String certPath = "certs/" + domain + "/" + taskId;
@@ -246,7 +271,8 @@ public class AcmeAsyncService {
         // 保存私钥 (KEY文件)
         try (FileWriter fw = new FileWriter(new File(certDir, domain + ".key"))) {
             KeyPairUtils.writeKeyPair(keyPair, fw);
-            log.info("私钥文件已保存: {}", domain + ".key");
+            saveRunningLog(String.format("私钥文件已保存: %s", domain + ".key"), "info");
+//            log.info("私钥文件已保存: {}", domain + ".key");
         }
 
         X509Certificate certificate = cert.getCertificate();
@@ -255,7 +281,8 @@ public class AcmeAsyncService {
         // 保存证书 (CRT文件)
         try (FileOutputStream fos = new FileOutputStream(new File(certDir, domain + ".crt"))) {
             writeCertificate(certificate, fos);
-            log.info("证书文件已保存: {}", domain + ".crt");
+            saveRunningLog(String.format("证书文件已保存: %s", domain + ".crt"), "info");
+//            log.info("证书文件已保存: {}", domain + ".crt");
         }
 
         // 保存完整证书链 (PEM文件)
@@ -267,7 +294,8 @@ public class AcmeAsyncService {
                 fos.write('\n');
                 writeCertificate(chain.get(i), fos);
             }
-            log.info("完整证书链文件已保存: {}", domain + ".pem");
+            saveRunningLog(String.format("完整证书链文件已保存: %s", domain + ".pem"), "info");
+//            log.info("完整证书链文件已保存: {}", domain + ".pem");
         }
 
         // 保存完整证书链和私钥 (FULLCHAIN文件) - 修复后的版本
@@ -292,10 +320,11 @@ public class AcmeAsyncService {
                 fos.write('\n');
                 writeCertificate(chain.get(i), fos);
             }
-            log.info("完整证书链和私钥文件已保存: {}", domain + ".fullchain.pem");
+            saveRunningLog(String.format("完整证书链和私钥文件已保存: %s", domain + ".fullchain.pem"), "info");
+//            log.info("完整证书链和私钥文件已保存: {}", domain + ".fullchain.pem");
         }
-
-        log.info("所有证书文件保存完成");
+        saveRunningLog("所有证书文件保存完成", "info");
+//        log.info("所有证书文件保存完成");
     }
 
     private void writeCertificate(X509Certificate certificate, OutputStream out) throws IOException, CertificateEncodingException {
@@ -316,11 +345,16 @@ public class AcmeAsyncService {
         // 注意：这里不关闭writer，因为我们使用的是外部传入的OutputStream
     }
 
-    private void saveRunningLog(String logInfo) {
+    private void saveRunningLog(String logInfo, String logLeve) {
         if (this.logList.size() == 50) {
             this.logList.poll();
         }
         this.logList.add(logInfo);
+        switch (logInfo){
+            case "warn" -> log.warn(logInfo);
+            case "error" -> log.error(logInfo);
+            default -> log.info(logInfo);
+        }
 
     }
 
