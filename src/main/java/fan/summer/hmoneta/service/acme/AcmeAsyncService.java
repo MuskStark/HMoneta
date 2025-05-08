@@ -217,7 +217,7 @@ public class AcmeAsyncService {
         log.info("开始验证域名{}的TXT解析是否生效", domain);
         try {
             Lookup lookup = new Lookup(domain, Type.TXT);
-            for (int attempt = 1; maxAttempts >= attempt; attempt++) {
+            for (int attempt = 1; this.maxAttempts >= attempt; attempt++) {
                 lookup.run();
                 if (lookup.getResult() == Lookup.SUCCESSFUL) {
                     log.info("DNS记录查询成功，开始验证");
