@@ -9,8 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Queue;
-
 /**
  * 提供ACME相关服务
  *
@@ -51,8 +49,8 @@ public class AcmeService {
         return taskId;
     }
 
-    public String getLastInfo(){
-        return acmeAsyncService.getLogInfo().peek();
+    public String getLastInfo() {
+        return acmeAsyncService.getLogInfo().getLast();
     }
 
 
