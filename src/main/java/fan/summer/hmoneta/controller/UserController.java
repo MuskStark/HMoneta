@@ -6,6 +6,7 @@ import fan.summer.hmoneta.common.enums.error.BusinessExceptionEnum;
 import fan.summer.hmoneta.common.exception.BusinessException;
 import fan.summer.hmoneta.database.entity.user.User;
 import fan.summer.hmoneta.service.UserService;
+import fan.summer.hmoneta.util.JwtUtil;
 import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
 import fan.summer.hmoneta.webEntity.req.user.UserLoginReq;
 import fan.summer.hmoneta.webEntity.req.user.UserRegReq;
@@ -74,6 +75,10 @@ public class UserController {
     @PostMapping("/login")
     public ApiRestResponse<UserResp> login(@RequestBody UserLoginReq req){
         User loginUser = userService.login(req.getUserName(), req.getPassword());
-        return ApiRestResponse.success(BeanUtil.copyProperties(loginUser, UserResp.class));
+        UserResp userResp = BeanUtil.copyProperties(loginUser, UserResp.class);
+        // 临时解决token未更新签发的问题
+        userResp.setToken(null);
+        userResp.setToken(JwtUtil.createTokenForObject(userResp));
+        return ApiRestResponse.success(userResp);
     }
 }
