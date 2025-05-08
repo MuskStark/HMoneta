@@ -162,7 +162,6 @@ public class UserService {
     public User login(String username, String password) {
         try {
             User byUserName = userRepository.findByUserName(username);
-            String tokenForObject = JwtUtil.createTokenForObject(byUserName);
             if (ObjUtil.isEmpty(byUserName)) {
                 throw new BusinessException(BusinessExceptionEnum.USER_NOT_EXISTS);
             } else {
