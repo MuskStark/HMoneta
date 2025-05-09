@@ -5,7 +5,10 @@ import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
 
 /**
  * 类的详细说明
@@ -28,8 +31,15 @@ public class AcmeController {
     public ApiRestResponse<Long> test() {
         return ApiRestResponse.success(acmeService.applyCertificate("test7.summer.fan", "TencentCloud"));
     }
+
     @GetMapping("/logInfo")
-    public ApiRestResponse<String> getLogInfo(){
+    public ApiRestResponse<String> getLogInfo() {
         return ApiRestResponse.success(acmeService.getLastInfo());
+    }
+
+    @GetMapping("/getCert")
+    public ApiRestResponse<byte[]> getCertificate(@RequestParam String domain) throws IOException {
+        byte[] cert = acmeService.getCert(domain);
+        return ApiRestResponse.success(cert);
     }
 }

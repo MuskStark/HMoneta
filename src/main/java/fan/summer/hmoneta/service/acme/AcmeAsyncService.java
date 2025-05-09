@@ -4,6 +4,8 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import fan.summer.hmoneta.common.context.LoginUserContext;
 import fan.summer.hmoneta.common.enums.DDNSProvidersSelectEnum;
+import fan.summer.hmoneta.common.enums.error.BusinessExceptionEnum;
+import fan.summer.hmoneta.common.exception.BusinessException;
 import fan.summer.hmoneta.database.entity.acme.AcmeChallengeInfoEntity;
 import fan.summer.hmoneta.database.entity.acme.AcmeUserInfoEntity;
 import fan.summer.hmoneta.database.repository.acme.AcmeChallengeInfoRepository;
@@ -26,6 +28,9 @@ import org.xbill.DNS.Record;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
@@ -33,6 +38,8 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * ACME所有异步方法服务
@@ -66,6 +73,31 @@ public class AcmeAsyncService {
 
     protected LinkedList<String> getLogInfo() {
         return this.logList;
+    }
+
+    protected byte[] packCertifications(String domain) throws IOException {
+        String dirPath = "certs/" + domain;
+        Path basePath = Paths.get(dirPath);
+        if (!Files.exists(basePath) || !Files.isDirectory(basePath)) {
+            throw new BusinessException(BusinessExceptionEnum.CER_ERROR_FOLDER_NOT_EXIST);
+        }
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try (ZipOutputStream zipOut = new ZipOutputStream(byteArrayOutputStream)) {
+            Files.walk(basePath)
+                    .filter(Files::isRegularFile) // 只处理普通文件
+                    .forEach(file -> {
+                        try {
+                            // 添加文件到 ZIP 中
+                            ZipEntry zipEntry = new ZipEntry(basePath.relativize(file).toString());
+                            zipOut.putNextEntry(zipEntry);
+                            Files.copy(file, zipOut);
+                            zipOut.closeEntry();
+                        } catch (IOException e) {
+                            throw new RuntimeException("文件打包失败", e);
+                        }
+                    });
+        }
+        return byteArrayOutputStream.toByteArray();
     }
 
 
