@@ -31,10 +31,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Base64;
-import java.util.EnumSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -265,12 +262,20 @@ public class AcmeAsyncService {
 //        log.info("开始保存证书文件，域名: {}, 任务ID: {}", domain, taskId);
 
         // 创建证书存储目录
-        String certPath = "certs/" + domain + "/" + taskId;
+        String certPath = "certs/" + domain;
         File certDir = new File(certPath);
-        if (!certDir.exists() && !certDir.mkdirs()) {
+        // 删除已存在目录并重新创建
+        boolean successMkDir = false;
+        if (certDir.exists()) {
+            if (deleteRecursively(certDir)) {
+                successMkDir = certDir.mkdirs();
+            }
+        } else {
+            successMkDir = certDir.mkdirs();
+        }
+        if (!successMkDir) {
             throw new IOException("无法创建证书目录: " + certPath);
         }
-
         // 保存私钥 (KEY文件)
         try (FileWriter fw = new FileWriter(new File(certDir, domain + ".key"))) {
             KeyPairUtils.writeKeyPair(keyPair, fw);
@@ -360,5 +365,29 @@ public class AcmeAsyncService {
         }
 
     }
+
+    private static boolean deleteRecursively(File file) {
+        // 如果是文件或空文件夹，直接删除
+        if (file == null || !file.exists()) {
+            return false;
+        }
+        if (file.isFile() || Objects.requireNonNull(file.list()).length == 0) {
+            return file.delete();
+        }
+
+        // 如果是文件夹，先删除其内容
+        File[] files = file.listFiles();
+        if (files != null) {
+            for (File subFile : files) {
+                if (!deleteRecursively(subFile)) {
+                    return false; // 删除失败时停止
+                }
+            }
+        }
+
+        // 最后删除文件夹本身
+        return file.delete();
+    }
+
 
 }
