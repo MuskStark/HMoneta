@@ -40,7 +40,8 @@ public enum BusinessExceptionEnum {
     DDNS_RECORDER_EMPTY_ERROR(5002, "DDNS记录为空"),
     DDNS_RECORDER_EXISTS_ERROR(5003, "DDNS记录已存在"),
     DDNS_RECORDER_UPDATE_NULL_RECORDER_ID_ERROR(5100, "DDNS更新记录不存在指定id的解析记录"),
-    REQ_ERROR_DDNS_PROVIDER_LEY_VALUE_EMPTY(8010, "DDNS供应商关键信息为空");
+    REQ_ERROR_DDNS_PROVIDER_LEY_VALUE_EMPTY(8010, "DDNS供应商关键信息为空"),
+    CER_ERROR_FOLDER_NOT_EXIST(6001, "未找到指定的域名证书文件");
 
     BusinessExceptionEnum(int code, String message) {
         this.code = code;
