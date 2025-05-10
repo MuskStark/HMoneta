@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.Base64;
 
 /**
  * 类的详细说明
@@ -38,8 +39,8 @@ public class AcmeController {
     }
 
     @GetMapping("/getCert")
-    public ApiRestResponse<byte[]> getCertificate(@RequestParam String domain) throws IOException {
+    public ApiRestResponse<String> getCertificate(@RequestParam String domain) throws IOException {
         byte[] cert = acmeService.getCert(domain);
-        return ApiRestResponse.success(cert);
+        return ApiRestResponse.success(Base64.getEncoder().encodeToString(cert));
     }
 }
