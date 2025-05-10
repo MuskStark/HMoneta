@@ -33,6 +33,23 @@
         </a-menu-item>
 
       </a-sub-menu>
+      <a-sub-menu key="network">
+        <template #title>
+          <span>
+            网络服务
+          </span>
+        </template>
+        <a-menu-item key="/dns">
+          <router-link to="/dns">
+            &nbsp; DNS供应商管理
+          </router-link>
+        </a-menu-item>
+        <a-menu-item key="/acme">
+          <router-link to="/acme">
+            &nbsp; 域名证书申请
+          </router-link>
+        </a-menu-item>
+      </a-sub-menu>
       <a-sub-menu key="setting">
         <template #title>
           <span>
@@ -47,26 +64,15 @@
         </a-menu-item>
 
       </a-sub-menu>
-      <a-sub-menu key="network">
-        <template #title>
-          <span>
-            网络服务
-          </span>
-        </template>
-        <a-menu-item key="/dns">
-          <router-link to="/dns">
-            &nbsp; DNS供应商管理
-          </router-link>
-        </a-menu-item>
-      </a-sub-menu>
+
     </a-menu>
   </a-layout-sider>
 
 </template>
 
 <script setup>
-import {defineComponent, ref, watch} from 'vue';
-import {DesktopOutlined, SettingOutlined, GlobalOutlined} from "@ant-design/icons-vue";
+import {ref, watch} from 'vue';
+import {DesktopOutlined, GlobalOutlined} from "@ant-design/icons-vue";
 import router from "@/router";
 import store from "@/store";
 
