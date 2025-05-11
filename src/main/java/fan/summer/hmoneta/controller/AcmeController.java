@@ -2,11 +2,9 @@ package fan.summer.hmoneta.controller;
 
 import fan.summer.hmoneta.service.acme.AcmeService;
 import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
+import fan.summer.hmoneta.webEntity.req.acme.AcmeReq;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.Base64;
@@ -28,9 +26,10 @@ public class AcmeController {
         this.acmeService = acmeService;
     }
 
-    @GetMapping("/test")
-    public ApiRestResponse<Long> test() {
-        return ApiRestResponse.success(acmeService.applyCertificate("test7.summer.fan", "TencentCloud"));
+    @PostMapping("/apply")
+    public ApiRestResponse<Long> applyCertificate(@RequestBody AcmeReq req) {
+        // TODO：验证域名格式
+        return ApiRestResponse.success(acmeService.applyCertificate(req.getDomain(), req.getDnsProvider()));
     }
 
     @GetMapping("/logInfo")
