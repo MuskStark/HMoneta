@@ -3,6 +3,7 @@ package fan.summer.hmoneta.service.acme;
 import cn.hutool.core.util.ObjectUtil;
 import fan.summer.hmoneta.database.entity.acme.AcmeChallengeInfoEntity;
 import fan.summer.hmoneta.database.entity.ddns.DDNSRecorderEntity;
+import fan.summer.hmoneta.database.repository.acme.AcmeChallengeInfoRepository;
 import fan.summer.hmoneta.service.ddns.DDNSService;
 import fan.summer.hmoneta.util.SnowFlakeUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -24,12 +25,22 @@ public class AcmeService {
 
     private final DDNSService ddnsService;
     private final AcmeAsyncService acmeAsyncService;
+    private final AcmeChallengeInfoRepository acmeChallengeInfoRepository;
 
 
     @Autowired
-    public AcmeService(DDNSService ddnsService, AcmeAsyncService acmeAsyncService) {
+    public AcmeService(DDNSService ddnsService, AcmeAsyncService acmeAsyncService, AcmeChallengeInfoRepository repository) {
         this.ddnsService = ddnsService;
         this.acmeAsyncService = acmeAsyncService;
+        this.acmeChallengeInfoRepository = repository;
+    }
+
+    public AcmeChallengeInfoEntity queryCertApplyStatus(Long taskId) {
+        if (acmeChallengeInfoRepository.findById(taskId).isPresent()) {
+            return acmeChallengeInfoRepository.findById(taskId).get();
+        } else {
+            return null;
+        }
     }
 
     public Long applyCertificate(String domain, String providerName) {

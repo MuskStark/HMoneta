@@ -1,5 +1,6 @@
 package fan.summer.hmoneta.controller;
 
+import fan.summer.hmoneta.database.entity.acme.AcmeChallengeInfoEntity;
 import fan.summer.hmoneta.service.acme.AcmeService;
 import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
 import fan.summer.hmoneta.webEntity.req.acme.AcmeReq;
@@ -30,6 +31,12 @@ public class AcmeController {
     public ApiRestResponse<Long> applyCertificate(@RequestBody AcmeReq req) {
         // TODO：验证域名格式
         return ApiRestResponse.success(acmeService.applyCertificate(req.getDomain(), req.getDnsProvider()));
+    }
+
+    @GetMapping("/apply/status")
+    public ApiRestResponse<String> getCertApplyStatus(@RequestParam String taskId) {
+        AcmeChallengeInfoEntity acmeChallengeInfoEntity = acmeService.queryCertApplyStatus(Long.getLong(taskId));
+        return ApiRestResponse.success(acmeChallengeInfoEntity.getStatusInfo());
     }
 
     @GetMapping("/logInfo")
