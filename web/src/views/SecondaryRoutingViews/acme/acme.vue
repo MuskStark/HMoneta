@@ -7,7 +7,7 @@ import {responseIsSuccess} from "@/utils/common.js";
 import {onMounted, reactive, ref} from "vue";
 
 const queryCertApplyStatus = (taskId) => {
-  axios.get("/acme/apply/status?taskId" + taskId).then((resp) => {
+  axios.get("/acme/apply/status?taskId=" + taskId).then((resp) => {
     if (responseIsSuccess(resp)) {
       formSource.value = resp.data.data;
     }
@@ -88,6 +88,7 @@ const columns = [
 
 onMounted(() => {
   queryDDNSProvider();
+  queryCertApplyStatus("0");
 })
 
 </script>
