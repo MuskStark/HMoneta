@@ -17,6 +17,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -35,12 +36,14 @@ import java.util.Objects;
 public class AcmeChallengeInfoEntity {
     @Id
     private Long taskId;
+    private Long userId;
     private String domain;
     @Column(length = 1000)
     private String certPublicKey;
     @Column(length = 1000)
     private String certPrivateKey;
     private String statusInfo;
+    private Date certApplyTime;
 
     /**
      * 根据KeyPair存入
@@ -61,11 +64,17 @@ public class AcmeChallengeInfoEntity {
 
     @Override
     public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null) {
+            return false;
+        }
         Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
+        if (thisEffectiveClass != oEffectiveClass) {
+            return false;
+        }
         AcmeChallengeInfoEntity that = (AcmeChallengeInfoEntity) o;
         return getTaskId() != null && Objects.equals(getTaskId(), that.getTaskId());
     }

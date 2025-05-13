@@ -1,5 +1,6 @@
 package fan.summer.hmoneta.service.acme;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import fan.summer.hmoneta.common.context.LoginUserContext;
@@ -107,7 +108,11 @@ public class AcmeAsyncService {
     protected void useDnsChallengeGetCertification(String domain, String providerName, AcmeChallengeInfoEntity info) {
         MDC.put("LOG_ID", System.currentTimeMillis() + RandomUtil.randomString(3));
         String email = LoginUserContext.getMember().getEmail();
+        if (ObjectUtil.isNotEmpty(acmeChallengeInfoRepository.findByDomain(domain))) {
+            acmeChallengeInfoRepository.deleteByDomain(domain);
+        }
         AcmeChallengeInfoEntity dataBaseInfo = new AcmeChallengeInfoEntity();
+        dataBaseInfo.setUserId(LoginUserContext.getId());
         dataBaseInfo.setDomain(domain);
         dataBaseInfo.setTaskId(info.getTaskId());
         dataBaseInfo.setStatusInfo("0");
@@ -184,7 +189,6 @@ public class AcmeAsyncService {
                             try {
                                 saveRunningLog(String.format("[ACME-Task:%s]获取证书", info.getTaskId()), "info");
                                 KeyPair cerKeyPair = KeyPairUtils.createKeyPair(2048);
-                                dataBaseInfo.saveKeyPair(keyPair);
                                 order.execute(cerKeyPair);
                                 while (!EnumSet.of(Status.VALID, Status.INVALID).contains(order.getStatus())) {
                                     TimeUnit.MILLISECONDS.sleep(5000);
@@ -197,6 +201,8 @@ public class AcmeAsyncService {
                                     X509Certificate certificate = cert.getCertificate();
                                     List<X509Certificate> chain = cert.getCertificateChain();
                                     saveCertificateFiles(cerKeyPair, cert, domain, info.getTaskId());
+                                    dataBaseInfo.saveKeyPair(keyPair);
+                                    dataBaseInfo.setCertApplyTime(DateTime.now());
                                     dataBaseInfo.setStatusInfo("1");
                                 } else {
                                     saveRunningLog(String.format("[ACME-Task:%s]订单确认失败", info.getTaskId()), "error");
