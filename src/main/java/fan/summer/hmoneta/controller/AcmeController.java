@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 类的详细说明
@@ -34,9 +37,12 @@ public class AcmeController {
     }
 
     @GetMapping("/apply/status")
-    public ApiRestResponse<String> getCertApplyStatus(@RequestParam String taskId) {
-        AcmeChallengeInfoEntity acmeChallengeInfoEntity = acmeService.queryCertApplyStatus(Long.getLong(taskId));
-        return ApiRestResponse.success(acmeChallengeInfoEntity.getStatusInfo());
+    public ApiRestResponse<List<AcmeChallengeInfoEntity>> getCertApplyStatus(@RequestParam String taskId) {
+        if (Objects.equals(taskId, "0")) {
+            return ApiRestResponse.success(acmeService.queryCertApplyByUserId());
+        } else {
+            return ApiRestResponse.success(Collections.singletonList(acmeService.queryCertApplyStatus(Long.getLong(taskId))));
+        }
     }
 
     @GetMapping("/logInfo")

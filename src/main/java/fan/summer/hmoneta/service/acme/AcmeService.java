@@ -1,6 +1,7 @@
 package fan.summer.hmoneta.service.acme;
 
 import cn.hutool.core.util.ObjectUtil;
+import fan.summer.hmoneta.common.context.LoginUserContext;
 import fan.summer.hmoneta.database.entity.acme.AcmeChallengeInfoEntity;
 import fan.summer.hmoneta.database.entity.ddns.DDNSRecorderEntity;
 import fan.summer.hmoneta.database.repository.acme.AcmeChallengeInfoRepository;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * 提供ACME相关服务
@@ -36,11 +38,16 @@ public class AcmeService {
     }
 
     public AcmeChallengeInfoEntity queryCertApplyStatus(Long taskId) {
-        if (acmeChallengeInfoRepository.findById(taskId).isPresent()) {
-            return acmeChallengeInfoRepository.findById(taskId).get();
+        AcmeChallengeInfoEntity byUserIdAndTaskId = acmeChallengeInfoRepository.findByUserIdAndTaskId(LoginUserContext.getId(), taskId);
+        if (ObjectUtil.isNotEmpty(byUserIdAndTaskId)) {
+            return byUserIdAndTaskId;
         } else {
             return null;
         }
+    }
+
+    public List<AcmeChallengeInfoEntity> queryCertApplyByUserId() {
+        return acmeChallengeInfoRepository.findAllByUserId(LoginUserContext.getId());
     }
 
     public Long applyCertificate(String domain, String providerName) {
