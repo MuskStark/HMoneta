@@ -238,7 +238,12 @@ public class AcmeAsyncService {
             dataBaseInfo.setStatusInfo("-1");
             throw new RuntimeException(e);
         } finally {
-            acmeChallengeInfoRepository.save(dataBaseInfo);
+            if (ObjectUtil.isNotEmpty(dataBaseInfo)) {
+                if (ObjectUtil.isEmpty(dataBaseInfo.getStatusInfo())) {
+                    dataBaseInfo.setStatusInfo("-1");
+                }
+                acmeChallengeInfoRepository.save(dataBaseInfo);
+            }
             saveRunningLog(String.format("[ACME-Task:%s]结束证书申请服务", info.getTaskId()), "info");
         }
     }
