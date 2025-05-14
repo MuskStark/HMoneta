@@ -1,6 +1,5 @@
 package fan.summer.hmoneta.database.entity.acme;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -16,7 +15,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 import java.util.Date;
 import java.util.Objects;
 
@@ -38,10 +36,8 @@ public class AcmeChallengeInfoEntity {
     private Long taskId;
     private Long userId;
     private String domain;
-    @Column(length = 1000)
-    private String certPublicKey;
-    @Column(length = 1000)
-    private String certPrivateKey;
+    private byte[] certPublicKey;
+    private byte[] certPrivateKey;
     private String statusInfo;
     private Date certApplyTime;
 
@@ -51,15 +47,13 @@ public class AcmeChallengeInfoEntity {
      * @param keyPair 待存入的KeyPair
      */
     public void saveKeyPair(KeyPair keyPair) {
-        this.certPublicKey = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
-        this.certPrivateKey = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
+        this.certPublicKey = keyPair.getPublic().getEncoded();
+        this.certPrivateKey = keyPair.getPrivate().getEncoded();
     }
 
     public KeyPair generateKeyPair() throws NoSuchAlgorithmException, InvalidKeySpecException {
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        byte[] publicDecode = Base64.getDecoder().decode(this.certPublicKey);
-        byte[] privateDecode = Base64.getDecoder().decode(this.certPrivateKey);
-        return new KeyPair(keyFactory.generatePublic(new X509EncodedKeySpec(publicDecode)), keyFactory.generatePrivate(new PKCS8EncodedKeySpec(privateDecode)));
+        return new KeyPair(keyFactory.generatePublic(new X509EncodedKeySpec(this.certPublicKey)), keyFactory.generatePrivate(new PKCS8EncodedKeySpec(this.certPrivateKey)));
     }
 
     @Override
