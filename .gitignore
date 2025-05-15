@@ -41,3 +41,4 @@ build/
 /web/.env.prodaction
 /qodana.yaml
 /certs/
+/src/main/resources/application-mac.yml
