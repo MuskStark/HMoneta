@@ -3,7 +3,7 @@
 // 查询全部DNS信息
 import axios from "axios";
 import {message} from "ant-design-vue";
-import {responseIsSuccess} from "@/utils/common.js";
+import {getDownloadFileFromBase64, responseIsSuccess} from "@/utils/common.js";
 import {onMounted, reactive, ref} from "vue";
 
 const queryCertApplyStatus = (taskId) => {
@@ -44,14 +44,6 @@ const handelOk = () => {
         message.error(resp.data.message)
       }
     })
-    // axios.get("/acme/getCert?domain=test7.summer.fan").then((resp) => {
-    //   const json = resp.data
-    //   if (json.status) {
-    //     getDownloadFileFromBase64(json.data, 'test7.summer.fan.zip', 'application/zip')
-    //   } else {
-    //     message.error(json.message)
-    //   }
-    // })
   } else {
     message.error("表单为空请重新填写")
   }
@@ -72,18 +64,37 @@ const columns = [
     title: '域名',
     dataIndex: 'domain',
     key: 'domain',
+    align: 'center'
   },
   {
     title: '状态',
-    dataIndex: 'status',
-    key: 'status',
+    dataIndex: 'statusInfo',
+    key: 'statusInfo',
+    align: 'center'
   },
   {
     title: '操作',
     dataIndex: 'operation',
     key: 'operation',
+    align: 'center'
   },
 ]
+// Table组件相关方法
+
+// 下载相关功能
+const downLoadCertFile = (domain) => {
+  axios.get("/acme/getCert?domain=" + domain).then((resp) => {
+    const json = resp.data
+    if (json.status) {
+      if (json.data) {
+        message.success("开始下载[" + domain + "]证书文件")
+        getDownloadFileFromBase64(json.data, domain + '.zip', 'application/zip')
+      }
+    } else {
+      message.error(json.message)
+    }
+  })
+}
 
 
 onMounted(() => {
@@ -111,20 +122,27 @@ onMounted(() => {
       </a-form-item>
     </a-form>
   </a-modal>
-  <a-button @click="openModal">申请证书</a-button>
-  <!-- 证书申请展示Table -->
-  <a-table :data-source="formSource" :columns="columns">
-    <template #bodyCell="{column, record}">
-      <template v-if="column.dataIndex === 'status'">
-        <a-tag color="green" v-if="record.status === '1'">申请成功</a-tag>
-        <a-tag color="red" v-else-if="record.status === '-1'">申请失败</a-tag>
+  <a-flex gap="middle" vertical style="margin-top: 12px">
+    <a-button style="width: 10%" @click="openModal">申请证书</a-button>
+    <!-- 证书申请展示Table -->
+    <a-table :data-source="formSource" :columns="columns">
+      <template #bodyCell="{column, record}">
+        <template v-if="column.dataIndex === 'statusInfo'">
+          <a-flex justify="center">
+            <a-tag color="green" v-if="record.statusInfo === '1'">申请成功</a-tag>
+            <a-tag color="red" v-else-if="record.statusInfo === '-1'">申请失败</a-tag>
+          </a-flex>
+        </template>
+        <template v-if="column.dataIndex === 'operation'">
+          <a-flex gap="middle" justify="center">
+            <a-button>重新申请</a-button>
+            <a-button>查看日志</a-button>
+            <a-button @click="downLoadCertFile(record.domain)">下载证书</a-button>
+          </a-flex>
+        </template>
       </template>
-      <template v-if="column.dataIndex === 'operation'">
-        <a-button>重新申请</a-button>
-        <a-button>查看日志</a-button>
-      </template>
-    </template>
-  </a-table>
+    </a-table>
+  </a-flex>
 </template>
 
 <style scoped>
