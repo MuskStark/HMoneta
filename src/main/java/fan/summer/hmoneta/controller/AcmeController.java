@@ -1,9 +1,10 @@
 package fan.summer.hmoneta.controller;
 
-import fan.summer.hmoneta.database.entity.acme.AcmeChallengeInfoEntity;
+import cn.hutool.core.bean.BeanUtil;
 import fan.summer.hmoneta.service.acme.AcmeService;
 import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
 import fan.summer.hmoneta.webEntity.req.acme.AcmeReq;
+import fan.summer.hmoneta.webEntity.resp.acme.AcmeResp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,11 +38,11 @@ public class AcmeController {
     }
 
     @GetMapping("/apply/status")
-    public ApiRestResponse<List<AcmeChallengeInfoEntity>> getCertApplyStatus(@RequestParam String taskId) {
+    public ApiRestResponse<List<AcmeResp>> getCertApplyStatus(@RequestParam String taskId) {
         if (Objects.equals(taskId, "0")) {
-            return ApiRestResponse.success(acmeService.queryCertApplyByUserId());
+            return ApiRestResponse.success(BeanUtil.copyToList(acmeService.queryCertApplyByUserId(), AcmeResp.class));
         } else {
-            return ApiRestResponse.success(Collections.singletonList(acmeService.queryCertApplyStatus(Long.getLong(taskId))));
+            return ApiRestResponse.success(BeanUtil.copyToList(Collections.singletonList(acmeService.queryCertApplyStatus(Long.getLong(taskId))), AcmeResp.class));
         }
     }
 
