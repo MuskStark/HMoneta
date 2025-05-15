@@ -135,9 +135,9 @@ onMounted(() => {
         </template>
         <template v-if="column.dataIndex === 'operation'">
           <a-flex gap="middle" justify="center">
-            <a-button>重新申请</a-button>
+            <a-button v-if="record.statusInfo === '-1'">重新申请</a-button>
             <a-button>查看日志</a-button>
-            <a-button @click="downLoadCertFile(record.domain)">下载证书</a-button>
+            <a-button v-if="record.statusInfo === '1'" @click="downLoadCertFile(record.domain)">下载证书</a-button>
           </a-flex>
         </template>
       </template>
