@@ -1,6 +1,7 @@
 package fan.summer.hmoneta.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import fan.summer.hmoneta.service.acme.AcmeService;
 import fan.summer.hmoneta.webEntity.common.ApiRestResponse;
 import fan.summer.hmoneta.webEntity.req.acme.AcmeReq;
@@ -46,9 +47,13 @@ public class AcmeController {
         }
     }
 
-    @GetMapping("/logInfo")
-    public ApiRestResponse<String> getLogInfo() {
-        return ApiRestResponse.success(acmeService.getLastInfo());
+    @GetMapping("/apply/logInfo")
+    public ApiRestResponse<List<String>> getLogInfo(@RequestParam Long taskId) {
+        if (ObjectUtil.isEmpty(taskId)) {
+            return ApiRestResponse.success(acmeService.getLogList(null));
+        } else {
+            return ApiRestResponse.success(acmeService.getLogList(taskId));
+        }
     }
 
     @GetMapping("/getCert")

@@ -69,8 +69,12 @@ public class AcmeService {
         return taskId;
     }
 
-    public String getLastInfo() {
-        return acmeAsyncService.getLogInfo().getLast();
+    public List<String> getLogList(Long taskId) {
+        if (ObjectUtil.isEmpty(taskId)) {
+            return acmeAsyncService.getLogList();
+        } else {
+            return acmeAsyncService.getLogList(taskId);
+        }
     }
 
     public byte[] getCert(String domain) throws IOException {
