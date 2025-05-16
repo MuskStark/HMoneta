@@ -114,6 +114,7 @@ public class AcmeAsyncService {
         AcmeChallengeInfoEntity dataBaseInfo = new AcmeChallengeInfoEntity();
         dataBaseInfo.setUserId(LoginUserContext.getId());
         dataBaseInfo.setDomain(domain);
+        dataBaseInfo.setProviderName(providerName);
         dataBaseInfo.setTaskId(info.getTaskId());
         dataBaseInfo.setStatusInfo("0");
         saveRunningLog(String.format("[ACME-Task:%s]开始为%s申请证书", info.getTaskId(), domain), "info");
@@ -396,7 +397,7 @@ public class AcmeAsyncService {
             this.logList.poll();
         }
         this.logList.add(logInfo);
-        switch (logInfo) {
+        switch (logLeve) {
             case "warn" -> log.warn(logInfo);
             case "error" -> log.error(logInfo);
             default -> log.info(logInfo);
