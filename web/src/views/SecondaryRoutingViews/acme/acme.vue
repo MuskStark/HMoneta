@@ -67,6 +67,12 @@ const columns = [
     align: 'center'
   },
   {
+    title: 'DNS服务商',
+    dataIndex: 'providerName',
+    key: 'providerName',
+    align: 'center'
+  },
+  {
     title: '状态',
     dataIndex: 'statusInfo',
     key: 'statusInfo',
@@ -95,7 +101,32 @@ const downLoadCertFile = (domain) => {
     }
   })
 }
+// 日志查询相关
+const logMap = new Map()
+const queryLogByTaskId = (taskId) => {
+  axios.get("/acme/apply/logInfo?taskId=" + taskId).then((resp) => {
+    if (responseIsSuccess(resp)) {
+      logMap.set(taskId, resp.data.data)
+    }
+  })
 
+}
+
+// 重新申请相关功能
+const reApplyCert = (record) => {
+  axios.post("/acme/apply", {
+    domain: record.domain,
+    dnsProvider: record.providerName
+  }).then((resp) => {
+    if (responseIsSuccess(resp)) {
+      const json = resp.data.data;
+      message.info("已提交证书申请，详情请查看日志")
+      queryCertApplyStatus(json)
+    } else {
+      message.error(resp.data.message)
+    }
+  })
+}
 
 onMounted(() => {
   queryDDNSProvider();
@@ -135,8 +166,8 @@ onMounted(() => {
         </template>
         <template v-if="column.dataIndex === 'operation'">
           <a-flex gap="middle" justify="center">
-            <a-button v-if="record.statusInfo === '-1'">重新申请</a-button>
-            <a-button>查看日志</a-button>
+            <a-button v-if="record.statusInfo === '-1'" @click="reApplyCert(record)">重新申请</a-button>
+            <a-button @click="queryLogByTaskId(record.taskId)">查看日志</a-button>
             <a-button v-if="record.statusInfo === '1'" @click="downLoadCertFile(record.domain)">下载证书</a-button>
           </a-flex>
         </template>
