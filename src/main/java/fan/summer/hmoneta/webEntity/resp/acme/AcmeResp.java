@@ -1,5 +1,7 @@
 package fan.summer.hmoneta.webEntity.resp.acme;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 /**
@@ -11,6 +13,9 @@ import lombok.Data;
  */
 @Data
 public class AcmeResp {
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long taskId;
     private String domain;
     private String statusInfo;
+    private String providerName;
 }

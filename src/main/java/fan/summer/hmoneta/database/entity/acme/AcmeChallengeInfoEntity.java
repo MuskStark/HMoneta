@@ -36,6 +36,7 @@ public class AcmeChallengeInfoEntity {
     private Long taskId;
     private Long userId;
     private String domain;
+    private String providerName;
     private byte[] certPublicKey;
     private byte[] certPrivateKey;
     private String statusInfo;
