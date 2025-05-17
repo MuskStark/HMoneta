@@ -102,15 +102,21 @@ const downLoadCertFile = (domain) => {
   })
 }
 // 日志查询相关
-const logMap = new Map()
-const queryLogByTaskId = (taskId) => {
-  axios.get("/acme/apply/logInfo?taskId=" + taskId).then((resp) => {
-    if (responseIsSuccess(resp)) {
-      logMap.set(taskId, resp.data.data)
-    }
-  })
+const logOpen = ref(false)
+const logTitle = ref()
+const logValue = ref()
+const
+    queryLogByTaskId = (taskId, domain) => {
+      axios.get("/acme/apply/logInfo?taskId=" + taskId).then((resp) => {
+        if (responseIsSuccess(resp)) {
+          logValue.value = null;
+          logValue.value = resp.data.data;
+          logTitle.value = domain + "证书申请过程日志"
+          logOpen.value = true;
+        }
+      })
 
-}
+    }
 
 // 重新申请相关功能
 const reApplyCert = (record) => {
@@ -153,6 +159,16 @@ onMounted(() => {
       </a-form-item>
     </a-form>
   </a-modal>
+  <!-- 日志查询弹窗 -->
+  <a-modal
+      v-model:open="logOpen"
+      :centered=true
+      :title="logTitle"
+      :footer="null"
+  >
+    <p v-for="(log, index) in logValue" :key="index">{{ log }}</p>
+  </a-modal>
+  <!--  <a-float-button @click="openModal"/>-->
   <a-flex gap="middle" vertical style="margin-top: 12px">
     <a-button style="width: 10%" @click="openModal">申请证书</a-button>
     <!-- 证书申请展示Table -->
@@ -167,7 +183,7 @@ onMounted(() => {
         <template v-if="column.dataIndex === 'operation'">
           <a-flex gap="middle" justify="center">
             <a-button v-if="record.statusInfo === '-1'" @click="reApplyCert(record)">重新申请</a-button>
-            <a-button @click="queryLogByTaskId(record.taskId)">查看日志</a-button>
+            <a-button @click="queryLogByTaskId(record.taskId, record.domain)">查看日志</a-button>
             <a-button v-if="record.statusInfo === '1'" @click="downLoadCertFile(record.domain)">下载证书</a-button>
           </a-flex>
         </template>
