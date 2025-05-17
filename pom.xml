@@ -10,7 +10,7 @@
     </parent>
     <groupId>fan.summer.hmoneta</groupId>
     <artifactId>HMoneta</artifactId>
-    <version>0.1.0-alpha.1</version>
+    <version>0.1.0-alpha.2</version>
     <name>HMoneta</name>
     <description>HMoneta</description>
     <properties>
@@ -50,9 +50,20 @@
         <dependency>
             <groupId>org.shredzone.acme4j</groupId>
             <artifactId>acme4j-client</artifactId>
-            <version>3.3.1</version>
+            <version>3.5.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
+            <version>1.80</version>
+        </dependency>
+
+        <dependency>
+            <groupId>dnsjava</groupId>
+            <artifactId>dnsjava</artifactId>
+            <version>3.6.3</version>
+        </dependency>
 
         <dependency>
             <groupId>com.mysql</groupId>

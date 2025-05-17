@@ -1,6 +1,7 @@
 package fan.summer.hmoneta.task.scheduled;
 
 import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.RandomUtil;
 import fan.summer.hmoneta.database.entity.agent.AgentInfo;
 import fan.summer.hmoneta.database.entity.agent.AgentReport;
 import fan.summer.hmoneta.database.entity.serverInfo.ServerInfoDetail;
@@ -11,6 +12,7 @@ import fan.summer.hmoneta.webEntity.agent.ConfigEntity;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -57,6 +59,7 @@ public class AgentScanTask {
      */
     @Scheduled(cron = "0/30 * * * * ?")
     protected void agentListener() {
+        MDC.put("LOG_ID", System.currentTimeMillis() + RandomUtil.randomString(3));
         LOG.info("----------------启动Agent扫描任务----------------");
         List<ServerInfoDetail> allServerInfo = infoManagerService.findAllServerInfo();
         if(!allServerInfo.isEmpty()) {

@@ -1,11 +1,13 @@
 package fan.summer.hmoneta.task.scheduled;
 
+import cn.hutool.core.util.RandomUtil;
 import fan.summer.hmoneta.database.entity.ipPool.IpPool;
 import fan.summer.hmoneta.service.IpResourceManagerService;
 import fan.summer.hmoneta.service.ServerInfoManagerService;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +30,7 @@ public class IpPoolResourceUpdateTask {
 
     @Scheduled(cron = "0 0/5 * * * ?")
     public void updateIpPoolResource() {
+        MDC.put("LOG_ID", System.currentTimeMillis() + RandomUtil.randomString(3));
         LOG.info(">>>>>>>>>>>>>>>开始更新IpPool资源使用情况");
         List<IpPool> ipPools = ipResourceManagerService.findAllIpPool();
         for (IpPool ipPool : ipPools) {

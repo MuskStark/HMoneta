@@ -39,3 +39,6 @@ build/
 !/src/main/resources/application-self.yml
 /src/main/resources/application-self.yml
 /web/.env.prodaction
+/qodana.yaml
+/certs/
+/src/main/resources/application-mac.yml
